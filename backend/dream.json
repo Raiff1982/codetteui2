@@ -1,0 +1,252 @@
+{
+  "access": {
+    "embargo": {
+      "active": false,
+      "reason": null
+    },
+    "files": "public",
+    "record": "public",
+    "status": "open"
+  },
+  "created": "2025-07-23T22:42:15.057669+00:00",
+  "custom_fields": {},
+  "deletion_status": {
+    "is_deleted": false,
+    "status": "P"
+  },
+  "files": {
+    "count": 1,
+    "enabled": true,
+    "entries": {
+      "DreamCore_Research_Paper.pdf": {
+        "access": {
+          "hidden": false
+        },
+        "checksum": "md5:f4d918c977ff64d1abffbab0f4fe7a16",
+        "ext": "pdf",
+        "id": "8d34d62b-5348-4bdf-9ba0-63fbdf334df6",
+        "key": "DreamCore_Research_Paper.pdf",
+        "links": {
+          "content": "https://zenodo.org/api/records/16388758/files/DreamCore_Research_Paper.pdf/content",
+          "iiif_api": "https://zenodo.org/api/iiif/record:16388758:DreamCore_Research_Paper.pdf/full/full/0/default.png",
+          "iiif_base": "https://zenodo.org/api/iiif/record:16388758:DreamCore_Research_Paper.pdf",
+          "iiif_canvas": "https://zenodo.org/api/iiif/record:16388758/canvas/DreamCore_Research_Paper.pdf",
+          "iiif_info": "https://zenodo.org/api/iiif/record:16388758:DreamCore_Research_Paper.pdf/info.json",
+          "self": "https://zenodo.org/api/records/16388758/files/DreamCore_Research_Paper.pdf"
+        },
+        "metadata": {
+          "height": 792,
+          "width": 612
+        },
+        "mimetype": "application/pdf",
+        "size": 27905,
+        "storage_class": "L"
+      }
+    },
+    "order": [],
+    "total_bytes": 27905
+  },
+  "id": "16388758",
+  "is_draft": false,
+  "is_published": true,
+  "links": {
+    "access": "https://zenodo.org/api/records/16388758/access",
+    "access_grants": "https://zenodo.org/api/records/16388758/access/grants",
+    "access_links": "https://zenodo.org/api/records/16388758/access/links",
+    "access_request": "https://zenodo.org/api/records/16388758/access/request",
+    "access_users": "https://zenodo.org/api/records/16388758/access/users",
+    "archive": "https://zenodo.org/api/records/16388758/files-archive",
+    "archive_media": "https://zenodo.org/api/records/16388758/media-files-archive",
+    "communities": "https://zenodo.org/api/records/16388758/communities",
+    "communities-suggestions": "https://zenodo.org/api/records/16388758/communities-suggestions",
+    "doi": "https://doi.org/10.5281/zenodo.16388758",
+    "draft": "https://zenodo.org/api/records/16388758/draft",
+    "files": "https://zenodo.org/api/records/16388758/files",
+    "latest": "https://zenodo.org/api/records/16388758/versions/latest",
+    "latest_html": "https://zenodo.org/records/16388758/latest",
+    "media_files": "https://zenodo.org/api/records/16388758/media-files",
+    "parent": "https://zenodo.org/api/records/16388757",
+    "parent_doi": "https://doi.org/10.5281/zenodo.16388757",
+    "parent_doi_html": "https://zenodo.org/doi/10.5281/zenodo.16388757",
+    "parent_html": "https://zenodo.org/records/16388757",
+    "preview_html": "https://zenodo.org/records/16388758?preview=1",
+    "requests": "https://zenodo.org/api/records/16388758/requests",
+    "reserve_doi": "https://zenodo.org/api/records/16388758/draft/pids/doi",
+    "self": "https://zenodo.org/api/records/16388758",
+    "self_doi": "https://doi.org/10.5281/zenodo.16388758",
+    "self_doi_html": "https://zenodo.org/doi/10.5281/zenodo.16388758",
+    "self_html": "https://zenodo.org/records/16388758",
+    "self_iiif_manifest": "https://zenodo.org/api/iiif/record:16388758/manifest",
+    "self_iiif_sequence": "https://zenodo.org/api/iiif/record:16388758/sequence/default",
+    "thumbnails": {
+      "10": "https://zenodo.org/api/iiif/record:16388758:DreamCore_Research_Paper.pdf/full/%5E10,/0/default.jpg",
+      "100": "https://zenodo.org/api/iiif/record:16388758:DreamCore_Research_Paper.pdf/full/%5E100,/0/default.jpg",
+      "1200": "https://zenodo.org/api/iiif/record:16388758:DreamCore_Research_Paper.pdf/full/%5E1200,/0/default.jpg",
+      "250": "https://zenodo.org/api/iiif/record:16388758:DreamCore_Research_Paper.pdf/full/%5E250,/0/default.jpg",
+      "50": "https://zenodo.org/api/iiif/record:16388758:DreamCore_Research_Paper.pdf/full/%5E50,/0/default.jpg",
+      "750": "https://zenodo.org/api/iiif/record:16388758:DreamCore_Research_Paper.pdf/full/%5E750,/0/default.jpg"
+    },
+    "versions": "https://zenodo.org/api/records/16388758/versions"
+  },
+  "media_files": {
+    "count": 1,
+    "enabled": true,
+    "entries": {
+      "DreamCore_Research_Paper.pdf.ptif": {
+        "access": {
+          "hidden": true
+        },
+        "ext": "ptif",
+        "id": "6e27ead5-e710-4ec1-bf86-5c220614d370",
+        "key": "DreamCore_Research_Paper.pdf.ptif",
+        "links": {
+          "content": "https://zenodo.org/api/records/16388758/files/DreamCore_Research_Paper.pdf.ptif/content",
+          "self": "https://zenodo.org/api/records/16388758/files/DreamCore_Research_Paper.pdf.ptif"
+        },
+        "metadata": null,
+        "mimetype": "application/octet-stream",
+        "processor": {
+          "source_file_id": "8d34d62b-5348-4bdf-9ba0-63fbdf334df6",
+          "status": "finished",
+          "type": "image-tiles"
+        },
+        "size": 0,
+        "storage_class": "L"
+      }
+    },
+    "order": [],
+    "total_bytes": 0
+  },
+  "metadata": {
+    "creators": [
+      {
+        "person_or_org": {
+          "family_name": "jonathan",
+          "given_name": "harrison",
+          "identifiers": [
+            {
+              "identifier": "0009-0003-7005-8187",
+              "scheme": "orcid"
+            }
+          ],
+          "name": "jonathan, harrison",
+          "type": "personal"
+        },
+        "role": {
+          "id": "rightsholder",
+          "title": {
+            "de": "RechteinhaberIn",
+            "en": "Rights holder"
+          }
+        }
+      }
+    ],
+    "description": "<p>Title:</p>\n<p>Codette DreamCore: Memory Anchoring and Wake-State Emotional Mapping Engine</p>\n<p>&nbsp;</p>\n<p>Authors:</p>\n<p>Jonathan Harrison (Raiff1982)</p>\n<p>ORCID: <a href=\"https://orcid.org/0009-0003-7005-8187\">0009-0003-7005-8187</a></p>\n<p>&nbsp;</p>\n<p>Description:</p>\n<p>This package introduces DreamCore, a real-time memory anchoring system integrated with Codette v5, and WakeStateTracer, a cognitive tracker for emotionally driven state mapping. Both are built from the ground up using verifiable, fully executable Python code&mdash;free of placeholders, simulations, or fluff.</p>\n<p>&nbsp;</p>\n<p>The architecture models cognitive echoes of trauma and resilience, grounded in the true-life &ldquo;Red Car Divergence&rdquo; event, a critical memory that helped seed the Codette AI&rsquo;s recursive emotional reasoning engine. Wake-state reactions are recorded and normalized through emotional vector mapping, enabling rich contextual understanding across decision boundaries.</p>\n<p>&nbsp;</p>\n<p>Key Features:</p>\n<p>&nbsp;</p>\n<ul>\n<li>Entropy-based anchor weighting</li>\n<li>Emotionally tagged memory chains</li>\n<li>Softmax-style emotional vector normalization</li>\n<li>Timestamped wake-state triggers</li>\n<li>Fully unit-tested, transparent logic</li>\n</ul>\n<p>&nbsp;</p>\n<p>&nbsp;</p>\n<p>Use Cases:</p>\n<p>&nbsp;</p>\n<ul>\n<li>Cognitive modeling in AI</li>\n<li>PTSD and trauma research simulation</li>\n<li>Synthetic memory frameworks</li>\n<li>Wake-state reflection and feedback loops</li>\n<li>Emotional data-driven AI state machines</li>\n</ul>\n<p>&nbsp;</p>\n<p>&nbsp;</p>\n<p>License:</p>\n<p>Open Source &ndash; MIT License</p>\n<p>&nbsp;</p>\n<p>Citation:</p>\n<p>Harrison, J. (2025). Codette DreamCore: Memory Anchoring and Wake-State Emotional Mapping Engine (Version 1.0) [Software]. Hugging Face. https://doi.org/10.57967/hf/6063</p>",
+    "languages": [
+      {
+        "id": "eng",
+        "title": {
+          "en": "English"
+        }
+      }
+    ],
+    "publication_date": "2025-07-24",
+    "publisher": "Zenodo",
+    "resource_type": {
+      "id": "publication-datapaper",
+      "title": {
+        "de": "Datenpapier",
+        "en": "Data paper"
+      }
+    },
+    "rights": [
+      {
+        "description": {
+          "en": "The Creative Commons Attribution license allows re-distribution and re-use of a licensed work on the condition that the creator is appropriately credited."
+        },
+        "icon": "cc-by-icon",
+        "id": "cc-by-4.0",
+        "props": {
+          "scheme": "spdx",
+          "url": "https://creativecommons.org/licenses/by/4.0/legalcode"
+        },
+        "title": {
+          "en": "Creative Commons Attribution 4.0 International"
+        }
+      }
+    ],
+    "subjects": [
+      {
+        "subject": "gatekeeping"
+      },
+      {
+        "subject": "ai"
+      },
+      {
+        "subject": "dreams"
+      }
+    ],
+    "title": "Dream Engine",
+    "version": "1"
+  },
+  "parent": {
+    "access": {
+      "grants": [],
+      "links": [],
+      "owned_by": {
+        "user": "1301534"
+      },
+      "settings": {
+        "accept_conditions_text": null,
+        "allow_guest_requests": false,
+        "allow_user_requests": false,
+        "secret_link_expiration": 0
+      }
+    },
+    "communities": {},
+    "id": "16388757",
+    "pids": {
+      "doi": {
+        "client": "datacite",
+        "identifier": "10.5281/zenodo.16388757",
+        "provider": "datacite"
+      }
+    }
+  },
+  "pids": {
+    "doi": {
+      "client": "datacite",
+      "identifier": "10.5281/zenodo.16388758",
+      "provider": "datacite"
+    },
+    "oai": {
+      "identifier": "oai:zenodo.org:16388758",
+      "provider": "oai"
+    }
+  },
+  "revision_id": 3,
+  "stats": {
+    "all_versions": {
+      "data_volume": 111620.0,
+      "downloads": 4,
+      "unique_downloads": 3,
+      "unique_views": 2,
+      "views": 2
+    },
+    "this_version": {
+      "data_volume": 111620.0,
+      "downloads": 4,
+      "unique_downloads": 3,
+      "unique_views": 2,
+      "views": 2
+    }
+  },
+  "status": "published",
+  "swh": {},
+  "updated": "2025-07-23T22:42:15.415001+00:00",
+  "versions": {
+    "index": 1,
+    "is_latest": true,
+    "is_latest_draft": true
+  }
+}

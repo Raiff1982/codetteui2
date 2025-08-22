@@ -1,0 +1,135 @@
+id: github-v1
+version: 1
+description: GitHub HTTPS origin and disclosure policy for zkfetch
+allowed_origins:
+  - host: api.github.com
+    schemes: [https]
+    ports: [443]
+  - host: raw.githubusercontent.com
+    schemes: [https]
+    ports: [443]
+  - host: objects.githubusercontent.com
+    schemes: [https]
+    ports: [443]
+  - host: github.com
+    schemes: [https]
+    ports: [443]
+
+tls:
+  min_version: "1.2"
+  allow_versions: ["1.2", "1.3"]
+  disallowed_ciphers: ["TLS_RSA_.*", "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA"]
+  require_alpn: ["h2", "http/1.1"]
+  trust_store: "system"
+  record_cert_chain_summary: true
+
+http:
+  allowed_methods: ["GET", "HEAD"]
+  request_header_allowlist:
+    - "Accept"
+    - "User-Agent"
+    - "If-None-Match"
+    - "Authorization"   # optional; allow only GitHub PATs in server-side flows
+  strip_request_headers:
+    - "Cookie"
+    - "X-*"
+  response_header_allowlist:
+    - "Content-Type"
+    - "ETag"
+    - "Last-Modified"
+    - "Cache-Control"
+    - "Content-Length"
+  max_response_bytes: 10485760   # 10 MB
+  upstream_timeouts_ms:
+    connect: 4000
+    read: 8000
+
+github_constraints:
+  require_commit_pin: true        # enforce /{owner}/{repo}/{commit}/path on raw
+  allow_branches: []              # empty = disallow mutable refs
+  allow_tags: true                # allow /tag refs only if resolved to commit first
+  allowed_owners:
+    - Raiff1982
+    - raiffs-bits
+  allowed_repos:
+    - Codette
+    - AEGIS
+    - NexusSignalEngine
+    - codette-TheDaytheDreamBecameReal
+  allowed_paths_glob:
+    - "/**/*.json"
+    - "/**/*.yaml"
+    - "/**/*.yml"
+    - "/**/*.txt"
+    - "/models/**/*.bin"          # optional; consider a lower size cap for binaries
+  disallowed_paths_glob:
+    - "/**/.git/**"
+    - "/**/*.exe"
+    - "/**/*.dll"
+    - "/**/*.sh"
+    - "/**/*.bat"
+    - "/**/*.ps1"
+
+disclosure:
+  default_mode: "jsonpath_allowlist"
+  jsonpath_allowlist:
+    # Examples for api.github.com JSON
+    - "$.name"
+    - "$.owner.login"
+    - "$.sha"
+    - "$.tag_name"
+    - "$.content"                 # only if required; prefer hashing large blobs
+    - "$.assets[*].browser_download_url"
+  headers_allowlist:
+    - "ETag"
+    - "Content-Type"
+  hash_only_for_large_blobs_bytes: 131072   # >128 KB => disclose only SHA-256
+  redact_patterns:
+    - "(?i)authorization:\\s*Bearer\\s+[A-Za-z0-9-_\\.]+"
+    - "(?i)github_pat_[A-Za-z0-9_]+"
+
+caching:
+  allow_cache: true
+  default_ttl_s: 300
+  vary_on:
+    - "url"
+    - "method"
+    - "ETag"
+    - "If-None-Match"
+
+proof:
+  format: "tlsnotary/v0.3.0"
+  store_proof_blob: true
+  store_transcript_hash: true
+  retain_days: 30
+  include_notary_pubkey_fingerprint: true
+
+audit:
+  log_fields:
+    - "timestamp"
+    - "origin.host"
+    - "origin.url_fetched"
+    - "hashes.transcript_sha256"
+    - "hashes.disclosed_sha256"
+    - "policy_id"
+    - "tls.version"
+    - "tls.cipher_suite"
+  daily_merkle_anchor:
+    enabled: true
+    chain: "none"    # set to "evm" and provide contract if/when you anchor on-chain
+
+safety:
+  block_if:
+    - reason: "mutable_ref"
+      match:
+        url_regex: "https://raw\\.githubusercontent\\.com/.+?/(main|master|dev)/"
+    - reason: "owner_not_allowed"
+      match:
+        owner_not_in_allowed: true
+    - reason: "path_disallowed"
+      match:
+        path_glob_in: "disallowed_paths_glob"
+  warn_if:
+    - reason: "missing_etag"
+      match:
+        response_header_missing: "ETag"

@@ -1,0 +1,285 @@
+openapi: 3.1.0
+info:
+  title: zkfetch
+  version: 1.0.0
+  description: >
+    Fetch HTTPS resources with a zero-knowledge TLS proof (TLSNotary or equivalent).
+    Returns selectively disclosed data plus a verifiable proof artifact.
+
+servers:
+  - url: https://api.codette.online
+
+paths:
+  /v1/zkfetch:
+    post:
+      summary: Fetch a URL with zkTLS proof and selective disclosure
+      operationId: zkfetch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ZkFetchRequest"
+      responses:
+        "200":
+          description: Success
+          headers:
+            X-ZKFetch-Request-Id:
+              description: Opaque request ID for audit
+              schema: { type: string }
+            X-ZKFetch-Key-Id:
+              description: Signing key identifier for response HMAC
+              schema: { type: string }
+            X-ZKFetch-Signature:
+              description: Base64 HMAC-SHA256 over the canonical JSON body
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ZkFetchResponse"
+        "400":
+          description: Bad request (schema, size, or policy violation)
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "403":
+          description: Blocked by policy
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "424":
+          description: TLS proof/verification failure
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "502":
+          description: Upstream error from origin
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "504":
+          description: Timeout generating proof or contacting origin
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /v1/proofs/{id}:
+    get:
+      summary: Retrieve a stored proof and disclosure bundle (for viewer)
+      operationId: getProof
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProofBundle"
+        "404":
+          description: Not found
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /v1/proofs/{id}/verify:
+    get:
+      summary: Server-side verification of a stored proof
+      operationId: verifyProof
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifyResult"
+        "404":
+          description: Not found
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /v1/health:
+    get:
+      summary: Liveness/readiness
+      operationId: health
+      responses:
+        "200": { description: OK }
+
+components:
+  schemas:
+    ZkFetchRequest:
+      type: object
+      required: [url, method]
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Absolute HTTPS URL (must match an allowlisted origin)
+        method:
+          type: string
+          enum: [GET, POST, HEAD]
+        headers:
+          type: object
+          additionalProperties: { type: string }
+          description: Optional request headers (policy-filtered)
+        body:
+          type: string
+          format: byte
+          description: Optional request body (base64-encoded)
+        policy_id:
+          type: string
+          description: Source policy identifier to apply (e.g., "github-v1")
+        disclosure:
+          $ref: "#/components/schemas/DisclosureRules"
+        cache:
+          type: object
+          properties:
+            max_age_s:
+              type: integer
+              minimum: 0
+              description: OK to serve a cached proof if not older than this
+            key:
+              type: string
+              description: Application cache key hint; defaults to canonical (url+method+headers+body)
+        timeouts:
+          type: object
+          properties:
+            connect_ms: { type: integer, minimum: 1 }
+            read_ms: { type: integer, minimum: 1 }
+            proof_ms: { type: integer, minimum: 1 }
+
+    DisclosureRules:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum: [jsonpath_allowlist, header_allowlist, body_regex]
+          default: jsonpath_allowlist
+        jsonpath:
+          type: array
+          items: { type: string }
+          description: JSONPath expressions to disclose from JSON responses
+        headers:
+          type: array
+          items: { type: string }
+          description: Response headers allowed to disclose (e.g., ETag, Content-Type)
+        body_regex:
+          type: array
+          items:
+            type: object
+            properties:
+              pattern: { type: string }
+              group: { type: integer }
+          description: For plaintext responses, disclose only regex capture groups
+        hash_only:
+          type: boolean
+          description: If true, disclose only hashes + origin metadata (no content)
+
+    ZkFetchResponse:
+      type: object
+      required: [origin, tls, proof, disclosed, hashes, timestamp, policy_id]
+      properties:
+        origin:
+          type: object
+          properties:
+            host: { type: string }
+            url_fetched: { type: string, format: uri }
+            ip: { type: string, description: "Redacted unless policy allows" }
+            cert_chain_summary:
+              type: array
+              items:
+                type: object
+                properties:
+                  subject: { type: string }
+                  issuer: { type: string }
+                  not_before: { type: string }
+                  not_after: { type: string }
+                  sha256_spki: { type: string }
+        tls:
+          type: object
+          properties:
+            version: { type: string, enum: ["1.2", "1.3"] }
+            cipher_suite: { type: string }
+            alpn: { type: string }
+        disclosed:
+          description: Data revealed per rules
+          oneOf:
+            - type: object # JSON
+            - type: string # plaintext
+            - type: "null"
+        hashes:
+          type: object
+          properties:
+            transcript_sha256: { type: string }
+            disclosed_sha256: { type: string }
+            full_body_sha256: { type: string, description: "May be null if not allowed" }
+        proof:
+          type: object
+          required: [format, blob_b64]
+          properties:
+            format: { type: string, example: "tlsnotary/v0.3.0" }
+            blob_b64: { type: string, description: "Opaque proof artifact (base64)" }
+            notary_pubkey_fingerprint: { type: string }
+        timestamp:
+          type: string
+          format: date-time
+        policy_id:
+          type: string
+        cache:
+          type: object
+          properties:
+            hit: { type: boolean }
+            age_s: { type: integer }
+        request_id:
+          type: string
+          description: Server-issued request UUID
+
+    ProofBundle:
+      type: object
+      required: [response, verifier_inputs]
+      properties:
+        response: { $ref: "#/components/schemas/ZkFetchResponse" }
+        verifier_inputs:
+          type: object
+          properties:
+            root_store: { type: string, description: "Identifier of trust store used" }
+            origin_host: { type: string }
+            tls_params: { type: object }
+            policy_snapshot: { type: object }
+
+    VerifyResult:
+      type: object
+      properties:
+        valid: { type: boolean }
+        checks:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              passed: { type: boolean }
+              detail: { type: string }
+        warnings:
+          type: array
+          items: { type: string }
+
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum:
+            - bad_request
+            - policy_violation
+            - upstream_error
+            - tls_verification_failed
+            - proof_generation_failed
+            - timeout
+            - size_limit
+            - unsupported_origin
+        message: { type: string }
+        detail: { type: object }
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+security:
+  - bearerAuth: []
