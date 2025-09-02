@@ -5,6 +5,9 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   root: '.',
   plugins: [react()],
+  server: {
+    https: false
+  },
   build: {
     rollupOptions: {
       input: 'index.html'
