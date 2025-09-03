@@ -27,34 +27,54 @@ import { BeginnerHelp } from './components/BeginnerHelp';
 import { BeginnerModeToggle } from './components/BeginnerModeToggle';
 import { ContextualAIAssistant } from './components/ContextualAIAssistant';
 import { Footer } from './components/Footer';
-import { AboutModal } from './components/AboutModal';
-import { MusicPlayer } from './components/MusicPlayer';
-import { MusicPlayerMini } from './components/MusicPlayerMini';
 import { HowToGuide } from './components/HowToGuide';
 import { SecurityPanel } from './components/SecurityPanel';
 import { MobileMenu } from './components/MobileMenu';
 import { TouchGestures } from './components/TouchGestures';
 import { RevolutionaryInterface } from './components/RevolutionaryInterface';
-import { MTVStyleMusicPlayer } from './components/MTVStyleMusicPlayer';
-import { EthicalAIPanel } from './components/EthicalAIPanel';
-import { CodeHealthDashboard } from './components/CodeHealthDashboard';
-import { PerformanceMonitor } from './components/PerformanceMonitor';
-import { AutoFixPanel } from './components/AutoFixPanel';
-import { CodetteChat } from './components/CodetteChat';
-import { StreamlinedOnboarding } from './components/StreamlinedOnboarding';
-import { PerformanceOptimizer } from './components/PerformanceOptimizer';
 import { CommunityBuilder } from './components/CommunityBuilder';
 import { AccessibilityEnhancer } from './components/AccessibilityEnhancer';
 import { DocumentationMaker } from './components/DocumentationMaker';
-import { LazyLoadWrapper } from './components/LazyLoadWrapper';
+import { CommandPalette } from './components/CommandPalette';
+import { AIDrawer } from './components/AIDrawer';
+import { StatusToasts } from './components/StatusToasts';
+import { SkipLink } from './components/SkipLink';
+import { EmptyState } from './components/EmptyState';
 import { useTheme } from './hooks/useTheme';
 import { useFileSystem } from './hooks/useFileSystem';
 import { useFirstTimeUser } from './hooks/useFirstTimeUser';
 import { useMusic } from './hooks/useMusic';
 import { useAdvancedAI } from './hooks/useAdvancedAI';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { useToasts } from './hooks/useToasts';
 import { aiCodeService } from './services/aiCodeService';
 import { backendIntegration } from './services/backendIntegration';
-import { X, Crown, Sparkles, Music, Trophy, Shield, Activity, Atom, Brain } from 'lucide-react';
+import { X, Crown, Sparkles, Music, Trophy, Shield, Activity, Atom, Brain, FileText, Folder, Code, Palette, TerminalIcon, HelpCircle, BookOpen, TrendingUp, Users, Eye, Database, Settings } from 'lucide-react';
+
+// Lazy load heavy components
+const LazyResearchPaperViewer = React.lazy(() => 
+  import('./components/ResearchPaperViewer').then(module => ({ default: module.ResearchPaperViewer }))
+);
+
+const LazyDatabaseViewer = React.lazy(() => 
+  import('./components/DatabaseViewer').then(module => ({ default: module.DatabaseViewer }))
+);
+
+const LazyPerformanceOptimizer = React.lazy(() => 
+  import('./components/PerformanceOptimizer').then(module => ({ default: module.PerformanceOptimizer }))
+);
+
+const LazyCommunityBuilder = React.lazy(() => 
+  import('./components/CommunityBuilder').then(module => ({ default: module.CommunityBuilder }))
+);
+
+const LazyAccessibilityEnhancer = React.lazy(() => 
+  import('./components/AccessibilityEnhancer').then(module => ({ default: module.AccessibilityEnhancer }))
+);
+
+const LazyDocumentationMaker = React.lazy(() => 
+  import('./components/DocumentationMaker').then(module => ({ default: module.DocumentationMaker }))
+);
 
 function App() {
   const { theme, toggleTheme } = useTheme();
@@ -124,6 +144,14 @@ function App() {
     disableBeginnerMode
   } = useFirstTimeUser();
 
+  // UI State
+  const [focusMode, setFocusMode] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [aiDrawerOpen, setAiDrawerOpen] = useState(false);
+
+  // Toast system
+  const { toasts, dismissToast, success, error, info, loading } = useToasts();
+
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
@@ -133,6 +161,218 @@ function App() {
       setShowStreamlinedOnboarding(true);
     }
   }, [isFirstTime, tourCompleted]);
+
+  // Commands for command palette
+  const commands = [
+    {
+      id: 'new-file',
+      title: 'New File',
+      description: 'Create a new file',
+      category: 'file' as const,
+      shortcut: '⌘N',
+      action: () => {
+        createFile('untitled.txt', 'file');
+        success('File Created', 'New file ready for editing');
+      }
+    },
+    {
+      id: 'new-js-file',
+      title: 'New JavaScript File',
+      description: 'Create a new JavaScript file',
+      category: 'file' as const,
+      action: () => {
+        createFile('script.js', 'file');
+        success('JavaScript File Created', 'Ready for coding');
+      }
+    },
+    {
+      id: 'new-folder',
+      title: 'New Folder',
+      description: 'Create a new folder',
+      category: 'file' as const,
+      action: () => {
+        createFile('new-folder', 'folder');
+        success('Folder Created', 'New folder added to project');
+      }
+    },
+    {
+      id: 'toggle-ai',
+      title: 'Toggle AI Assistant',
+      description: 'Open or close the AI assistant drawer',
+      category: 'ai' as const,
+      shortcut: '⌘⇧A',
+      action: () => {
+        setAiDrawerOpen(!aiDrawerOpen);
+        info(aiDrawerOpen ? 'AI Assistant Closed' : 'AI Assistant Opened');
+      }
+    },
+    {
+      id: 'toggle-terminal',
+      title: 'Toggle Terminal',
+      description: 'Show or hide the integrated terminal',
+      category: 'view' as const,
+      shortcut: '⌘`',
+      action: () => {
+        setTerminalVisible(!terminalVisible);
+        info(terminalVisible ? 'Terminal Hidden' : 'Terminal Opened');
+      }
+    },
+    {
+      id: 'toggle-music',
+      title: 'Toggle Music Player',
+      description: 'Open the adaptive music player',
+      category: 'view' as const,
+      shortcut: '⌘⇧M',
+      action: () => {
+        setMusicPlayerVisible(!musicPlayerVisible);
+        info(musicPlayerVisible ? 'Music Player Hidden' : 'Music Player Opened');
+      }
+    },
+    {
+      id: 'focus-mode',
+      title: 'Toggle Focus Mode',
+      description: 'Enter zen mode for distraction-free coding',
+      category: 'view' as const,
+      shortcut: '⌘⇧F',
+      action: () => {
+        setFocusMode(!focusMode);
+        if (!focusMode) {
+          setSidebarCollapsed(true);
+          setTerminalVisible(false);
+          setAiDrawerOpen(false);
+          success('Focus Mode Activated', 'Distractions hidden for deep coding');
+        } else {
+          setSidebarCollapsed(false);
+          info('Focus Mode Deactivated', 'Interface restored');
+        }
+      }
+    },
+    {
+      id: 'performance-optimizer',
+      title: 'Performance Optimizer',
+      description: 'Open real-time performance monitoring',
+      category: 'view' as const,
+      shortcut: '⌘⇧O',
+      action: () => {
+        setShowPerformanceOptimizer(true);
+        loading('Loading Performance Optimizer', 'Initializing monitoring tools', { category: 'performance' });
+      }
+    },
+    {
+      id: 'community-hub',
+      title: 'Community Hub',
+      description: 'Connect with ethical developers',
+      category: 'view' as const,
+      shortcut: '⌘⇧B',
+      action: () => {
+        setShowCommunityBuilder(true);
+        loading('Loading Community Hub', 'Connecting to developer network', { category: 'general' });
+      }
+    },
+    {
+      id: 'accessibility-center',
+      title: 'Accessibility Center',
+      description: 'Configure accessibility settings',
+      category: 'settings' as const,
+      shortcut: '⌘⇧X',
+      action: () => {
+        setShowAccessibilityEnhancer(true);
+        info('Accessibility Center Opened', 'Configure inclusive settings');
+      }
+    },
+    {
+      id: 'research-papers',
+      title: 'Research Papers',
+      description: 'Browse academic research and papers',
+      category: 'view' as const,
+      action: () => {
+        setShowResearchPapers(true);
+        loading('Loading Research Papers', 'Accessing academic database', { category: 'general' });
+      }
+    },
+    {
+      id: 'database-viewer',
+      title: 'Database Viewer',
+      description: 'Connect and explore databases',
+      category: 'view' as const,
+      action: () => {
+        setShowDatabaseViewer(true);
+        loading('Loading Database Viewer', 'Initializing database tools', { category: 'general' });
+      }
+    },
+    {
+      id: 'documentation-maker',
+      title: 'Documentation Maker',
+      description: 'Generate ethical documentation',
+      category: 'view' as const,
+      action: () => {
+        setShowDocumentationMaker(true);
+        loading('Loading Documentation Maker', 'Preparing documentation tools', { category: 'ai' });
+      }
+    },
+    {
+      id: 'beginner-help',
+      title: 'Beginner Help',
+      description: 'Get help for new developers',
+      category: 'help' as const,
+      action: () => {
+        setShowBeginnerHelp(true);
+        info('Beginner Help Opened', 'Welcome to coding!');
+      }
+    },
+    {
+      id: 'how-to-guide',
+      title: 'How-To Guide',
+      description: 'Complete feature tutorials',
+      category: 'help' as const,
+      action: () => {
+        setShowHowToGuide(true);
+        info('How-To Guide Opened', 'Learn Codette features');
+      }
+    },
+    {
+      id: 'toggle-theme',
+      title: 'Toggle Theme',
+      description: 'Switch between light and dark mode',
+      category: 'settings' as const,
+      shortcut: '⌘T',
+      action: () => {
+        toggleTheme();
+        info('Theme Changed', `Switched to ${theme === 'dark' ? 'light' : 'dark'} mode`);
+      }
+    }
+  ];
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onCommandPalette: () => setCommandPaletteOpen(true),
+    onFocusMode: () => {
+      setFocusMode(!focusMode);
+      if (!focusMode) {
+        setSidebarCollapsed(true);
+        setTerminalVisible(false);
+        setAiDrawerOpen(false);
+        success('Focus Mode Activated', 'Press ⌘⇧F to exit');
+      } else {
+        setSidebarCollapsed(false);
+        info('Focus Mode Deactivated', 'Interface restored');
+      }
+    },
+    onAIDrawer: () => {
+      setAiDrawerOpen(!aiDrawerOpen);
+      info(aiDrawerOpen ? 'AI Assistant Closed' : 'AI Assistant Opened');
+    },
+    onTerminal: () => {
+      setTerminalVisible(!terminalVisible);
+      info(terminalVisible ? 'Terminal Hidden' : 'Terminal Opened');
+    },
+    onSave: () => {
+      if (activeFile) {
+        saveFile(activeFile.id);
+        success('File Saved', `${activeFile.name} saved successfully`);
+      }
+    }
+  });
 
   useEffect(() => {
     const checkDeviceType = () => {
@@ -327,6 +567,7 @@ function App() {
 
   return (
     <ErrorBoundary>
+      <SkipLink />
     <TouchGestures
       onSwipeRight={() => isMobile && setSidebarCollapsed(false)}
       onSwipeLeft={() => isMobile && setSidebarCollapsed(true)}
@@ -353,40 +594,74 @@ function App() {
           musicPlayerVisible={musicPlayerVisible}
           onToggleUltimateAI={() => setShowUltimateAI(!showUltimateAI)}
           showUltimateAI={showUltimateAI}
-          onShowHowTo={() => setShowHowToGuide(true)}
+          <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-purple-950 transition-all duration-500 motion-reduce:transition-none">
+            
+            {/* Focus Mode Indicator */}
+            {focusMode && (
+              <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-40 px-4 py-2 bg-purple-600 text-white rounded-full text-sm font-medium shadow-lg">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                  Focus Mode Active
+                </div>
+              </div>
+            )}
+
           onShowSecurity={() => setShowSecurityPanel(true)}
           forceMobileLayout={forceMobileLayout}
           onToggleMobileLayout={() => setForceMobileLayout(!forceMobileLayout)}
           onToggleAutoFix={() => setShowAutoFix(!showAutoFix)}
           showAutoFix={showAutoFix}
           onToggleChat={() => setShowCodetteChat(!showCodetteChat)}
+              onToggleAI={() => setAiDrawerOpen(!aiDrawerOpen)}
+              aiDrawerOpen={aiDrawerOpen}
+              focusMode={focusMode}
         />
         
         <div className={`flex flex-1 overflow-hidden ${isMobile ? 'mobile-stack' : ''}`}>
-          <Sidebar 
-            collapsed={sidebarCollapsed}
-            onCollapse={() => setSidebarCollapsed(true)}
-          >
-            <div className="file-explorer">
+              {!focusMode && (
+                <Sidebar 
+                  collapsed={sidebarCollapsed}
+                  onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+                  isMobile={isMobile}
+                />
+              )}
               <FileExplorer
                 files={files}
-                activeFile={activeFile}
-                onFileSelect={openFile}
-                onFileCreate={createFile}
-                onFileDelete={deleteFile}
-              />
-            </div>
-          </Sidebar>
-          
-          <div className={`flex-1 flex flex-col ${isMobile ? 'min-h-0' : ''}`}>
-            <div className="flex-1 relative">
+                {!focusMode && (
+                  <FileExplorer 
+                    files={files}
+                    activeFile={activeFile}
               {activeFile ? (
                 <div className={`flex h-full ${isMobile ? 'flex-col space-y-2' : ''}`}>
                   <div className="flex-1 editor-area">
-                    <AdvancedEditor
-                      file={activeFile}
-                      onContentChange={(content) => updateFileContent(activeFile.id, content)}
-                      onCursorChange={(position) => setCursorPosition(position)}
+            {!focusMode && (
+              <StatusBar 
+                activeFile={activeFile}
+                isMobile={isMobile}
+                theme={theme}
+                focusMode={focusMode}
+              />
+            )}
+
+            {/* Command Palette */}
+            <CommandPalette
+              isOpen={commandPaletteOpen}
+              onClose={() => setCommandPaletteOpen(false)}
+              commands={commands}
+            />
+
+            {/* AI Drawer */}
+            <AIDrawer
+              isOpen={aiDrawerOpen}
+              onClose={() => setAiDrawerOpen(false)}
+              activeFile={activeFile}
+            />
+
+            {/* Status Toasts */}
+            <StatusToasts
+              toasts={toasts}
+              onDismiss={dismissToast}
+            />
                       onSave={() => saveFile(activeFile.id)}
                       onClose={() => closeFile(activeFile.id)}
                       theme={theme}
@@ -530,10 +805,11 @@ function App() {
                     <WelcomeScreen 
                       onCreateFile={createFile}
                       onOpenMusic={() => setMusicPlayerVisible(true)}
+                      onOpenCommandPalette={() => setCommandPaletteOpen(true)}
                     />
                   )}
                   
-                  {aiPanelVisible && !isMobile && (
+                  {terminalVisible && !focusMode && (
                     <div
                       className="absolute top-0 right-0 h-full border-l border-purple-200/50 dark:border-purple-700/50 bg-gradient-to-br from-white/95 via-purple-50/80 to-blue-50/80 dark:from-gray-900/95 dark:via-purple-950/80 dark:to-blue-950/80 backdrop-blur-xl shadow-2xl z-20 overflow-hidden"
                       style={{ 
@@ -732,18 +1008,36 @@ function App() {
         <AboutModal
           isVisible={showAboutModal}
           onClose={() => setShowAboutModal(false)}
-        />
-        
-        <SecurityPanel
-          isVisible={showSecurityPanel}
+          <React.Suspense fallback={
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+              <div className="bg-white dark:bg-gray-900 rounded-lg p-8 text-center">
+                <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                <p className="text-gray-600 dark:text-gray-400">Loading Research Papers...</p>
+              </div>
+            </div>
+          }>
+            <LazyResearchPaperViewer 
+              onClose={() => setShowResearchPapers(false)}
+              isMobile={isMobile}
+            />
+          </React.Suspense>
           onClose={() => setShowSecurityPanel(false)}
           currentCode={activeFile?.content || ''}
           language={selectedLanguage?.name.toLowerCase() || 'plaintext'}
           onSecurityFix={(fixedCode) => {
-            if (activeFile) {
-              updateFileContent(activeFile.id, fixedCode);
-            }
-          }}
+          <React.Suspense fallback={
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+              <div className="bg-white dark:bg-gray-900 rounded-lg p-8 text-center">
+                <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                <p className="text-gray-600 dark:text-gray-400">Loading Database Viewer...</p>
+              </div>
+            </div>
+          }>
+            <LazyDatabaseViewer 
+              onClose={() => setShowDatabaseViewer(false)}
+              isMobile={isMobile}
+            />
+          </React.Suspense>
         />
         
         {/* Music Player */}
@@ -835,31 +1129,17 @@ function App() {
             onClose={() => setShowMTVMusicPlayer(false)}
             currentLanguage={selectedLanguage?.name.toLowerCase() || 'typescript'}
             codeComplexity={activeFile ? Math.min(activeFile.content.length / 1000, 1) : 0.5}
-          />
-        )}
-        
-        {/* zkfetch Panel */}
-        {showZkFetch && (
-          <ZkFetchPanel
-            isVisible={showZkFetch}
-            onClose={() => setShowZkFetch(false)}
-          />
-        )}
-        
-        {/* Floating Advanced Panels */}
-        {showEthicalAI && (
-          <div className="fixed inset-4 bg-gradient-to-br from-white/95 via-green-50/80 to-blue-50/80 dark:from-gray-800/95 dark:via-green-950/80 dark:to-blue-950/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-green-200/50 dark:border-green-700/50 z-50 overflow-hidden">
-            <div className="h-full">
-              <EthicalAIPanel
-                onCodeGenerated={(code, title) => {
-                  if (title) {
-                    const fileName = `${title.toLowerCase().replace(/\s+/g, '-')}.${selectedLanguage?.extensions[0] || 'ts'}`;
-                    createFile(fileName, 'file');
-                    setTimeout(() => {
                       const newFile = files.find(f => f.name === fileName);
                       if (newFile) {
-                        updateFileContent(newFile.id, code);
-                        openFile(newFile);
+          <React.Suspense fallback={
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+              <div className="bg-white dark:bg-gray-900 rounded-lg p-8 text-center">
+                <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                <p className="text-gray-600 dark:text-gray-400">Loading Performance Optimizer...</p>
+              </div>
+            </div>
+          }>
+            <LazyPerformanceOptimizer 
                       }
                     }, 100);
                   } else if (activeFile) {
@@ -975,57 +1255,57 @@ function App() {
         {/* Mobile Menu */}
         <MobileMenu
           isOpen={showMobileMenu}
-          onClose={() => {
-            setShowMobileMenu(false);
+          <React.Suspense fallback={
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+              <div className="bg-white dark:bg-gray-900 rounded-lg p-8 text-center">
+                <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                <p className="text-gray-600 dark:text-gray-400">Loading Community Hub...</p>
+              </div>
+            </div>
+          }>
+            <LazyCommunityBuilder 
             if (isMobile) setSidebarCollapsed(true);
           }}
           onToggleAI={() => setAiPanelVisible(!aiPanelVisible)}
-          onToggleMusic={() => setMusicPlayerVisible(!musicPlayerVisible)}
+          </React.Suspense>
           onToggleTerminal={() => setTerminalVisible(!terminalVisible)}
           onToggleSecurity={() => setShowSecurityPanel(!showSecurityPanel)}
           onShowHelp={() => setShowBeginnerHelp(true)}
           onShowHowTo={() => setShowHowToGuide(true)}
-          aiPanelVisible={aiPanelVisible}
-          musicPlayerVisible={musicPlayerVisible}
+          <React.Suspense fallback={
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+              <div className="bg-white dark:bg-gray-900 rounded-lg p-8 text-center">
+                <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                <p className="text-gray-600 dark:text-gray-400">Loading Accessibility Center...</p>
+              </div>
+            </div>
+          }>
+            <LazyAccessibilityEnhancer 
           terminalVisible={terminalVisible}
           showSecurityPanel={showSecurityPanel}
           onToggleEthicalAI={() => setShowEthicalAI(!showEthicalAI)}
-          onToggleCodeHealth={() => setShowCodeHealth(!showCodeHealth)}
+          </React.Suspense>
           onToggleQuantumVisualizer={() => setShowQuantumVisualizer(!showQuantumVisualizer)}
           onToggleCocoonsViewer={() => setShowCocoonsViewer(!showCocoonsViewer)}
           onTogglePerformanceMonitor={() => setShowPerformanceMonitor(!showPerformanceMonitor)}
           showEthicalAI={showEthicalAI}
-          showCodeHealth={showCodeHealth}
-          showQuantumVisualizer={showQuantumVisualizer}
+          <React.Suspense fallback={
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+              <div className="bg-white dark:bg-gray-900 rounded-lg p-8 text-center">
+                <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                <p className="text-gray-600 dark:text-gray-400">Loading Documentation Maker...</p>
+              </div>
+            </div>
+          }>
+            <LazyDocumentationMaker 
           showCocoonsViewer={showCocoonsViewer}
           showPerformanceMonitor={showPerformanceMonitor}
           forceMobileLayout={forceMobileLayout}
-          onToggleMobileLayout={() => setForceMobileLayout(!forceMobileLayout)}
-          codingStreak={codingStreak}
-          totalLinesCodedToday={totalLinesCodedToday}
-          onToggleMTVMusicPlayer={() => setShowMTVMusicPlayer(!showMTVMusicPlayer)}
-          onToggleRevolutionaryInterface={() => setShowRevolutionaryInterface(!showRevolutionaryInterface)}
-          showMTVMusicPlayer={showMTVMusicPlayer}
-          showRevolutionaryInterface={showRevolutionaryInterface}
-          onToggleAutoFix={() => setShowAutoFix(!showAutoFix)}
-          showAutoFix={showAutoFix}
-          onToggleChat={() => setShowCodetteChat(!showCodetteChat)}
-          onTogglePerformanceOptimizer={() => setShowPerformanceOptimizer(!showPerformanceOptimizer)}
-          onToggleCommunityBuilder={() => setShowCommunityBuilder(!showCommunityBuilder)}
-          onToggleAccessibility={() => setShowAccessibilityEnhancer(!showAccessibilityEnhancer)}
-          onToggleDocumentation={() => setShowDocumentationMaker(!showDocumentationMaker)}
-          showPerformanceOptimizer={showPerformanceOptimizer}
-          showCommunityBuilder={showCommunityBuilder}
-          showAccessibilityEnhancer={showAccessibilityEnhancer}
-          showDocumentationMaker={showDocumentationMaker}
-          isMobile={isMobile}
-        />
-        
-      </div>
+          </React.Suspense>
     </TooltipProvider>
     </TouchGestures>
     </ErrorBoundary>
-  );
+          </React.Suspense>
 }
 
 export default App;

@@ -1,75 +1,71 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 
-interface KeyboardShortcuts {
-  onToggleCommandPalette: () => void;
-  onToggleFocusMode: () => void;
-  onToggleAIDrawer: () => void;
-  onSave?: () => void;
-  onToggleTerminal?: () => void;
-  onToggleTheme?: () => void;
+interface KeyboardShortcutsConfig {
+  onCommandPalette: () => void;
+  onFocusMode: () => void;
+  onAIDrawer: () => void;
+  onTerminal: () => void;
+  onSave: () => void;
 }
 
 export function useKeyboardShortcuts({
-  onToggleCommandPalette,
-  onToggleFocusMode,
-  onToggleAIDrawer,
-  onSave,
-  onToggleTerminal,
-  onToggleTheme
-}: KeyboardShortcuts) {
+  onCommandPalette,
+  onFocusMode,
+  onAIDrawer,
+  onTerminal,
+  onSave
+}: KeyboardShortcutsConfig) {
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    // Ignore if user is typing in an input field
+    const target = e.target as HTMLElement;
+    const isInputFocused = target.tagName === 'INPUT' || 
+                          target.tagName === 'TEXTAREA' || 
+                          target.contentEditable === 'true' ||
+                          target.closest('[contenteditable="true"]');
+
+    if (isInputFocused) return;
+
+    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+
+    // Ctrl/Cmd + K for command palette
+    if (cmdOrCtrl && e.key === 'k') {
+      e.preventDefault();
+      onCommandPalette();
+      return;
+    }
+
+    // Ctrl/Cmd + Shift + F for focus mode
+    if (cmdOrCtrl && e.shiftKey && e.key === 'F') {
+      e.preventDefault();
+      onFocusMode();
+      return;
+    }
+
+    // Ctrl/Cmd + Shift + A for AI drawer
+    if (cmdOrCtrl && e.shiftKey && e.key === 'A') {
+      e.preventDefault();
+      onAIDrawer();
+      return;
+    }
+
+    // Ctrl/Cmd + ` for terminal
+    if (cmdOrCtrl && e.key === '`') {
+      e.preventDefault();
+      onTerminal();
+      return;
+    }
+
+    // Ctrl/Cmd + S for save
+    if (cmdOrCtrl && e.key === 's') {
+      e.preventDefault();
+      onSave();
+      return;
+    }
+  }, [onCommandPalette, onFocusMode, onAIDrawer, onTerminal, onSave]);
+
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore shortcuts when user is typing in inputs
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true') {
-        return;
-      }
-
-      // Command Palette - Ctrl/Cmd + K
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        onToggleCommandPalette();
-      }
-
-      // Focus Mode - Ctrl/Cmd + Shift + F
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'F') {
-        e.preventDefault();
-        onToggleFocusMode();
-      }
-
-      // AI Drawer - Ctrl/Cmd + Shift + A
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'A') {
-        e.preventDefault();
-        onToggleAIDrawer();
-      }
-
-      // Save - Ctrl/Cmd + S
-      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-        e.preventDefault();
-        onSave?.();
-      }
-
-      // Terminal - Ctrl/Cmd + `
-      if ((e.ctrlKey || e.metaKey) && e.key === '`') {
-        e.preventDefault();
-        onToggleTerminal?.();
-      }
-
-      // Theme - Ctrl/Cmd + T
-      if ((e.ctrlKey || e.metaKey) && e.key === 't') {
-        e.preventDefault();
-        onToggleTheme?.();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [
-    onToggleCommandPalette,
-    onToggleFocusMode,
-    onToggleAIDrawer,
-    onSave,
-    onToggleTerminal,
-    onToggleTheme
-  ]);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
 }

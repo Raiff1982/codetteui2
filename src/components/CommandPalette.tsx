@@ -1,192 +1,177 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { 
-  Search, 
-  Command as CommandIcon,
-  FileText,
-  Brain,
-  Eye,
-  Settings,
-  HelpCircle,
-  Zap,
-  Music,
-  Shield,
-  Terminal,
-  Palette,
-  Code,
-  Atom,
-  Heart,
-  Activity,
-  TrendingUp,
-  Users,
-  BookOpen,
-  ChevronRight
-} from 'lucide-react';
-import { Command } from '../hooks/useCommandPalette';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, FileText, Folder, Code, Palette, TerminalIcon, HelpCircle, BookOpen, TrendingUp, Users, Eye, Settings, Brain, Atom, Shield, Music, Crown, Sparkles, Activity } from 'lucide-react';
+
+interface Command {
+  id: string;
+  title: string;
+  description: string;
+  category: 'file' | 'ai' | 'view' | 'settings' | 'help';
+  shortcut?: string;
+  action: () => void;
+}
 
 interface CommandPaletteProps {
   isOpen: boolean;
   onClose: () => void;
-  searchTerm: string;
-  onSearchChange: (term: string) => void;
   commands: Command[];
-  onExecuteCommand: (commandId: string) => void;
 }
 
-export function CommandPalette({
-  isOpen,
-  onClose,
-  searchTerm,
-  onSearchChange,
-  commands,
-  onExecuteCommand
-}: CommandPaletteProps) {
+const categoryIcons = {
+  file: FileText,
+  ai: Brain,
+  view: Eye,
+  settings: Settings,
+  help: HelpCircle
+};
+
+const categoryColors = {
+  file: 'text-blue-600 dark:text-blue-400',
+  ai: 'text-purple-600 dark:text-purple-400',
+  view: 'text-green-600 dark:text-green-400',
+  settings: 'text-orange-600 dark:text-orange-400',
+  help: 'text-pink-600 dark:text-pink-400'
+};
+
+export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProps) {
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const filteredCommands = commands.filter(command =>
+    command.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    command.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    command.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
+      setSearchTerm('');
+      setSelectedIndex(0);
     }
   }, [isOpen]);
 
   useEffect(() => {
     setSelectedIndex(0);
-  }, [searchTerm, commands]);
+  }, [searchTerm]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        setSelectedIndex(prev => (prev + 1) % commands.length);
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        setSelectedIndex(prev => (prev - 1 + commands.length) % commands.length);
-        break;
-      case 'Enter':
-        e.preventDefault();
-        if (commands[selectedIndex]) {
-          onExecuteCommand(commands[selectedIndex].id);
-        }
-        break;
-      case 'Escape':
-        e.preventDefault();
-        onClose();
-        break;
-    }
-  };
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen) return;
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'file': return <FileText className="w-4 h-4" />;
-      case 'ai': return <Brain className="w-4 h-4" />;
-      case 'view': return <Eye className="w-4 h-4" />;
-      case 'settings': return <Settings className="w-4 h-4" />;
-      case 'help': return <HelpCircle className="w-4 h-4" />;
-      default: return <CommandIcon className="w-4 h-4" />;
-    }
-  };
+      switch (e.key) {
+        case 'Escape':
+          e.preventDefault();
+          onClose();
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          setSelectedIndex(prev => 
+            prev < filteredCommands.length - 1 ? prev + 1 : 0
+          );
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setSelectedIndex(prev => 
+            prev > 0 ? prev - 1 : filteredCommands.length - 1
+          );
+          break;
+        case 'Enter':
+          e.preventDefault();
+          if (filteredCommands[selectedIndex]) {
+            filteredCommands[selectedIndex].action();
+            onClose();
+          }
+          break;
+      }
+    };
 
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'file': return 'text-blue-600';
-      case 'ai': return 'text-purple-600';
-      case 'view': return 'text-green-600';
-      case 'settings': return 'text-orange-600';
-      case 'help': return 'text-pink-600';
-      default: return 'text-gray-600';
-    }
-  };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose, filteredCommands, selectedIndex]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start justify-center pt-32 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-2xl mx-4 overflow-hidden">
-        {/* Header */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <CommandIcon className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-800 dark:text-white">Command Palette</h3>
-              <p className="text-xs text-gray-600 dark:text-gray-400">Type to search commands</p>
-            </div>
-          </div>
-        </div>
-
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center pt-[20vh]">
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-2xl mx-4 max-h-[60vh] flex flex-col">
         {/* Search Input */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="relative">
-            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              ref={inputRef}
-              type="text"
-              value={searchTerm}
-              onChange={(e) => onSearchChange(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Search commands..."
-              className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+        <div className="flex items-center gap-3 p-4 border-b border-gray-200 dark:border-gray-700">
+          <Search className="w-5 h-5 text-gray-400" />
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder="Type a command or search..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex-1 bg-transparent border-none outline-none text-gray-900 dark:text-white placeholder-gray-500 text-lg"
+          />
+          <kbd className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded">
+            ESC
+          </kbd>
         </div>
 
         {/* Commands List */}
-        <div className="max-h-96 overflow-y-auto">
-          {commands.length > 0 ? (
-            <div className="p-2">
-              {commands.map((command, index) => (
-                <button
-                  key={command.id}
-                  onClick={() => onExecuteCommand(command.id)}
-                  className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-all ${
-                    index === selectedIndex
-                      ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700'
-                      : 'hover:bg-gray-50 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${getCategoryColor(command.category)} bg-gray-100 dark:bg-gray-700`}>
-                    {getCategoryIcon(command.category)}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-gray-800 dark:text-white">
-                        {command.title}
-                      </span>
-                      {command.shortcut && (
-                        <kbd className="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-xs font-mono text-gray-600 dark:text-gray-400">
-                          {command.shortcut}
-                        </kbd>
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {command.description}
-                    </p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-gray-400" />
-                </button>
-              ))}
+        <div ref={listRef} className="flex-1 overflow-y-auto">
+          {filteredCommands.length === 0 ? (
+            <div className="p-8 text-center text-gray-500">
+              <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>No commands found for "{searchTerm}"</p>
             </div>
           ) : (
-            <div className="p-8 text-center">
-              <Search className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-              <p className="text-gray-600 dark:text-gray-400">No commands found</p>
-              <p className="text-sm text-gray-500 dark:text-gray-500">Try a different search term</p>
+            <div className="p-2">
+              {filteredCommands.map((command, index) => {
+                const Icon = categoryIcons[command.category];
+                const isSelected = index === selectedIndex;
+                
+                return (
+                  <div
+                    key={command.id}
+                    className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                      isSelected 
+                        ? 'bg-purple-100 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-700' 
+                        : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                    }`}
+                    onClick={() => {
+                      command.action();
+                      onClose();
+                    }}
+                  >
+                    <Icon className={`w-5 h-5 ${categoryColors[command.category]}`} />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-gray-900 dark:text-white">
+                        {command.title}
+                      </div>
+                      <div className="text-sm text-gray-500 truncate">
+                        {command.description}
+                      </div>
+                    </div>
+                    {command.shortcut && (
+                      <kbd className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded">
+                        {command.shortcut}
+                      </kbd>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
-          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-            <div className="flex items-center space-x-4">
-              <span>↑↓ Navigate</span>
-              <span>↵ Execute</span>
-              <span>Esc Close</span>
-            </div>
-            <span>{commands.length} commands available</span>
+        <div className="flex items-center justify-between p-3 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500">
+          <div className="flex items-center gap-4">
+            <span className="flex items-center gap-1">
+              <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded">↑↓</kbd>
+              Navigate
+            </span>
+            <span className="flex items-center gap-1">
+              <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded">↵</kbd>
+              Select
+            </span>
           </div>
+          <span>{filteredCommands.length} commands</span>
         </div>
       </div>
     </div>

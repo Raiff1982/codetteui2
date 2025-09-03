@@ -1,217 +1,173 @@
-import React, { useState } from 'react';
-import { 
-  Brain, 
-  Atom, 
-  Shield, 
-  Eye, 
-  TrendingUp,
-  Sparkles,
-  X,
-  ChevronLeft,
-  ChevronRight
-} from 'lucide-react';
-import { LazyLoadWrapper } from './LazyLoadWrapper';
+import React, { useState, Suspense } from 'react';
+import { X, Brain, BarChart3, Atom, Shield, Sparkles, Crown, Activity } from 'lucide-react';
+
+// Lazy load heavy AI components
+const LazyEnhancedAIPanel = React.lazy(() => 
+  import('./EnhancedAIPanel').then(module => ({ default: module.EnhancedAIPanel }))
+);
+
+const LazyQuantumCodeVisualizer = React.lazy(() => 
+  import('./QuantumCodeVisualizer').then(module => ({ default: module.QuantumCodeVisualizer }))
+);
+
+const LazyUltimateAIPanel = React.lazy(() => 
+  import('./UltimateAIPanel').then(module => ({ default: module.UltimateAIPanel }))
+);
+
+const LazyCodeHealthDashboard = React.lazy(() => 
+  import('./CodeHealthDashboard').then(module => ({ default: module.CodeHealthDashboard }))
+);
 
 interface AIDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  currentCode: string;
-  language: string;
-  cursorPosition: number;
-  onCodeGenerated: (code: string, title?: string) => void;
+  activeFile?: { id: string; name: string; content: string; type: string };
 }
 
-export function AIDrawer({ 
-  isOpen, 
-  onClose, 
-  currentCode, 
-  language, 
-  cursorPosition, 
-  onCodeGenerated 
-}: AIDrawerProps) {
-  const [activeTab, setActiveTab] = useState<'assist' | 'analyze' | 'visualize' | 'ethics'>('assist');
-  const [isCollapsed, setIsCollapsed] = useState(false);
+type TabType = 'assist' | 'analyze' | 'visualize' | 'ethics';
 
-  const tabs = [
-    { id: 'assist', label: 'Assist', icon: Brain, description: 'Smart code assistance' },
-    { id: 'analyze', label: 'Analyze', icon: Atom, description: 'Quantum analysis' },
-    { id: 'visualize', label: 'Visualize', icon: Eye, description: 'Code visualization' },
-    { id: 'ethics', label: 'Ethics', icon: Shield, description: 'Virtue-driven analysis' }
-  ];
+const tabs = [
+  { id: 'assist' as TabType, label: 'Assist', icon: Brain, description: 'AI-powered coding assistance' },
+  { id: 'analyze' as TabType, label: 'Analyze', icon: BarChart3, description: 'Code analysis and insights' },
+  { id: 'visualize' as TabType, label: 'Visualize', icon: Atom, description: 'Quantum code visualization' },
+  { id: 'ethics' as TabType, label: 'Ethics', icon: Shield, description: 'Virtue-driven development' }
+];
+
+function LoadingFallback({ name }: { name: string }) {
+  return (
+    <div className="flex items-center justify-center p-8 h-full">
+      <div className="text-center">
+        <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">
+          Loading {name}...
+        </h3>
+        <p className="text-gray-600 dark:text-gray-400">
+          Initializing AI components
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export function AIDrawer({ isOpen, onClose, activeFile }: AIDrawerProps) {
+  const [activeTab, setActiveTab] = useState<TabType>('assist');
+  const [loadedTabs, setLoadedTabs] = useState<Set<TabType>>(new Set());
+
+  const handleTabClick = (tabId: TabType) => {
+    setActiveTab(tabId);
+    setLoadedTabs(prev => new Set([...prev, tabId]));
+  };
 
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed top-16 right-0 bottom-0 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-2xl z-40 transition-all duration-300 ${
-      isCollapsed ? 'w-16' : 'w-96'
-    }`}>
-      {/* Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
-        <div className="flex items-center justify-between">
-          {!isCollapsed && (
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center">
-                <Brain className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-800 dark:text-white">AI Assistant</h3>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Quantum • Ethical • Intelligent</p>
-              </div>
-            </div>
-          )}
-          
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-              title={isCollapsed ? 'Expand' : 'Collapse'}
-            >
-              {isCollapsed ? (
-                <ChevronLeft className="w-4 h-4 text-gray-500" />
-              ) : (
-                <ChevronRight className="w-4 h-4 text-gray-500" />
-              )}
-            </button>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-              title="Close AI Assistant"
-            >
-              <X className="w-4 h-4 text-gray-500" />
-            </button>
+    <>
+      {/* Backdrop */}
+      <div 
+        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+        onClick={onClose}
+      />
+      
+      {/* Drawer */}
+      <div className="fixed right-0 top-0 h-full w-96 bg-white dark:bg-gray-900 shadow-2xl border-l border-gray-200 dark:border-gray-700 z-50 flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-2">
+            <Brain className="w-5 h-5 text-purple-600" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              AI Assistant
+            </h2>
           </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
         </div>
 
-        {/* Tab Navigation */}
-        {!isCollapsed && (
-          <div className="flex space-x-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1 mt-4">
-            {tabs.map(tab => (
+        {/* Tabs */}
+        <div className="flex border-b border-gray-200 dark:border-gray-700">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            
+            return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-md text-xs font-medium transition-all ${
-                  activeTab === tab.id
-                    ? 'bg-white dark:bg-gray-800 text-purple-600 dark:text-purple-400 shadow-sm'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                onClick={() => handleTabClick(tab.id)}
+                className={`flex-1 flex items-center justify-center gap-2 p-3 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                  isActive
+                    ? 'text-purple-600 dark:text-purple-400 border-b-2 border-purple-600 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/20'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800'
                 }`}
                 title={tab.description}
               >
-                <tab.icon className="w-4 h-4" />
-                <span>{tab.label}</span>
+                <Icon className="w-4 h-4" />
+                <span className="hidden sm:inline">{tab.label}</span>
               </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Collapsed State */}
-      {isCollapsed && (
-        <div className="p-2 space-y-2">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setActiveTab(tab.id as any);
-                setIsCollapsed(false);
-              }}
-              className={`w-full p-3 rounded-lg transition-all ${
-                activeTab === tab.id
-                  ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-600'
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
-              }`}
-              title={tab.description}
-            >
-              <tab.icon className="w-5 h-5 mx-auto" />
-            </button>
-          ))}
+            );
+          })}
         </div>
-      )}
 
-      {/* Content */}
-      {!isCollapsed && (
-        <div className="flex-1 overflow-y-auto">
+        {/* Content */}
+        <div className="flex-1 overflow-hidden">
           {activeTab === 'assist' && (
-            <LazyLoadWrapper name="AI Code Assistant">
-              <div className="p-4">
-                <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-4">
-                  <h4 className="font-medium text-gray-800 dark:text-white mb-2">Smart Code Assistance</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                    Get intelligent suggestions, auto-corrections, and code optimizations powered by virtue-driven AI.
-                  </p>
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => onCodeGenerated('// AI-generated function\nfunction optimizedFunction() {\n  // Implementation with virtue-driven principles\n  return "Hello, ethical world!";\n}')}
-                      className="w-full px-3 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm"
-                    >
-                      Generate Ethical Code
-                    </button>
-                    <button className="w-full px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm">
-                      Optimize Current Code
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </LazyLoadWrapper>
+            <Suspense fallback={<LoadingFallback name="AI Assistant" />}>
+              {loadedTabs.has('assist') && (
+                <LazyEnhancedAIPanel activeFile={activeFile} />
+              )}
+            </Suspense>
           )}
 
           {activeTab === 'analyze' && (
-            <LazyLoadWrapper name="Quantum Analyzer">
-              <div className="p-4">
-                <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg p-4">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Atom className="w-5 h-5 text-purple-600" />
-                    <h4 className="font-medium text-gray-800 dark:text-white">Quantum Analysis</h4>
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                    Advanced quantum-inspired optimization and code analysis using genuine research algorithms.
-                  </p>
-                  <button className="w-full px-3 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg hover:from-purple-600 hover:to-indigo-700 transition-all text-sm">
-                    Run Quantum Optimization
-                  </button>
-                </div>
-              </div>
-            </LazyLoadWrapper>
+            <Suspense fallback={<LoadingFallback name="Code Analysis" />}>
+              {loadedTabs.has('analyze') && (
+                <LazyCodeHealthDashboard />
+              )}
+            </Suspense>
           )}
 
           {activeTab === 'visualize' && (
-            <LazyLoadWrapper name="Code Visualizer">
-              <div className="p-4">
-                <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg p-4">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Eye className="w-5 h-5 text-green-600" />
-                    <h4 className="font-medium text-gray-800 dark:text-white">Code Visualization</h4>
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                    Visualize code structure, dependencies, and quantum states with interactive diagrams.
-                  </p>
-                  <button className="w-full px-3 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all text-sm">
-                    Generate Visualization
-                  </button>
-                </div>
-              </div>
-            </LazyLoadWrapper>
+            <Suspense fallback={<LoadingFallback name="Quantum Visualizer" />}>
+              {loadedTabs.has('visualize') && (
+                <LazyQuantumCodeVisualizer />
+              )}
+            </Suspense>
           )}
 
           {activeTab === 'ethics' && (
-            <LazyLoadWrapper name="Ethical Analyzer">
-              <div className="p-4">
-                <div className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-lg p-4">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Shield className="w-5 h-5 text-orange-600" />
-                    <h4 className="font-medium text-gray-800 dark:text-white">Ethical Analysis</h4>
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                    Analyze code through virtue-driven principles: compassion, integrity, wisdom, and courage.
-                  </p>
-                  <button className="w-full px-3 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition-all text-sm">
-                    Analyze Ethics
-                  </button>
-                </div>
+            <Suspense fallback={<LoadingFallback name="Ethics Panel" />}>
+              {loadedTabs.has('ethics') && (
+                <LazyUltimateAIPanel />
+              )}
+            </Suspense>
+          )}
+
+          {/* Show initial content for unloaded tabs */}
+          {!loadedTabs.has(activeTab) && (
+            <div className="p-6 text-center">
+              <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                {React.createElement(tabs.find(t => t.id === activeTab)?.icon || Brain, {
+                  className: "w-8 h-8 text-purple-600 dark:text-purple-400"
+                })}
               </div>
-            </LazyLoadWrapper>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                {tabs.find(t => t.id === activeTab)?.label}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                {tabs.find(t => t.id === activeTab)?.description}
+              </p>
+              <button
+                onClick={() => handleTabClick(activeTab)}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                Load {tabs.find(t => t.id === activeTab)?.label}
+              </button>
+            </div>
           )}
         </div>
-      )}
-    </div>
+      </div>
+    </>
   );
 }

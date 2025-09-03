@@ -24,7 +24,8 @@ import {
   TrendingUp,
   Users,
   Eye,
-  BookOpen
+  BookOpen,
+  Command
 } from 'lucide-react';
 import { FileType } from '../types/file';
 import { LanguageSelector } from './LanguageSelector';
@@ -59,6 +60,8 @@ interface HeaderProps {
   onToggleCommunityBuilder?: () => void;
   onToggleAccessibility?: () => void;
   onToggleDocumentation?: () => void;
+  aiDrawerOpen: boolean;
+  focusMode: boolean;
 }
 
 export function Header({
@@ -89,7 +92,9 @@ export function Header({
   onTogglePerformanceOptimizer = () => {},
   onToggleCommunityBuilder = () => {},
   onToggleAccessibility = () => {},
-  onToggleDocumentation = () => {}
+  onToggleDocumentation = () => {},
+  aiDrawerOpen,
+  focusMode
 }: HeaderProps) {
   const [showAbout, setShowAbout] = useState(false);
   const [backendConnected, setBackendConnected] = useState(false);
@@ -102,31 +107,39 @@ export function Header({
   }, []);
 
   return (
-    <header className="h-16 bg-gradient-to-r from-white/90 via-blue-50/70 to-purple-50/70 dark:from-gray-900/90 dark:via-blue-950/70 dark:to-purple-950/70 backdrop-blur-xl border-b border-blue-200/50 dark:border-purple-700/50 flex items-center justify-between px-6 relative z-30 shadow-lg">
+    <header className={`h-16 bg-gradient-to-r from-white/90 via-blue-50/70 to-purple-50/70 dark:from-gray-900/90 dark:via-blue-950/70 dark:to-purple-950/70 backdrop-blur-xl border-b border-blue-200/50 dark:border-purple-700/50 flex items-center justify-between px-6 relative z-30 shadow-lg transition-all duration-300 motion-reduce:transition-none ${
+      focusMode ? 'py-2' : ''
+    }`}>
       {/* Left Section */}
       <div className="flex items-center space-x-4">
-        <button
-          onClick={onToggleSidebar}
-          className="p-2.5 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg md:hidden"
-          title="Toggle Sidebar"
-        >
-          <Menu className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-        </button>
+        {!focusMode && (
+          <button
+            onClick={onToggleSidebar}
+            className="p-2.5 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg md:hidden focus:outline-none focus:ring-2 focus:ring-purple-500"
+            title="Toggle Sidebar"
+          >
+            <Menu className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          </button>
+        )}
         
-        <button
-          onClick={onToggleSidebar}
-          className="hidden md:block p-2.5 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
-          title="Toggle Sidebar"
-        >
-          <Menu className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-        </button>
+        {!focusMode && (
+          <button
+            onClick={onToggleSidebar}
+            className="hidden md:block p-2.5 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            title="Toggle Sidebar"
+          >
+            <Menu className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          </button>
+        )}
         
         <div className="flex items-center space-x-3">
           <div className="w-9 h-9 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 animate-pulse">
             <Code className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent tracking-tight">Codette</h1>
+            <h1 className={`font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent tracking-tight ${
+              focusMode ? 'text-lg' : 'text-lg'
+            }`}>Codette</h1>
             <p className="text-xs bg-gradient-to-r from-gray-600 to-purple-600 bg-clip-text text-transparent font-medium">AI Development Environment</p>
           </div>
         </div>
@@ -174,75 +187,89 @@ export function Header({
 
       {/* Right Section */}
       <div className="flex items-center space-x-3">
-        {/* Quick Access to New Features */}
-        <div className="hidden lg:flex items-center space-x-2">
-          <button
-            onClick={onTogglePerformanceOptimizer}
-            className="p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
-            title="Performance Optimizer (⌘⇧O)"
-          >
-            <TrendingUp className="w-4 h-4 text-green-600" />
-          </button>
-          
-          <button
-            onClick={onToggleCommunityBuilder}
-            className="p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
-            title="Community Hub (⌘⇧B)"
-          >
-            <Users className="w-4 h-4 text-purple-600" />
-          </button>
-          
-          <button
-            onClick={onToggleAccessibility}
-            className="p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
-            title="Accessibility Center (⌘⇧X)"
-          >
-            <Eye className="w-4 h-4 text-blue-600" />
-          </button>
-          
-          <button
-            onClick={onToggleDocumentation}
-            className="p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
-            title="Documentation Maker"
-          >
-            <BookOpen className="w-4 h-4 text-orange-600" />
-          </button>
-        </div>
-        
-        <button
-          onClick={onToggleChat}
-          className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 text-white rounded-xl hover:from-purple-700 hover:via-pink-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
-          title="Chat with Codette AI"
-        >
-          <MessageCircle className="w-4 h-4" />
-          <span className="text-sm font-medium">Chat</span>
-        </button>
+        {!focusMode && (
+          <>
+            {/* Quick Access to New Features */}
+            <div className="hidden lg:flex items-center space-x-2">
+              <button
+                onClick={onTogglePerformanceOptimizer}
+                className="p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                title="Performance Optimizer (⌘⇧O)"
+              >
+                <TrendingUp className="w-4 h-4 text-green-600" />
+              </button>
+              
+              <button
+                onClick={onToggleCommunityBuilder}
+                className="p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                title="Community Hub (⌘⇧B)"
+              >
+                <Users className="w-4 h-4 text-purple-600" />
+              </button>
+              
+              <button
+                onClick={onToggleAccessibility}
+                className="p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                title="Accessibility Center (⌘⇧X)"
+              >
+                <Eye className="w-4 h-4 text-blue-600" />
+              </button>
+              
+              <button
+                onClick={onToggleDocumentation}
+                className="p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                title="Documentation Maker"
+              >
+                <BookOpen className="w-4 h-4 text-orange-600" />
+              </button>
+            </div>
+            
+            <button
+              onClick={() => {/* Command palette will be opened via keyboard shortcut */}}
+              className="p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              title="Command Palette (⌘K)"
+            >
+              <Command className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            </button>
+            
+            <button
+              onClick={onToggleChat}
+              className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 text-white rounded-xl hover:from-purple-700 hover:via-pink-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
+              title="Chat with Codette AI"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span className="text-sm font-medium">Chat</span>
+            </button>
 
-        <button
-          onClick={() => {
-            onToggleAI();
-          }}
-          className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
-          title="Toggle AI Panel (⌘⇧A)"
-        >
-          <Brain className="w-4 h-4" />
-          <span className="text-sm font-medium">
-            AI
-          </span>
-        </button>
+            <button
+              onClick={onToggleAI}
+              className={`flex items-center space-x-2 px-3 py-2 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                aiDrawerOpen 
+                  ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400' 
+                  : 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700'
+              }`}
+              title="AI Assistant (⌘⇧A)"
+            >
+              <Brain className="w-4 h-4" />
+              <span className="text-sm font-medium">
+                AI
+              </span>
+            </button>
 
-        <button
-          onClick={onToggleTerminal}
-          className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-xl hover:from-gray-900 hover:to-black transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
-          title="Toggle Terminal (⌘`)"
-        >
-          <Terminal className="w-4 h-4" />
-          <span className="text-sm font-medium">Terminal</span>
-        </button>
+            <button
+              onClick={onToggleTerminal}
+              className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-xl hover:from-gray-900 hover:to-black transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
+              title="Toggle Terminal (⌘`)"
+            >
+              <Terminal className="w-4 h-4" />
+              <span className="text-sm font-medium">Terminal</span>
+            </button>
+          </>
+        )}
 
         <button
           onClick={onToggleTheme}
-          className="p-2.5 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
+          className="p-2.5 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
           title="Toggle Theme"
         >
           {theme === 'light' ? (
