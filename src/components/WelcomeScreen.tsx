@@ -93,15 +93,27 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic }: WelcomeScreenProps)
     },
     {
       icon: Sparkles,
-      title: 'Generate Music',
-      description: 'AI-generated music for coding focus',
+      title: 'AI Music Experience',
+      description: 'Revolutionary adaptive music that responds to your code',
       action: () => onOpenMusic?.()
     },
     {
       icon: Brain,
-      title: 'Ultimate AI Suite',
-      description: 'Revolutionary quantum, neural, and emotional AI analysis',
+      title: 'Quantum AI Analysis',
+      description: 'Experience genuine quantum-inspired code optimization',
       action: () => onCreateFile('example-ai.ts', 'file')
+    },
+    {
+      icon: Heart,
+      title: 'Ethical AI Demo',
+      description: 'See virtue-driven AI in action with real examples',
+      action: () => onCreateFile('ethical-example.ts', 'file')
+    },
+    {
+      icon: Shield,
+      title: 'Security Analysis',
+      description: 'Comprehensive security scanning with AI assistance',
+      action: () => onCreateFile('secure-code.ts', 'file')
     }
   ];
 
@@ -321,55 +333,55 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic }: WelcomeScreenProps)
               <div className="w-10 h-10 bg-gradient-to-br from-amber-500 via-orange-600 to-red-600 rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110">
                 <AlertTriangle className="w-5 h-5 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">⚡ Frontend Demo Mode</h3>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">⚡ Experience Mode</h3>
             </div>
             <p className="text-amber-800 dark:text-amber-200 mb-6 text-sm leading-relaxed font-medium">
-              You're experiencing the frontend interface of Codette. The revolutionary AI systems (quantum optimization, 
-              Aegis Council, DreamCore memory) require the Python backend to function. The research and innovation are 
-              real - you're just seeing the UI layer right now.
+              You're experiencing Codette's revolutionary interface! While the full AI backend unlocks complete functionality, 
+              you can explore the innovative UI, music systems, and see how virtue-driven AI would work. The research is real, 
+              the vision is genuine, and the experience is designed to inspire.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-amber-800 dark:text-amber-200 font-medium">
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
-                  <Atom className="w-4 h-4 text-amber-600" />
-                  <span><strong>Quantum Optimizer:</strong> Backend required for real quantum analysis</span>
+                  <Music className="w-4 h-4 text-amber-600" />
+                  <span><strong>Music Player:</strong> ✅ Fully functional with open source tracks!</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Activity className="w-4 h-4 text-amber-600" />
-                  <span><strong>DreamCore Memory:</strong> Python implementation needed</span>
+                  <Heart className="w-4 h-4 text-amber-600" />
+                  <span><strong>Interface:</strong> ✅ Complete UI experience available</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Zap className="w-4 h-4 text-amber-600" />
-                  <span><strong>Nexus Engine:</strong> Signal processing requires backend</span>
+                  <FileText className="w-4 h-4 text-amber-600" />
+                  <span><strong>Research Papers:</strong> ✅ Real DOIs and documentation</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Shield className="w-4 h-4 text-amber-600" />
-                  <span><strong>Virtue Ethics:</strong> Full analysis needs Python systems</span>
+                  <Eye className="w-4 h-4 text-amber-600" />
+                  <span><strong>GitHub:</strong> ✅ Full source code available</span>
                 </div>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
-                  <Music className="w-4 h-4 text-amber-600" />
-                  <span><strong>Music Player:</strong> Open source tracks work now!</span>
+                  <Atom className="w-4 h-4 text-amber-600" />
+                  <span><strong>Quantum AI:</strong> 🔧 Backend required for full analysis</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Heart className="w-4 h-4 text-amber-600" />
-                  <span><strong>Interface:</strong> Full UI experience available</span>
+                  <Activity className="w-4 h-4 text-amber-600" />
+                  <span><strong>DreamCore Memory:</strong> 🔧 Python implementation needed</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <FileText className="w-4 h-4 text-amber-600" />
-                  <span><strong>Research Papers:</strong> Real DOIs and documentation</span>
+                  <Zap className="w-4 h-4 text-amber-600" />
+                  <span><strong>Nexus Engine:</strong> 🔧 Signal processing requires backend</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Eye className="w-4 h-4 text-amber-600" />
-                  <span><strong>GitHub:</strong> Full source code available</span>
+                  <Shield className="w-4 h-4 text-amber-600" />
+                  <span><strong>Virtue Ethics:</strong> 🔧 Full analysis needs Python systems</span>
                 </div>
               </div>
             </div>
             <div className="mt-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 backdrop-blur-sm p-4 rounded-xl border border-blue-200/50 dark:border-purple-800/50 shadow-lg">
               <p className="text-xs text-blue-800 dark:text-blue-200 font-medium">
-                <strong>Want the full experience?</strong> Check out the GitHub repository for backend setup instructions. 
-                The Python systems implement the actual quantum algorithms, neural networks, and ethical AI described in the research papers.
+                <strong>Ready for the full experience?</strong> The interface shows you exactly how revolutionary AI development 
+                can be. Check out the GitHub repository to deploy the complete system with all AI features fully functional!
               </p>
             </div>
           </div>

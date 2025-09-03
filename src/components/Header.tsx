@@ -51,6 +51,10 @@ interface HeaderProps {
   onToggleAutoFix: () => void;
   showAutoFix: boolean;
   onToggleChat: () => void;
+  onTogglePerformanceOptimizer?: () => void;
+  onToggleCommunityBuilder?: () => void;
+  onToggleAccessibility?: () => void;
+  onToggleDocumentation?: () => void;
 }
 
 export function Header({
@@ -77,7 +81,11 @@ export function Header({
   onToggleMobileLayout,
   onToggleAutoFix,
   showAutoFix,
-  onToggleChat
+  onToggleChat,
+  onTogglePerformanceOptimizer,
+  onToggleCommunityBuilder,
+  onToggleAccessibility,
+  onToggleDocumentation
 }: HeaderProps) {
   const [showAbout, setShowAbout] = useState(false);
   const [backendConnected, setBackendConnected] = useState(false);
@@ -162,6 +170,49 @@ export function Header({
 
       {/* Right Section */}
       <div className="flex items-center space-x-3">
+        {/* Quick Access to New Features */}
+        <div className="hidden lg:flex items-center space-x-2">
+          {onTogglePerformanceOptimizer && (
+            <button
+              onClick={onTogglePerformanceOptimizer}
+              className="p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
+              title="Performance Optimizer (⌘⇧O)"
+            >
+              <TrendingUp className="w-4 h-4 text-green-600" />
+            </button>
+          )}
+          
+          {onToggleCommunityBuilder && (
+            <button
+              onClick={onToggleCommunityBuilder}
+              className="p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
+              title="Community Hub (⌘⇧B)"
+            >
+              <Users className="w-4 h-4 text-purple-600" />
+            </button>
+          )}
+          
+          {onToggleAccessibility && (
+            <button
+              onClick={onToggleAccessibility}
+              className="p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
+              title="Accessibility Center (⌘⇧X)"
+            >
+              <Eye className="w-4 h-4 text-blue-600" />
+            </button>
+          )}
+          
+          {onToggleDocumentation && (
+            <button
+              onClick={onToggleDocumentation}
+              className="p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
+              title="Documentation Maker"
+            >
+              <BookOpen className="w-4 h-4 text-orange-600" />
+            </button>
+          )}
+        </div>
+        
         <button
           onClick={onToggleChat}
           className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 text-white rounded-xl hover:from-purple-700 hover:via-pink-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"

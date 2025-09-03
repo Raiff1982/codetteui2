@@ -60,6 +60,14 @@ interface MobileMenuProps {
   showAutoFix: boolean;
   onToggleChat: () => void;
   isMobile?: boolean;
+  onTogglePerformanceOptimizer: () => void;
+  onToggleCommunityBuilder: () => void;
+  onToggleAccessibility: () => void;
+  onToggleDocumentation: () => void;
+  showPerformanceOptimizer: boolean;
+  showCommunityBuilder: boolean;
+  showAccessibilityEnhancer: boolean;
+  showDocumentationMaker: boolean;
 }
 
 export function MobileMenu({
@@ -96,6 +104,14 @@ export function MobileMenu({
   showAutoFix,
   onToggleChat,
   isMobile = true
+  onTogglePerformanceOptimizer,
+  onToggleCommunityBuilder,
+  onToggleAccessibility,
+  onToggleDocumentation,
+  showPerformanceOptimizer,
+  showCommunityBuilder,
+  showAccessibilityEnhancer,
+  showDocumentationMaker,
 }: MobileMenuProps) {
   if (!isOpen) return null;
 
@@ -190,6 +206,34 @@ export function MobileMenu({
       active: false,
       action: onToggleChat,
       description: 'Ask Codette questions'
+    },
+    {
+      icon: TrendingUp,
+      label: 'Performance Optimizer',
+      active: showPerformanceOptimizer,
+      action: onTogglePerformanceOptimizer,
+      description: 'Real-time performance monitoring'
+    },
+    {
+      icon: Users,
+      label: 'Community Hub',
+      active: showCommunityBuilder,
+      action: onToggleCommunityBuilder,
+      description: 'Connect with developers'
+    },
+    {
+      icon: Eye,
+      label: 'Accessibility Center',
+      active: showAccessibilityEnhancer,
+      action: onToggleAccessibility,
+      description: 'Inclusive design tools'
+    },
+    {
+      icon: BookOpen,
+      label: 'Documentation Maker',
+      active: showDocumentationMaker,
+      action: onToggleDocumentation,
+      description: 'AI-powered documentation'
     }
   ];
 

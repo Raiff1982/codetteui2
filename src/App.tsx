@@ -41,6 +41,12 @@ import { CodeHealthDashboard } from './components/CodeHealthDashboard';
 import { PerformanceMonitor } from './components/PerformanceMonitor';
 import { AutoFixPanel } from './components/AutoFixPanel';
 import { CodetteChat } from './components/CodetteChat';
+import { StreamlinedOnboarding } from './components/StreamlinedOnboarding';
+import { PerformanceOptimizer } from './components/PerformanceOptimizer';
+import { CommunityBuilder } from './components/CommunityBuilder';
+import { AccessibilityEnhancer } from './components/AccessibilityEnhancer';
+import { DocumentationMaker } from './components/DocumentationMaker';
+import { LazyLoadWrapper } from './components/LazyLoadWrapper';
 import { useTheme } from './hooks/useTheme';
 import { useFileSystem } from './hooks/useFileSystem';
 import { useFirstTimeUser } from './hooks/useFirstTimeUser';
@@ -95,6 +101,11 @@ function App() {
   const [totalLinesCodedToday, setTotalLinesCodedToday] = useState(0);
   const [showCodetteChat, setShowCodetteChat] = useState(false);
   const [showZkFetch, setShowZkFetch] = useState(false);
+  const [showStreamlinedOnboarding, setShowStreamlinedOnboarding] = useState(false);
+  const [showPerformanceOptimizer, setShowPerformanceOptimizer] = useState(false);
+  const [showCommunityBuilder, setShowCommunityBuilder] = useState(false);
+  const [showAccessibilityEnhancer, setShowAccessibilityEnhancer] = useState(false);
+  const [showDocumentationMaker, setShowDocumentationMaker] = useState(false);
   
   const { playerState } = useMusic();
   const { 
@@ -116,6 +127,12 @@ function App() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    if (isFirstTime && !tourCompleted) {
+      setShowStreamlinedOnboarding(true);
+    }
+  }, [isFirstTime, tourCompleted]);
 
   useEffect(() => {
     const checkDeviceType = () => {
@@ -209,6 +226,24 @@ function App() {
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'Z') {
       e.preventDefault();
       setShowZkFetch(!showZkFetch);
+    }
+    
+    // Ctrl/Cmd + Shift + O for Performance Optimizer
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'O') {
+      e.preventDefault();
+      setShowPerformanceOptimizer(!showPerformanceOptimizer);
+    }
+    
+    // Ctrl/Cmd + Shift + B for Community Builder
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'B') {
+      e.preventDefault();
+      setShowCommunityBuilder(!showCommunityBuilder);
+    }
+    
+    // Ctrl/Cmd + Shift + X for Accessibility
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'X') {
+      e.preventDefault();
+      setShowAccessibilityEnhancer(!showAccessibilityEnhancer);
     }
   };
 
@@ -367,28 +402,29 @@ function App() {
                         minWidth: '300px'
                       }}
                     >
-                      {showUltimateAI ? (
-                        <UltimateAIPanel
-                          currentCode={activeFile.content}
-                          language={selectedLanguage?.name.toLowerCase() || 'typescript'}
-                          cursorPosition={cursorPosition}
-                          onCodeGenerated={(code, title) => {
-                            if (title) {
-                              const fileName = `${title.toLowerCase().replace(/\s+/g, '-')}.${selectedLanguage?.extensions[0] || 'ts'}`;
-                              createFile(fileName, 'file');
-                              setTimeout(() => {
-                                const newFile = files.find(f => f.name === fileName);
-                                if (newFile) {
-                                  updateFileContent(newFile.id, code);
-                                  openFile(newFile);
-                                }
-                              }, 100);
-                            } else {
-                              updateFileContent(activeFile.id, code);
-                            }
-                          }}
-                        />
-                      ) : (
+                      <LazyLoadWrapper name="AI Panel">
+                        {showUltimateAI ? (
+                          <UltimateAIPanel
+                            currentCode={activeFile.content}
+                            language={selectedLanguage?.name.toLowerCase() || 'typescript'}
+                            cursorPosition={cursorPosition}
+                            onCodeGenerated={(code, title) => {
+                              if (title) {
+                                const fileName = `${title.toLowerCase().replace(/\s+/g, '-')}.${selectedLanguage?.extensions[0] || 'ts'}`;
+                                createFile(fileName, 'file');
+                                setTimeout(() => {
+                                  const newFile = files.find(f => f.name === fileName);
+                                  if (newFile) {
+                                    updateFileContent(newFile.id, code);
+                                    openFile(newFile);
+                                  }
+                                }, 100);
+                              } else {
+                                updateFileContent(activeFile.id, code);
+                              }
+                            }}
+                          />
+                        ) : (
                         <div className={`h-full flex ${isTablet ? 'flex-col' : 'flex-row'} overflow-hidden`}>
                         <div className={`${isTablet ? 'w-full border-b' : 'flex-1 border-r'} border-purple-200/30 dark:border-purple-700/30 overflow-hidden`}>
                           <AIPanel 
@@ -432,7 +468,8 @@ function App() {
                           />
                         </div>
                       </div>
-                      )}
+                        )}
+                      </LazyLoadWrapper>
                     </div>
                   )}
                   
@@ -596,11 +633,91 @@ function App() {
           />
         </div>
 
-        {/* First Time User Experience */}
-        <FirstTimeUserGuide
-          isFirstTime={isFirstTime}
-          onComplete={completeTour}
+        {/* Streamlined Onboarding */}
+        <StreamlinedOnboarding
+          isVisible={showStreamlinedOnboarding}
+          onComplete={() => {
+            setShowStreamlinedOnboarding(false);
+            completeTour();
+          }}
+          onCreateFile={createFile}
+          onToggleAI={() => setAiPanelVisible(true)}
+          onToggleMusic={() => setMusicPlayerVisible(true)}
+          onShowEthicalAI={() => setShowEthicalAI(true)}
         />
+        
+        {/* Performance Optimizer */}
+        {showPerformanceOptimizer && (
+          <div className="fixed inset-4 z-50">
+            <LazyLoadWrapper name="Performance Optimizer">
+              <PerformanceOptimizer />
+            </LazyLoadWrapper>
+            <button
+              onClick={() => setShowPerformanceOptimizer(false)}
+              className="absolute top-4 right-4 p-2 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-xl hover:bg-white dark:hover:bg-gray-600 transition-all shadow-lg hover:shadow-xl"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+        )}
+        
+        {/* Community Builder */}
+        {showCommunityBuilder && (
+          <div className="fixed inset-4 z-50">
+            <LazyLoadWrapper name="Community Builder">
+              <CommunityBuilder />
+            </LazyLoadWrapper>
+            <button
+              onClick={() => setShowCommunityBuilder(false)}
+              className="absolute top-4 right-4 p-2 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-xl hover:bg-white dark:hover:bg-gray-600 transition-all shadow-lg hover:shadow-xl"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+        )}
+        
+        {/* Accessibility Enhancer */}
+        <AccessibilityEnhancer
+          isVisible={showAccessibilityEnhancer}
+          onClose={() => setShowAccessibilityEnhancer(false)}
+        />
+        
+        {/* Documentation Maker */}
+        {showDocumentationMaker && activeFile && (
+          <div className="fixed inset-4 z-50">
+            <LazyLoadWrapper name="Documentation Maker">
+              <DocumentationMaker
+                currentCode={activeFile.content}
+                language={selectedLanguage?.name.toLowerCase() || 'plaintext'}
+                onDocumentationGenerated={(docs) => {
+                  const fileName = `${activeFile.name.split('.')[0]}-docs.md`;
+                  createFile(fileName, 'file');
+                  setTimeout(() => {
+                    const newFile = files.find(f => f.name === fileName);
+                    if (newFile) {
+                      updateFileContent(newFile.id, docs);
+                      openFile(newFile);
+                    }
+                  }, 100);
+                }}
+              />
+            </LazyLoadWrapper>
+            <button
+              onClick={() => setShowDocumentationMaker(false)}
+              className="absolute top-4 right-4 p-2 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-xl hover:bg-white dark:hover:bg-gray-600 transition-all shadow-lg hover:shadow-xl"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+        )}
+        
+        {/* First Time User Experience */}
+        {!showStreamlinedOnboarding && (
+          <FirstTimeUserGuide
+            isFirstTime={isFirstTime}
+            onComplete={completeTour}
+          />
+        )}
         
         <BeginnerHelp
           isVisible={showBeginnerHelp}
@@ -893,6 +1010,14 @@ function App() {
           onToggleAutoFix={() => setShowAutoFix(!showAutoFix)}
           showAutoFix={showAutoFix}
           onToggleChat={() => setShowCodetteChat(!showCodetteChat)}
+          onTogglePerformanceOptimizer={() => setShowPerformanceOptimizer(!showPerformanceOptimizer)}
+          onToggleCommunityBuilder={() => setShowCommunityBuilder(!showCommunityBuilder)}
+          onToggleAccessibility={() => setShowAccessibilityEnhancer(!showAccessibilityEnhancer)}
+          onToggleDocumentation={() => setShowDocumentationMaker(!showDocumentationMaker)}
+          showPerformanceOptimizer={showPerformanceOptimizer}
+          showCommunityBuilder={showCommunityBuilder}
+          showAccessibilityEnhancer={showAccessibilityEnhancer}
+          showDocumentationMaker={showDocumentationMaker}
           isMobile={isMobile}
         />
         
