@@ -59,6 +59,7 @@ interface MobileMenuProps {
   onToggleAutoFix: () => void;
   showAutoFix: boolean;
   onToggleChat: () => void;
+  isMobile?: boolean;
 }
 
 export function MobileMenu({
@@ -93,7 +94,8 @@ export function MobileMenu({
   showRevolutionaryInterface,
   onToggleAutoFix,
   showAutoFix,
-  onToggleChat
+  onToggleChat,
+  isMobile = true
 }: MobileMenuProps) {
   if (!isOpen) return null;
 
@@ -125,27 +127,6 @@ export function MobileMenu({
       active: showEthicalAI,
       action: onToggleEthicalAI,
       description: 'Virtue-driven analysis'
-    },
-    {
-      icon: Activity,
-      label: 'Code Health',
-      active: showCodeHealth,
-      action: onToggleCodeHealth,
-      description: 'Health monitoring'
-    },
-    {
-      icon: Atom,
-      label: 'Quantum Visualizer',
-      active: showQuantumVisualizer,
-      action: onToggleQuantumVisualizer,
-      description: 'Quantum analysis'
-    },
-    {
-      icon: Eye,
-      label: 'Cocoons Viewer',
-      active: showCocoonsViewer,
-      action: onToggleCocoonsViewer,
-      description: 'Memory crystallizations'
     },
     {
       icon: Activity,
@@ -228,10 +209,10 @@ export function MobileMenu({
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex">
-      <div className="w-80 bg-white dark:bg-gray-800 h-full shadow-2xl overflow-y-auto">
+    <div className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex ${isMobile ? '' : 'justify-center items-center'}`}>
+      <div className={`${isMobile ? 'w-80' : 'w-96 max-h-[80vh]'} bg-white dark:bg-gray-800 ${isMobile ? 'h-full' : 'rounded-2xl'} shadow-2xl overflow-y-auto`}>
         {/* Header */}
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
+        <div className={`p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 ${isMobile ? '' : 'rounded-t-2xl'}`}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
@@ -239,7 +220,7 @@ export function MobileMenu({
               </div>
               <div>
                 <h2 className="text-xl font-bold text-gray-800 dark:text-white">Codette</h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Mobile Menu</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{isMobile ? 'Mobile' : 'Desktop'} Menu</p>
               </div>
             </div>
             <button
@@ -323,7 +304,7 @@ export function MobileMenu({
         </div>
 
         {/* Settings */}
-        <div className="p-6 border-t border-gray-200 dark:border-gray-700">
+        <div className={`p-6 border-t border-gray-200 dark:border-gray-700 ${isMobile ? '' : 'space-y-4'}`}>
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Settings</h3>
           <div className="space-y-3">
             <button
@@ -346,11 +327,23 @@ export function MobileMenu({
                 {forceMobileLayout ? 'Mobile Layout' : 'Desktop Layout'}
               </span>
             </button>
+            
+            {!isMobile && (
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                <h4 className="font-medium text-gray-800 dark:text-white mb-2">Desktop Features</h4>
+                <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                  <li>• All AI panels available simultaneously</li>
+                  <li>• Multi-window interface support</li>
+                  <li>• Advanced keyboard shortcuts</li>
+                  <li>• Enhanced productivity tools</li>
+                </ul>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+        <div className={`p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 ${isMobile ? '' : 'rounded-b-2xl'}`}>
           <div className="text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
               © 2025 Raiff's Bits
@@ -382,7 +375,7 @@ export function MobileMenu({
       </div>
       
       {/* Overlay */}
-      <div className="flex-1" onClick={onClose} />
+      {isMobile && <div className="flex-1" onClick={onClose} />}
     </div>
   );
 }

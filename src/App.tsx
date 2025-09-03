@@ -878,6 +878,7 @@ function App() {
           onToggleAutoFix={() => setShowAutoFix(!showAutoFix)}
           showAutoFix={showAutoFix}
           onToggleChat={() => setShowCodetteChat(!showCodetteChat)}
+          isMobile={isMobile}
         />
         
       </div>
