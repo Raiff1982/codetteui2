@@ -241,7 +241,7 @@ export function ZkFetchPanel({ isVisible, onClose }: ZkFetchPanelProps) {
                     className="flex items-center space-x-2 p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm"
                   >
                     <Globe className="w-4 h-4 text-blue-600" />
-                    <span>Fetch Codette README</span>
+                    <span>Fetch Codette Repository</span>
                   </button>
                   
                   <button
@@ -251,6 +251,30 @@ export function ZkFetchPanel({ isVisible, onClose }: ZkFetchPanelProps) {
                   >
                     <FileText className="w-4 h-4 text-purple-600" />
                     <span>Verify Research Paper</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setUrl('https://api.github.com/repos/raiffs-bits/AEGIS');
+                      performZkFetch();
+                    }}
+                    disabled={isLoading || healthStatus === false}
+                    className="flex items-center space-x-2 p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm"
+                  >
+                    <Shield className="w-4 h-4 text-green-600" />
+                    <span>Fetch AEGIS System</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setUrl('https://api.github.com/repos/raiffs-bits/NexusSignalEngine');
+                      performZkFetch();
+                    }}
+                    disabled={isLoading || healthStatus === false}
+                    className="flex items-center space-x-2 p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm"
+                  >
+                    <Zap className="w-4 h-4 text-orange-600" />
+                    <span>Fetch Nexus Engine</span>
                   </button>
                 </div>
               </div>
