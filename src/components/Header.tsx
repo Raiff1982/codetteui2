@@ -173,22 +173,14 @@ export function Header({
 
         <button
           onClick={() => {
-            if (!backendConnected) {
-              alert('AI features require Python backend connection. This is a frontend-only demo.');
-              return;
-            }
             onToggleAI();
           }}
-          className={`flex items-center space-x-2 px-3 py-2 rounded-xl transition-all duration-200 ${
-            backendConnected 
-              ? 'bg-purple-600 text-white hover:bg-purple-700 shadow-md'
-              : 'bg-gray-400 text-white cursor-not-allowed opacity-60'
-          }`}
+          className="flex items-center space-x-2 px-3 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-all duration-200 shadow-md"
           title="Toggle AI Panel (⌘⇧A)"
         >
           <Brain className="w-4 h-4" />
           <span className="text-sm font-medium">
-            {backendConnected ? 'AI' : 'AI (Demo)'}
+            AI
           </span>
         </button>
 
