@@ -177,6 +177,30 @@ class ZkFetchService {
     path: string = '',
     commit?: string
   ): Promise<ZkFetchResponse> {
+    // Validate against GitHub policy constraints
+    const allowedOwners = ['Raiff1982', 'raiffs-bits'];
+    const allowedRepos = ['Codette', 'AEGIS', 'NexusSignalEngine', 'codette-TheDaytheDreamBecameReal'];
+    
+    if (!allowedOwners.includes(owner)) {
+      throw new Error(`Owner '${owner}' not allowed by GitHub policy. Allowed: ${allowedOwners.join(', ')}`);
+    }
+    
+    if (!allowedRepos.includes(repo)) {
+      throw new Error(`Repository '${repo}' not allowed by GitHub policy. Allowed: ${allowedRepos.join(', ')}`);
+    }
+    
+    // Validate file path against policy
+    const allowedExtensions = ['.json', '.yaml', '.yml', '.txt'];
+    const disallowedPaths = ['.git', '.exe', '.dll', '.sh', '.bat', '.ps1'];
+    
+    if (path && !allowedExtensions.some(ext => path.endsWith(ext)) && !path.startsWith('/models/') && !path.endsWith('.bin')) {
+      throw new Error(`File path '${path}' not allowed by GitHub policy`);
+    }
+    
+    if (disallowedPaths.some(blocked => path.includes(blocked))) {
+      throw new Error(`File path '${path}' contains disallowed content`);
+    }
+
     const url = commit 
       ? `https://raw.githubusercontent.com/${owner}/${repo}/${commit}/${path}`
       : `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
@@ -184,20 +208,77 @@ class ZkFetchService {
     const request: ZkFetchRequest = {
       url,
       method: 'GET',
-      policy_id: 'github-v1',
+      policy_id: 'github-v1', // Use the GitHub policy you defined
       disclosure: {
         mode: 'jsonpath_allowlist',
-        jsonpath: ['$.name', '$.content', '$.sha', '$.download_url'],
-        headers: ['Content-Type', 'ETag']
+        jsonpath: [
+          '$.name',
+          '$.owner.login', 
+          '$.sha',
+          '$.tag_name',
+          '$.content',
+          '$.assets[*].browser_download_url'
+        ],
+        headers: ['ETag', 'Content-Type', 'Last-Modified', 'Cache-Control', 'Content-Length']
       },
       cache: {
-        max_age_s: 300 // 5 minutes
+        max_age_s: 300 // 5 minutes as per policy default_ttl_s
       }
     };
 
     return this.zkfetch(request);
   }
 
+  // Fetch specific Codette repositories with verification
+  async fetchCodetteRepository(repo: 'Codette' | 'AEGIS' | 'NexusSignalEngine' | 'codette-TheDaytheDreamBecameReal', path: string = '', commit?: string): Promise<ZkFetchResponse> {
+    return this.fetchGitHubWithProof('raiffs-bits', repo, path, commit);
+  }
+  
+  // Fetch Codette research data with verification
+  async fetchCodetteResearch(filename: string): Promise<ZkFetchResponse> {
+    // Ensure we're fetching allowed file types
+    if (!filename.endsWith('.json') && !filename.endsWith('.yaml') && !filename.endsWith('.txt')) {
+      throw new Error('Only JSON, YAML, and TXT files are allowed for research data');
+    }
+    
+    return this.fetchCodetteRepository('Codette', `research/${filename}`);
+  }
+  
+  // Fetch AI models with verification (if available)
+  async fetchAIModel(modelPath: string): Promise<ZkFetchResponse> {
+    if (!modelPath.startsWith('models/') || !modelPath.endsWith('.bin')) {
+      throw new Error('AI models must be in /models/ directory and have .bin extension');
+    }
+    
+    return this.fetchCodetteRepository('Codette', modelPath);
+  }
+  
+  // Validate GitHub URL against policy
+  validateGitHubUrl(url: string): { valid: boolean; reason?: string } {
+    try {
+      const urlObj = new URL(url);
+      
+      // Check allowed hosts
+      const allowedHosts = ['api.github.com', 'raw.githubusercontent.com', 'objects.githubusercontent.com', 'github.com'];
+      if (!allowedHosts.includes(urlObj.hostname)) {
+        return { valid: false, reason: `Host '${urlObj.hostname}' not allowed` };
+      }
+      
+      // Check for mutable refs (main, master, dev branches)
+      if (urlObj.hostname === 'raw.githubusercontent.com') {
+        const pathParts = urlObj.pathname.split('/');
+        const branch = pathParts[3]; // /{owner}/{repo}/{branch}/path
+        
+        if (['main', 'master', 'dev'].includes(branch)) {
+          return { valid: false, reason: 'Mutable branch references not allowed - use commit hash' };
+        }
+      }
+      
+      return { valid: true };
+    } catch (error) {
+      return { valid: false, reason: 'Invalid URL format' };
+    }
+  }
   // Fetch research papers with cryptographic verification
   async fetchResearchPaperWithProof(doi: string): Promise<ZkFetchResponse> {
     const url = `https://doi.org/${doi}`;
