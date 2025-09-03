@@ -1,17 +1,33 @@
 import { useState, useCallback } from 'react';
 import { aiService, QuantumAnalysisResult, CouncilDecision, EthicalAnalysis } from '../services/aiService';
+import { aiVerificationService } from '../services/aiVerificationService';
 
 export function useAI() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastAnalysis, setLastAnalysis] = useState<QuantumAnalysisResult | null>(null);
   const [lastCouncilDecision, setLastCouncilDecision] = useState<CouncilDecision | null>(null);
   const [lastEthicalAnalysis, setLastEthicalAnalysis] = useState<EthicalAnalysis | null>(null);
+  const [lastVerification, setLastVerification] = useState<any>(null);
 
   const runQuantumOptimization = useCallback(async (objectives: string[] = ['sphere', 'rastrigin']) => {
     setIsProcessing(true);
     try {
       const result = await aiService.runQuantumOptimization(objectives);
       setLastAnalysis(result);
+      
+      // Verify the quantum optimization sources
+      try {
+        const verification = await aiVerificationService.verifyCodetteResearch();
+        setLastVerification(verification);
+        
+        // Enhance confidence with verification
+        result.optimization_score = aiVerificationService.enhanceAIConfidenceWithVerification(
+          result.optimization_score,
+          verification.dreamcore
+        );
+      } catch (verificationError) {
+        console.warn('AI verification failed:', verificationError);
+      }
       
       // Store the analysis result
       await aiService.storeSignal(
@@ -37,6 +53,21 @@ export function useAI() {
     try {
       const decision = await aiService.conveneAegisCouncil(inputText, overrides);
       setLastCouncilDecision(decision);
+      
+      // Verify the Aegis Council sources
+      try {
+        const verification = await aiVerificationService.verifyCodetteResearch();
+        
+        // Enhance virtue profile confidence with verification
+        Object.keys(decision.virtue_profile).forEach(virtue => {
+          decision.virtue_profile[virtue] = aiVerificationService.enhanceAIConfidenceWithVerification(
+            decision.virtue_profile[virtue],
+            verification.nexus
+          );
+        });
+      } catch (verificationError) {
+        console.warn('Council verification failed:', verificationError);
+      }
       
       // Store the council decision
       await aiService.storeSignal(
@@ -64,6 +95,29 @@ export function useAI() {
     }
   }, []);
 
+  const verifyAIDecision = useCallback(async (decision: any, sources: string[]) => {
+    setIsProcessing(true);
+    try {
+      const audit = await aiVerificationService.createAIDecisionAudit(decision, sources);
+      
+      // Store the verification audit
+      await aiService.storeSignal(
+        'ai_verification',
+        `AI decision verification`,
+        `Decision verified with ${audit.source_proofs.length} cryptographic proofs`,
+        null,
+        audit,
+        null
+      );
+      
+      return audit;
+    } catch (error) {
+      console.error('AI decision verification failed:', error);
+      throw error;
+    } finally {
+      setIsProcessing(false);
+    }
+  }, []);
   const analyzeEthics = useCallback(async (quantumVector: number[], chaosVector: number[]) => {
     setIsProcessing(true);
     try {
@@ -133,10 +187,12 @@ export function useAI() {
     lastAnalysis,
     lastCouncilDecision,
     lastEthicalAnalysis,
+    lastVerification,
     runQuantumOptimization,
     conveneCouncil,
     analyzeEthics,
     runBenchmark,
     generatePhilosophicalInsight
+    verifyAIDecision
   };
 }

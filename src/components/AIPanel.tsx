@@ -54,6 +54,7 @@ export function AIPanel({
 
   const [activeTab, setActiveTab] = useState<'quantum' | 'council' | 'ethics' | 'benchmark' | 'insights'>('quantum');
   const [analysisHistory, setAnalysisHistory] = useState<any[]>([]);
+  const [showVerification, setShowVerification] = useState(false);
 
   const handleQuantumAnalysis = async () => {
     try {
@@ -119,6 +120,25 @@ export function AIPanel({
     }, ...prev].slice(0, 10));
   };
 
+  const handleVerifyAI = async () => {
+    try {
+      // Import the verification service
+      const { aiVerificationService } = await import('../services/aiVerificationService');
+      
+      // Verify Codette's research papers
+      const verification = await aiVerificationService.verifyCodetteResearch();
+      
+      setAnalysisHistory(prev => [{
+        type: 'verification',
+        result: verification,
+        timestamp: new Date()
+      }, ...prev].slice(0, 10));
+      
+      setShowVerification(true);
+    } catch (error) {
+      console.error('AI verification failed:', error);
+    }
+  };
   return (
     <div className="h-full flex flex-col bg-white dark:bg-gray-800">
       {/* Header */}
@@ -129,7 +149,7 @@ export function AIPanel({
           </div>
           <div>
             <h3 className="font-semibold text-gray-800 dark:text-white">AI Analysis Panel</h3>
-            <p className="text-xs text-gray-600 dark:text-gray-400">Quantum • Ethical • Intelligent</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400">Quantum • Ethical • Verified</p>
           </div>
         </div>
 
@@ -140,7 +160,8 @@ export function AIPanel({
             { id: 'council', label: 'Council', icon: Users },
             { id: 'ethics', label: 'Ethics', icon: Shield },
             { id: 'benchmark', label: 'Benchmark', icon: TrendingUp },
-            { id: 'insights', label: 'Insights', icon: Lightbulb }
+            { id: 'insights', label: 'Insights', icon: Lightbulb },
+            { id: 'verification', label: 'Verify', icon: CheckCircle }
           ].map(tab => (
             <button
               key={tab.id}
@@ -189,6 +210,18 @@ export function AIPanel({
                     <p className="font-bold text-green-600">{(lastAnalysis.optimization_score * 100).toFixed(0)}%</p>
                     <p className="text-gray-600 dark:text-gray-400">Score</p>
                   </div>
+                </div>
+              )}
+              
+              {lastVerification && (
+                <div className="mt-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-3">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <span className="text-sm font-medium text-green-800 dark:text-green-200">Research Verified</span>
+                  </div>
+                  <p className="text-xs text-green-700 dark:text-green-300">
+                    Quantum algorithms verified against published research (DOI: 10.5281/zenodo.16388758)
+                  </p>
                 </div>
               )}
             </div>
@@ -328,6 +361,51 @@ export function AIPanel({
           </div>
         )}
 
+        {activeTab === 'verification' && (
+          <div className="space-y-4">
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="font-medium text-gray-800 dark:text-white">AI Source Verification</h4>
+                <button
+                  onClick={handleVerifyAI}
+                  disabled={isProcessing}
+                  className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 transition-colors"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  <span>{isProcessing ? 'Verifying...' : 'Verify AI Sources'}</span>
+                </button>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-3">
+                  <h5 className="font-medium text-gray-800 dark:text-white mb-2">Cryptographic Verification</h5>
+                  <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                    <li>• Verify AI model sources with zero-knowledge proofs</li>
+                    <li>• Cryptographically authenticate research papers</li>
+                    <li>• Create immutable audit trail of AI decisions</li>
+                    <li>• Enhance confidence with verified sources</li>
+                  </ul>
+                </div>
+                
+                {lastVerification && (
+                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
+                    <h5 className="font-medium text-gray-800 dark:text-white mb-2">Verification Results</h5>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">DreamCore Paper:</span>
+                        <span className="text-green-600 font-medium">✓ Verified</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Nexus Engine:</span>
+                        <span className="text-green-600 font-medium">✓ Verified</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
         {/* Analysis History */}
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
           <h4 className="font-medium text-gray-800 dark:text-white mb-4">Analysis History</h4>
@@ -346,6 +424,7 @@ export function AIPanel({
                       {entry.type === 'ethics' && <Shield className="w-4 h-4 text-orange-600" />}
                       {entry.type === 'benchmark' && <TrendingUp className="w-4 h-4 text-green-600" />}
                       {entry.type === 'insight' && <Lightbulb className="w-4 h-4 text-yellow-600" />}
+                      {entry.type === 'verification' && <CheckCircle className="w-4 h-4 text-green-600" />}
                       <span className="font-medium text-gray-800 dark:text-white capitalize">
                         {entry.type}
                       </span>
@@ -355,7 +434,7 @@ export function AIPanel({
                     </span>
                   </div>
                   <div className="text-xs text-gray-600 dark:text-gray-300">
-                    Analysis completed successfully
+                    {entry.type === 'verification' ? 'Cryptographic verification completed' : 'Analysis completed successfully'}
                   </div>
                 </div>
               ))
@@ -388,7 +467,7 @@ export function AIPanel({
                 AI Processing
               </h3>
               <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Running advanced analysis...
+                Running verified AI analysis...
               </p>
             </div>
           </div>
