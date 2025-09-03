@@ -371,12 +371,12 @@ export function CodetteChat({
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center space-x-3 min-w-0 flex-1">
               <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
                 <MessageCircle className="w-6 h-6 text-white" />
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <h2 className="text-xl font-bold text-gray-800 dark:text-white">
                   Chat with Codette
                 </h2>
@@ -386,11 +386,11 @@ export function CodetteChat({
               </div>
             </div>
             
-            <div className="flex items-center space-x-3 flex-shrink-0">
+            <div className="flex items-center space-x-2 flex-shrink-0">
               <select
                 value={chatPersonality}
                 onChange={(e) => setChatPersonality(e.target.value as any)}
-                className="px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-800 dark:text-white"
+                className="px-2 py-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-xs text-gray-800 dark:text-white"
               >
                 <option value="helpful">Helpful</option>
                 <option value="creative">Creative</option>
@@ -400,23 +400,23 @@ export function CodetteChat({
               
               <button
                 onClick={clearChat}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
+                className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
                 title="Clear chat"
               >
-                <RotateCcw className="w-5 h-5 text-gray-500" />
+                <RotateCcw className="w-4 h-4 text-gray-500" />
               </button>
               
               <button
                 onClick={exportChat}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
+                className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
                 title="Export chat"
               >
-                <Download className="w-5 h-5 text-gray-500" />
+                <Download className="w-4 h-4 text-gray-500" />
               </button>
               
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0 ml-2"
               >
                 <X className="w-6 h-6 text-gray-500" />
               </button>
