@@ -369,28 +369,40 @@ export function CodetteChat({
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-        {/* Header */}
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3 flex-1 min-w-0">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                <MessageCircle className="w-6 h-6 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h2 className="text-xl font-bold text-gray-800 dark:text-white">
-                  Chat with Codette
-                </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Your AI coding companion • Powered by Virtue-Driven AI
-                </p>
-              </div>
+        {/* Simplified Header with Prominent Close Button */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+              <MessageCircle className="w-5 h-5 text-white" />
             </div>
-            
-            <div className="flex items-center space-x-2 ml-4">
+            <div>
+              <h2 className="text-lg font-bold text-gray-800 dark:text-white">
+                Chat with Codette
+              </h2>
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                AI Coding Companion
+              </p>
+            </div>
+          </div>
+          
+          {/* Close Button - Always Visible */}
+          <button
+            onClick={onClose}
+            className="w-10 h-10 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors shadow-lg flex items-center justify-center"
+            title="Close chat"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        
+        {/* Settings Row */}
+        <div className="px-6 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
               <select
                 value={chatPersonality}
                 onChange={(e) => setChatPersonality(e.target.value as any)}
-                className="px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-800 dark:text-white"
+                className="px-3 py-1 bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 rounded-lg text-sm text-gray-800 dark:text-white"
               >
                 <option value="helpful">Helpful</option>
                 <option value="creative">Creative</option>
@@ -400,7 +412,7 @@ export function CodetteChat({
               
               <button
                 onClick={clearChat}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
                 title="Clear chat"
               >
                 <RotateCcw className="w-4 h-4 text-gray-500" />
@@ -408,19 +420,15 @@ export function CodetteChat({
               
               <button
                 onClick={exportChat}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
                 title="Export chat"
               >
                 <Download className="w-4 h-4 text-gray-500" />
               </button>
-              
-              <button
-                onClick={onClose}
-                className="p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40"
-                title="Close chat"
-              >
-                <X className="w-5 h-5 text-red-600 dark:text-red-400" />
-              </button>
+            </div>
+            
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              {messages.length - 1} messages • {isProcessing ? 'AI thinking...' : 'Ready'}
             </div>
           </div>
         </div>
