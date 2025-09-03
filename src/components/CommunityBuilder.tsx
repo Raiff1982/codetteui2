@@ -1,25 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Users, 
-  Heart, 
-  Star, 
-  MessageCircle, 
-  Share2,
-  Github,
-  Globe,
-  Award,
-  Trophy,
-  Crown,
-  Sparkles,
-  Code,
-  Music,
-  Shield,
-  Brain,
-  ExternalLink,
-  UserPlus,
-  Coffee,
-  Handshake
-} from 'lucide-react';
+import { Users, Heart, Star, MessageCircle, Share2, Github, Globe, Award, Trophy, Crown, Sparkles, Code, Music, Shield, Brain, ExternalLink, UserPlus, Coffee, HeartHandshake as Handshake } from 'lucide-react';
 
 interface CommunityMember {
   id: string;
