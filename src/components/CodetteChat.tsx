@@ -55,12 +55,6 @@ export function CodetteChat({
   language = 'typescript',
   onCodeGenerated 
 }: CodetteChatProps) {
-  const chatScroll = useAutoScroll({ 
-    speed: 0, // Disable auto-scroll for chat
-    pauseOnHover: true,
-    resetOnInteraction: false 
-  });
-
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -433,7 +427,6 @@ export function CodetteChat({
         {/* Chat Messages */}
         <div className="flex-1 overflow-y-auto p-6 max-h-96">
           <div 
-            ref={chatScroll.elementRef}
             className="space-y-4"
           >
             {messages.map((message) => (
