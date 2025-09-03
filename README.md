@@ -64,17 +64,13 @@ Codette is built on real academic research with published DOIs:
 
 ### 🎮 Getting Started Guide
 
-#### For Complete Beginners
-1. Create your first file by clicking the + button in the file explorer
-2. Try typing "function hello()" and watch the AI complete it
-3. Use the beginner mode toggle for helpful tips
-4. Enable the music player for focus-enhancing background music
+#### For Everyone (Beginners Welcome!)
+1. **Start the streamlined onboarding** - it will guide you through Codette's revolutionary features
+2. **Create your first file** and experience AI-powered assistance
+3. **Try the music player** - adaptive soundtracks that enhance your coding flow
+4. **Explore ethical AI** - see how virtue-driven development works
+5. **Join the community** - connect with developers building a better future
 
-#### For Experienced Developers
-1. Enable the AI panel (⌘⇧A) for advanced features
-2. Try the quantum code optimizer for performance analysis
-3. Use the Aegis Council for ethical code review
-4. Explore the emotional code analyzer for UX insights
 
 ### 🛠️ Technology Stack
 
