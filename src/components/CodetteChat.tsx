@@ -386,7 +386,7 @@ export function CodetteChat({
               </div>
             </div>
             
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 flex-shrink-0">
               <select
                 value={chatPersonality}
                 onChange={(e) => setChatPersonality(e.target.value as any)}
@@ -400,7 +400,7 @@ export function CodetteChat({
               
               <button
                 onClick={clearChat}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
                 title="Clear chat"
               >
                 <RotateCcw className="w-5 h-5 text-gray-500" />
@@ -408,7 +408,7 @@ export function CodetteChat({
               
               <button
                 onClick={exportChat}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
                 title="Export chat"
               >
                 <Download className="w-5 h-5 text-gray-500" />
@@ -416,7 +416,7 @@ export function CodetteChat({
               
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
               >
                 <X className="w-6 h-6 text-gray-500" />
               </button>
