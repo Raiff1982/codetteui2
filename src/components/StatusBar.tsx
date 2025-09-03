@@ -6,10 +6,11 @@ interface StatusBarProps {
   activeFile: FileType | null;
   theme: 'light' | 'dark';
   terminalVisible: boolean;
+  focusMode: boolean;
   aiPanelVisible: boolean;
 }
 
-export function StatusBar({ activeFile, theme, terminalVisible, aiPanelVisible }: StatusBarProps) {
+export function StatusBar({ activeFile, isMobile, theme, focusMode }: StatusBarProps) {
   const getFileStats = () => {
     if (!activeFile) return null;
     
@@ -23,7 +24,9 @@ export function StatusBar({ activeFile, theme, terminalVisible, aiPanelVisible }
   const stats = getFileStats();
 
   return (
-    <div className="h-7 bg-blue-600 dark:bg-blue-700 text-white text-xs flex items-center justify-between px-6 relative z-10">
+    <div className={`bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center justify-between text-sm ${
+      focusMode ? 'opacity-50' : ''
+    }`}>
       <div className="flex items-center space-x-6">
         <div className="flex items-center space-x-1">
           <GitBranch className="w-3 h-3" />
@@ -46,6 +49,13 @@ export function StatusBar({ activeFile, theme, terminalVisible, aiPanelVisible }
           </div>
         )}
       </div>
+      
+      {focusMode && (
+        <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400">
+          <div className="w-2 h-2 bg-purple-600 rounded-full animate-pulse" />
+          <span className="font-medium">Focus Mode</span>
+        </div>
+      )}
       
       <div className="flex items-center space-x-6">
         {stats && (

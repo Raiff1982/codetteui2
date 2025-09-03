@@ -24,9 +24,10 @@ import {
 interface WelcomeScreenProps {
   onCreateFile: (name: string, type: 'file' | 'folder') => void;
   onOpenMusic?: () => void;
+  onOpenCommandPalette: () => void;
 }
 
-export function WelcomeScreen({ onCreateFile, onOpenMusic }: WelcomeScreenProps) {
+export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette }: WelcomeScreenProps) {
   const quickActionsScroll = useAutoScroll({ 
     speed: 30, 
     direction: 'vertical',
@@ -206,7 +207,7 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic }: WelcomeScreenProps)
                 <button
                   key={index}
                   onClick={action.action}
-                  className={`${isMobile ? 'p-5' : 'p-8'} bg-gradient-to-br from-white/90 via-blue-50/60 to-purple-50/60 dark:from-gray-800/90 dark:via-blue-950/60 dark:to-purple-950/60 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 ${isMobile ? '' : 'hover:scale-[1.05]'} border border-blue-200/50 dark:border-purple-700/50 group cursor-pointer touch-target hover-lift`}
+                  className={`${isMobile ? 'p-5' : 'p-8'} bg-gradient-to-br from-white/90 via-blue-50/60 to-purple-50/60 dark:from-gray-800/90 dark:via-blue-950/60 dark:to-purple-950/60 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 ${isMobile ? '' : 'hover:scale-[1.05]'} border border-blue-200/50 dark:border-purple-700/50 group cursor-pointer touch-target hover-lift focus:outline-none focus:ring-2 focus:ring-purple-500`}
                 >
                   <action.icon className={`${isMobile ? 'w-7 h-7' : 'w-10 h-10'} text-blue-600 dark:text-purple-400 mx-auto ${isMobile ? 'mb-3' : 'mb-4'} group-hover:text-purple-600 dark:group-hover:text-pink-400 transition-all duration-200 group-hover:scale-110`} />
                   <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-gray-900 dark:text-white mb-2 tracking-tight`}>
@@ -226,6 +227,22 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic }: WelcomeScreenProps)
                 </span>
               </div>
             </div>
+          </div>
+
+          {/* Command Palette Tip */}
+          <div className="mb-8 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+            <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-100 mb-2">
+              💡 Pro Tip: Use the Command Palette
+            </h3>
+            <p className="text-purple-700 dark:text-purple-300 mb-3">
+              Press <kbd className="px-2 py-1 bg-purple-200 dark:bg-purple-800 rounded text-sm font-mono">⌘K</kbd> to open the command palette and quickly access all features.
+            </p>
+            <button
+              onClick={onOpenCommandPalette}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              Try Command Palette
+            </button>
           </div>
 
           {/* Features */}

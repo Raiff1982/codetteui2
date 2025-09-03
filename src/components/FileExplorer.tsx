@@ -13,6 +13,7 @@ import {
   Filter,
   Trash2
 } from 'lucide-react';
+import { EmptyState } from './EmptyState';
 
 interface FileExplorerProps {
   files: FileType[];
@@ -75,19 +76,14 @@ export function FileExplorer({
     }
   };
 
-  return (
-    <div className="h-full flex flex-col bg-gradient-to-b from-transparent via-white/50 to-blue-50/30 dark:from-transparent dark:via-gray-800/50 dark:to-purple-950/30">
-      {/* Header */}
-      <div className="p-4 border-b border-blue-200/50 dark:border-purple-700/50 bg-gradient-to-r from-white/80 to-blue-50/80 dark:from-gray-800/80 dark:to-purple-950/80 backdrop-blur-sm">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Files</h3>
-          <button
-            onClick={() => setShowCreateMenu(!showCreateMenu)}
-            className="p-1 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-lg transition-all duration-200 hover:scale-110 hover:shadow-lg"
-          >
-            <Plus className="w-4 h-4 text-blue-600 dark:text-purple-400" />
-          </button>
-        </div>
+        <EmptyState
+          icon={Folder}
+          title="No Files Yet"
+          description="Create your first file to start building your project"
+          actionLabel="Open Folder"
+          onAction={() => onFileCreate('new-project', 'folder')}
+          className="h-full"
+        />
         
         {/* Search */}
         <div className="relative">
