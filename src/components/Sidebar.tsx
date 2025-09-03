@@ -24,7 +24,7 @@ export function Sidebar({ collapsed, children, onCollapse }: SidebarProps) {
     <>
       <aside 
         className={`
-          bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-r border-gray-200/50 dark:border-gray-700/50 
+          bg-gradient-to-b from-white/95 via-blue-50/80 to-purple-50/80 dark:from-gray-900/95 dark:via-blue-950/80 dark:to-purple-950/80 backdrop-blur-xl border-r border-blue-200/50 dark:border-purple-700/50 shadow-xl
           transition-all duration-300 ease-in-out w-64
           ${isMobile ? 'fixed inset-y-0 left-0 z-40 shadow-2xl' : ''}
           ${collapsed && isMobile ? 'transform -translate-x-full' : ''}
@@ -38,7 +38,7 @@ export function Sidebar({ collapsed, children, onCollapse }: SidebarProps) {
       {/* Mobile overlay */}
       {isMobile && !collapsed && (
         <div 
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-30"
+          className="fixed inset-0 bg-black/40 backdrop-blur-md z-30"
           onClick={onCollapse}
         />
       )}

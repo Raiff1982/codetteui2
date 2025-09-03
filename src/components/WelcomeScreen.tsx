@@ -194,20 +194,20 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic }: WelcomeScreenProps)
                 <button
                   key={index}
                   onClick={action.action}
-                  className={`${isMobile ? 'p-5' : 'p-8'} bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 ${isMobile ? '' : 'hover:scale-[1.02]'} border border-gray-200/50 dark:border-gray-700/50 group cursor-pointer touch-target hover-lift`}
+                  className={`${isMobile ? 'p-5' : 'p-8'} bg-gradient-to-br from-white/90 via-blue-50/60 to-purple-50/60 dark:from-gray-800/90 dark:via-blue-950/60 dark:to-purple-950/60 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 ${isMobile ? '' : 'hover:scale-[1.05]'} border border-blue-200/50 dark:border-purple-700/50 group cursor-pointer touch-target hover-lift`}
                 >
-                  <action.icon className={`${isMobile ? 'w-7 h-7' : 'w-10 h-10'} text-blue-600 mx-auto ${isMobile ? 'mb-3' : 'mb-4'} group-hover:text-blue-700 transition-colors`} />
+                  <action.icon className={`${isMobile ? 'w-7 h-7' : 'w-10 h-10'} text-blue-600 dark:text-purple-400 mx-auto ${isMobile ? 'mb-3' : 'mb-4'} group-hover:text-purple-600 dark:group-hover:text-pink-400 transition-all duration-200 group-hover:scale-110`} />
                   <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-gray-900 dark:text-white mb-2 tracking-tight`}>
                     {action.title}
                   </h3>
-                  <p className={`${isMobile ? 'text-sm' : 'text-sm'} text-gray-600 dark:text-gray-400 font-medium`}>
+                  <p className={`${isMobile ? 'text-sm' : 'text-sm'} text-gray-600 dark:text-gray-400 font-medium group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors`}>
                     {action.description}
                   </p>
                 </button>
               ))}
               
               {/* Auto-scroll indicator */}
-              <div className="absolute top-2 right-2 flex items-center space-x-2 glass rounded-full px-3 py-1.5">
+              <div className="absolute top-2 right-2 flex items-center space-x-2 bg-gradient-to-r from-white/80 to-blue-50/80 dark:from-gray-800/80 dark:to-purple-950/80 backdrop-blur-xl rounded-full px-3 py-1.5 shadow-lg border border-blue-200/50 dark:border-purple-700/50">
                 <div className={`w-2 h-2 rounded-full ${quickActionsScroll.isPaused ? 'bg-yellow-500' : 'bg-green-500 animate-pulse'}`} />
                 <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">
                   {quickActionsScroll.isPaused ? 'Paused' : 'Auto-scrolling'}
@@ -227,7 +227,7 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic }: WelcomeScreenProps)
             >
               {features.map((feature, index) => (
                 <div key={index} className="text-center">
-                  <div className={`${isMobile ? 'w-12 h-12' : 'w-16 h-16'} bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-2xl flex items-center justify-center mx-auto ${isMobile ? 'mb-3' : 'mb-4'} shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105 border border-blue-200/50 dark:border-blue-800/50`}>
+                  <div className={`${isMobile ? 'w-12 h-12' : 'w-16 h-16'} bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-blue-900/40 dark:via-purple-900/40 dark:to-pink-900/40 rounded-2xl flex items-center justify-center mx-auto ${isMobile ? 'mb-3' : 'mb-4'} shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border border-blue-200/50 dark:border-purple-800/50 backdrop-blur-sm`}>
                     <feature.icon className={`${isMobile ? 'w-6 h-6' : 'w-8 h-8'} text-blue-600 dark:text-blue-400`} />
                   </div>
                   <h3 className={`${isMobile ? 'text-sm' : 'text-base'} font-semibold text-gray-900 dark:text-white mb-2 tracking-tight`}>
@@ -240,7 +240,7 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic }: WelcomeScreenProps)
               ))}
               
               {/* Auto-scroll indicator */}
-              <div className="absolute top-2 right-2 flex items-center space-x-2 glass rounded-full px-3 py-1.5">
+              <div className="absolute top-2 right-2 flex items-center space-x-2 bg-gradient-to-r from-white/80 to-blue-50/80 dark:from-gray-800/80 dark:to-purple-950/80 backdrop-blur-xl rounded-full px-3 py-1.5 shadow-lg border border-blue-200/50 dark:border-purple-700/50">
                 <div className={`w-2 h-2 rounded-full ${featuresScroll.isPaused ? 'bg-yellow-500' : 'bg-green-500 animate-pulse'}`} />
                 <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">
                   {featuresScroll.isPaused ? 'Paused' : 'Auto-scrolling'}
@@ -250,7 +250,7 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic }: WelcomeScreenProps)
           </div>
 
           {/* Keyboard Shortcuts */}
-          <div className={`bg-white dark:bg-gray-800 rounded-2xl ${isMobile ? 'p-5' : 'p-8'} shadow-lg border border-gray-200/50 dark:border-gray-700/50 relative ${isMobile ? 'mb-6' : 'mb-10'} ${isMobile ? 'mobile-hidden' : ''}`}>
+          <div className={`bg-gradient-to-br from-white/90 via-blue-50/60 to-purple-50/60 dark:from-gray-800/90 dark:via-blue-950/60 dark:to-purple-950/60 backdrop-blur-sm rounded-2xl ${isMobile ? 'p-5' : 'p-8'} shadow-xl border border-blue-200/50 dark:border-purple-700/50 relative ${isMobile ? 'mb-6' : 'mb-10'} ${isMobile ? 'mobile-hidden' : ''}`}>
             <h3 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold text-gray-900 dark:text-white mb-6 tracking-tight`}>
               Keyboard Shortcuts
             </h3>
@@ -260,38 +260,38 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic }: WelcomeScreenProps)
             >
               <div className="flex justify-between">
                 <span className="text-gray-700 dark:text-gray-300 font-medium">Save File</span>
-                <kbd className={`bg-gray-100 dark:bg-gray-700 ${isMobile ? 'px-2 py-1' : 'px-3 py-1'} rounded-lg text-gray-800 dark:text-gray-200 font-mono text-xs border border-gray-200 dark:border-gray-600`}>
+                <kbd className={`bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/50 dark:to-purple-900/50 ${isMobile ? 'px-2 py-1' : 'px-3 py-1'} rounded-lg text-gray-800 dark:text-gray-200 font-mono text-xs border border-blue-200/50 dark:border-purple-600/50 shadow-lg`}>
                   ⌘S
                 </kbd>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-700 dark:text-gray-300 font-medium">Toggle Terminal</span>
-                <kbd className={`bg-gray-100 dark:bg-gray-700 ${isMobile ? 'px-2 py-1' : 'px-3 py-1'} rounded-lg text-gray-800 dark:text-gray-200 font-mono text-xs border border-gray-200 dark:border-gray-600`}>
+                <kbd className={`bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/50 dark:to-purple-900/50 ${isMobile ? 'px-2 py-1' : 'px-3 py-1'} rounded-lg text-gray-800 dark:text-gray-200 font-mono text-xs border border-blue-200/50 dark:border-purple-600/50 shadow-lg`}>
                   ⌘`
                 </kbd>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-700 dark:text-gray-300 font-medium">Toggle AI Panel</span>
-                <kbd className={`bg-gray-100 dark:bg-gray-700 ${isMobile ? 'px-2 py-1' : 'px-3 py-1'} rounded-lg text-gray-800 dark:text-gray-200 font-mono text-xs border border-gray-200 dark:border-gray-600`}>
+                <kbd className={`bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/50 dark:to-purple-900/50 ${isMobile ? 'px-2 py-1' : 'px-3 py-1'} rounded-lg text-gray-800 dark:text-gray-200 font-mono text-xs border border-blue-200/50 dark:border-purple-600/50 shadow-lg`}>
                   ⌘⇧A
                 </kbd>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-700 dark:text-gray-300 font-medium">Search</span>
-                <kbd className={`bg-gray-100 dark:bg-gray-700 ${isMobile ? 'px-2 py-1' : 'px-3 py-1'} rounded-lg text-gray-800 dark:text-gray-200 font-mono text-xs border border-gray-200 dark:border-gray-600`}>
+                <kbd className={`bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/50 dark:to-purple-900/50 ${isMobile ? 'px-2 py-1' : 'px-3 py-1'} rounded-lg text-gray-800 dark:text-gray-200 font-mono text-xs border border-blue-200/50 dark:border-purple-600/50 shadow-lg`}>
                   ⌘K
                 </kbd>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-700 dark:text-gray-300 font-medium">Toggle Theme</span>
-                <kbd className={`bg-gray-100 dark:bg-gray-700 ${isMobile ? 'px-2 py-1' : 'px-3 py-1'} rounded-lg text-gray-800 dark:text-gray-200 font-mono text-xs border border-gray-200 dark:border-gray-600`}>
+                <kbd className={`bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/50 dark:to-purple-900/50 ${isMobile ? 'px-2 py-1' : 'px-3 py-1'} rounded-lg text-gray-800 dark:text-gray-200 font-mono text-xs border border-blue-200/50 dark:border-purple-600/50 shadow-lg`}>
                   ⌘T
                 </kbd>
               </div>
             </div>
             
             {/* Auto-scroll indicator */}
-            <div className="absolute top-4 right-4 flex items-center space-x-2 glass rounded-full px-3 py-1.5">
+            <div className="absolute top-4 right-4 flex items-center space-x-2 bg-gradient-to-r from-white/80 to-blue-50/80 dark:from-gray-800/80 dark:to-purple-950/80 backdrop-blur-xl rounded-full px-3 py-1.5 shadow-lg border border-blue-200/50 dark:border-purple-700/50">
               <div className={`w-2 h-2 rounded-full ${shortcutsScroll.isPaused ? 'bg-yellow-500' : 'bg-green-500 animate-pulse'}`} />
               <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">
                 {shortcutsScroll.isPaused ? 'Paused' : 'Auto-scrolling'}
@@ -301,7 +301,7 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic }: WelcomeScreenProps)
           
           {/* Mobile-specific help */}
           {isMobile && (
-            <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-6 rounded-2xl mb-6 border border-purple-200/50 dark:border-purple-800/50 shadow-lg">
+            <div className="bg-gradient-to-r from-purple-50 via-pink-50 to-blue-50 dark:from-purple-900/30 dark:via-pink-900/30 dark:to-blue-900/30 backdrop-blur-sm p-6 rounded-2xl mb-6 border border-purple-200/50 dark:border-purple-800/50 shadow-xl">
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 tracking-tight">📱 Frontend Demo Mode</h3>
               <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300 text-left font-medium">
                 <p>• 🎯 <strong>Interface:</strong> Full UI experience available</p>
@@ -316,9 +316,9 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic }: WelcomeScreenProps)
           )}
           
           {/* Codette Integration Showcase */}
-          <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 p-8 rounded-2xl border border-amber-200/50 dark:border-amber-800/50 shadow-lg">
+          <div className="bg-gradient-to-r from-amber-50 via-orange-50 to-red-50 dark:from-amber-900/30 dark:via-orange-900/30 dark:to-red-900/30 backdrop-blur-sm p-8 rounded-2xl border border-amber-200/50 dark:border-amber-800/50 shadow-xl">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-md">
+              <div className="w-10 h-10 bg-gradient-to-br from-amber-500 via-orange-600 to-red-600 rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110">
                 <AlertTriangle className="w-5 h-5 text-white" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">⚡ Frontend Demo Mode</h3>
@@ -366,7 +366,7 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic }: WelcomeScreenProps)
                 </div>
               </div>
             </div>
-            <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-200/50 dark:border-blue-800/50">
+            <div className="mt-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 backdrop-blur-sm p-4 rounded-xl border border-blue-200/50 dark:border-purple-800/50 shadow-lg">
               <p className="text-xs text-blue-800 dark:text-blue-200 font-medium">
                 <strong>Want the full experience?</strong> Check out the GitHub repository for backend setup instructions. 
                 The Python systems implement the actual quantum algorithms, neural networks, and ethical AI described in the research papers.

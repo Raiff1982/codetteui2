@@ -94,6 +94,7 @@ function App() {
   const [codingStreak, setCodingStreak] = useState(0);
   const [totalLinesCodedToday, setTotalLinesCodedToday] = useState(0);
   const [showCodetteChat, setShowCodetteChat] = useState(false);
+  const [showZkFetch, setShowZkFetch] = useState(false);
   
   const { playerState } = useMusic();
   const { 
@@ -203,6 +204,12 @@ function App() {
       e.preventDefault();
       // Focus on language selector if available
     }
+    
+    // Ctrl/Cmd + Shift + Z to toggle zkfetch panel
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'Z') {
+      e.preventDefault();
+      setShowZkFetch(!showZkFetch);
+    }
   };
 
   useEffect(() => {
@@ -292,7 +299,7 @@ function App() {
       onSwipeDown={() => isMobile && setTerminalVisible(false)}
     >
       <TooltipProvider showBeginnerTips={showBeginnerTips}>
-      <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+      <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-purple-950 transition-all duration-500">
         <Header 
           theme={theme}
           onToggleTheme={toggleTheme}
@@ -353,7 +360,7 @@ function App() {
                   
                   {aiPanelVisible && !isMobile && (
                     <div 
-                      className="border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden"
+                      className="border-l border-purple-200/50 dark:border-purple-700/50 bg-gradient-to-br from-white via-purple-50/30 to-blue-50/30 dark:from-gray-900 dark:via-purple-950/30 dark:to-blue-950/30 backdrop-blur-xl shadow-2xl overflow-hidden"
                       style={{ 
                         width: isTablet ? 350 : Math.min(aiPanelWidth, window.innerWidth * 0.4),
                         maxWidth: '450px',
@@ -383,7 +390,7 @@ function App() {
                         />
                       ) : (
                         <div className={`h-full flex ${isTablet ? 'flex-col' : 'flex-row'} overflow-hidden`}>
-                        <div className={`${isTablet ? 'w-full border-b' : 'flex-1 border-r'} border-gray-200 dark:border-gray-700 overflow-hidden`}>
+                        <div className={`${isTablet ? 'w-full border-b' : 'flex-1 border-r'} border-purple-200/30 dark:border-purple-700/30 overflow-hidden`}>
                           <AIPanel 
                             currentCode={activeFile.content}
                             language={selectedLanguage?.name.toLowerCase() || 'typescript'}
@@ -407,7 +414,7 @@ function App() {
                             }}
                           />
                         </div>
-                        <div className={`${isTablet ? 'w-full border-b' : 'flex-1 border-r'} border-gray-200 dark:border-gray-700 overflow-hidden`}>
+                        <div className={`${isTablet ? 'w-full border-b' : 'flex-1 border-r'} border-purple-200/30 dark:border-purple-700/30 overflow-hidden`}>
                           <AICodeAssistant
                             currentCode={activeFile.content}
                             language={selectedLanguage?.name.toLowerCase() || 'plaintext'}
@@ -431,7 +438,7 @@ function App() {
                   
                   {/* Mobile AI Panel - Bottom Sheet */}
                   {aiPanelVisible && isMobile && (
-                    <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto">
+                    <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-white via-purple-50/50 to-blue-50/50 dark:from-gray-900 dark:via-purple-950/50 dark:to-blue-950/50 backdrop-blur-xl border-t border-purple-200/50 dark:border-purple-700/50 z-50 max-h-96 overflow-y-auto shadow-2xl">
                       <div className="p-4">
                         <div className="flex items-center justify-between mb-4">
                           <h3 className="font-semibold text-gray-800 dark:text-white">AI Assistant</h3>
@@ -491,7 +498,7 @@ function App() {
                   
                   {aiPanelVisible && !isMobile && (
                     <div
-                      className="absolute top-0 right-0 h-full border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 z-20 overflow-hidden"
+                      className="absolute top-0 right-0 h-full border-l border-purple-200/50 dark:border-purple-700/50 bg-gradient-to-br from-white/95 via-purple-50/80 to-blue-50/80 dark:from-gray-900/95 dark:via-purple-950/80 dark:to-blue-950/80 backdrop-blur-xl shadow-2xl z-20 overflow-hidden"
                       style={{ 
                         width: isTablet ? 350 : Math.min(aiPanelWidth, window.innerWidth * 0.4),
                         maxWidth: '450px',
@@ -556,7 +563,7 @@ function App() {
             
             {terminalVisible && !isMobile && (
               <div 
-                className="border-t border-gray-200 dark:border-gray-700 terminal-toggle"
+                className="border-t border-purple-200/50 dark:border-purple-700/50 terminal-toggle bg-gradient-to-r from-gray-900/95 via-purple-950/95 to-blue-950/95 backdrop-blur-xl shadow-2xl"
                 style={{ height: isTablet ? 250 : terminalHeight }}
               >
                 <Terminal 
@@ -569,7 +576,7 @@ function App() {
             
             {/* Mobile Terminal - Bottom Sheet */}
             {terminalVisible && isMobile && (
-              <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 z-50 h-64">
+              <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900 via-purple-950/80 to-blue-950/80 backdrop-blur-xl border-t border-purple-700/50 z-50 h-64 shadow-2xl">
                 <Terminal 
                   onClose={() => setTerminalVisible(false)}
                   height={256}
@@ -635,7 +642,7 @@ function App() {
         
         {/* Mobile Music Player - Bottom Sheet */}
         {musicPlayerVisible && isMobile && (
-          <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-50 max-h-80 overflow-y-auto">
+          <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-white via-purple-50/50 to-pink-50/50 dark:from-gray-800 dark:via-purple-950/50 dark:to-pink-950/50 backdrop-blur-xl border-t border-purple-200/50 dark:border-purple-700/50 z-50 max-h-80 overflow-y-auto shadow-2xl">
             <div className="p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-800 dark:text-white">Music Player</h3>
@@ -714,9 +721,17 @@ function App() {
           />
         )}
         
+        {/* zkfetch Panel */}
+        {showZkFetch && (
+          <ZkFetchPanel
+            isVisible={showZkFetch}
+            onClose={() => setShowZkFetch(false)}
+          />
+        )}
+        
         {/* Floating Advanced Panels */}
         {showEthicalAI && (
-          <div className="fixed inset-4 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden">
+          <div className="fixed inset-4 bg-gradient-to-br from-white/95 via-green-50/80 to-blue-50/80 dark:from-gray-800/95 dark:via-green-950/80 dark:to-blue-950/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-green-200/50 dark:border-green-700/50 z-50 overflow-hidden">
             <div className="h-full">
               <EthicalAIPanel
                 onCodeGenerated={(code, title) => {
@@ -738,7 +753,7 @@ function App() {
             </div>
             <button
               onClick={() => setShowEthicalAI(false)}
-              className="absolute top-4 right-4 p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              className="absolute top-4 right-4 p-2 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-xl hover:bg-white dark:hover:bg-gray-600 transition-all shadow-lg hover:shadow-xl"
             >
               <X className="w-5 h-5 text-gray-500" />
             </button>
@@ -746,7 +761,7 @@ function App() {
         )}
         
         {showCodeHealth && activeFile && (
-          <div className="fixed inset-4 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden">
+          <div className="fixed inset-4 bg-gradient-to-br from-white/95 via-blue-50/80 to-purple-50/80 dark:from-gray-800/95 dark:via-blue-950/80 dark:to-purple-950/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-blue-200/50 dark:border-blue-700/50 z-50 overflow-hidden">
             <div className="h-full overflow-y-auto">
               <CodeHealthDashboard
                 currentCode={activeFile.content}
@@ -755,7 +770,7 @@ function App() {
             </div>
             <button
               onClick={() => setShowCodeHealth(false)}
-              className="absolute top-4 right-4 p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              className="absolute top-4 right-4 p-2 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-xl hover:bg-white dark:hover:bg-gray-600 transition-all shadow-lg hover:shadow-xl"
             >
               <X className="w-5 h-5 text-gray-500" />
             </button>
@@ -763,7 +778,7 @@ function App() {
         )}
         
         {showPerformanceMonitor && activeFile && (
-          <div className="fixed inset-4 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden">
+          <div className="fixed inset-4 bg-gradient-to-br from-white/95 via-orange-50/80 to-red-50/80 dark:from-gray-800/95 dark:via-orange-950/80 dark:to-red-950/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-orange-200/50 dark:border-orange-700/50 z-50 overflow-hidden">
             <div className="h-full overflow-y-auto">
               <PerformanceMonitor
                 currentCode={activeFile.content}
@@ -772,7 +787,7 @@ function App() {
             </div>
             <button
               onClick={() => setShowPerformanceMonitor(false)}
-              className="absolute top-4 right-4 p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              className="absolute top-4 right-4 p-2 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-xl hover:bg-white dark:hover:bg-gray-600 transition-all shadow-lg hover:shadow-xl"
             >
               <X className="w-5 h-5 text-gray-500" />
             </button>
@@ -780,7 +795,7 @@ function App() {
         )}
         
         {showQuantumVisualizer && (
-          <div className="fixed inset-4 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden">
+          <div className="fixed inset-4 bg-gradient-to-br from-white/95 via-purple-50/80 to-indigo-50/80 dark:from-gray-800/95 dark:via-purple-950/80 dark:to-indigo-950/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-purple-200/50 dark:border-purple-700/50 z-50 overflow-hidden">
             <div className="h-full overflow-y-auto p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-3">
@@ -789,7 +804,7 @@ function App() {
                 </div>
                 <button
                   onClick={() => setShowQuantumVisualizer(false)}
-                  className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  className="p-2 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-xl hover:bg-white dark:hover:bg-gray-600 transition-all shadow-lg hover:shadow-xl"
                 >
                   <X className="w-5 h-5 text-gray-500" />
                 </button>
@@ -808,7 +823,7 @@ function App() {
         )}
         
         {showCocoonsViewer && (
-          <div className="fixed inset-4 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden">
+          <div className="fixed inset-4 bg-gradient-to-br from-white/95 via-pink-50/80 to-purple-50/80 dark:from-gray-800/95 dark:via-pink-950/80 dark:to-purple-950/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-pink-200/50 dark:border-pink-700/50 z-50 overflow-hidden">
             <div className="h-full overflow-y-auto p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-3">
@@ -817,7 +832,7 @@ function App() {
                 </div>
                 <button
                   onClick={() => setShowCocoonsViewer(false)}
-                  className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  className="p-2 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-xl hover:bg-white dark:hover:bg-gray-600 transition-all shadow-lg hover:shadow-xl"
                 >
                   <X className="w-5 h-5 text-gray-500" />
                 </button>
