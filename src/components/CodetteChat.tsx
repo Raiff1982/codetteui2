@@ -77,7 +77,7 @@ export function CodetteChat({
       const welcomeMessage: ChatMessage = {
         id: 'welcome',
         role: 'codette',
-        content: `Hello! I'm Codette, your AI coding companion! 🚀\n\nI'm here to help you with:\n• Code optimization and debugging\n• Learning new programming concepts\n• Best practices and design patterns\n• Ethical AI and security guidance\n• Creative coding solutions\n\nWhat would you like to work on today?`,
+        content: `Chat cleared! Ready for a fresh conversation. 🆕\n\nWhat can I help with?`,
         timestamp: new Date(),
         type: 'text',
         metadata: { confidence: 1.0, category: 'welcome' }
