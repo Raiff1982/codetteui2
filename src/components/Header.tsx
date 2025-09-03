@@ -20,7 +20,11 @@ import {
   Github,
   ExternalLink,
   Wand2,
-  MessageCircle
+  MessageCircle,
+  TrendingUp,
+  Users,
+  Eye,
+  BookOpen
 } from 'lucide-react';
 import { FileType } from '../types/file';
 import { LanguageSelector } from './LanguageSelector';
@@ -82,10 +86,10 @@ export function Header({
   onToggleAutoFix,
   showAutoFix,
   onToggleChat,
-  onTogglePerformanceOptimizer,
-  onToggleCommunityBuilder,
-  onToggleAccessibility,
-  onToggleDocumentation
+  onTogglePerformanceOptimizer = () => {},
+  onToggleCommunityBuilder = () => {},
+  onToggleAccessibility = () => {},
+  onToggleDocumentation = () => {}
 }: HeaderProps) {
   const [showAbout, setShowAbout] = useState(false);
   const [backendConnected, setBackendConnected] = useState(false);
@@ -172,45 +176,37 @@ export function Header({
       <div className="flex items-center space-x-3">
         {/* Quick Access to New Features */}
         <div className="hidden lg:flex items-center space-x-2">
-          {onTogglePerformanceOptimizer && (
-            <button
-              onClick={onTogglePerformanceOptimizer}
-              className="p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
-              title="Performance Optimizer (⌘⇧O)"
-            >
-              <TrendingUp className="w-4 h-4 text-green-600" />
-            </button>
-          )}
+          <button
+            onClick={onTogglePerformanceOptimizer}
+            className="p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
+            title="Performance Optimizer (⌘⇧O)"
+          >
+            <TrendingUp className="w-4 h-4 text-green-600" />
+          </button>
           
-          {onToggleCommunityBuilder && (
-            <button
-              onClick={onToggleCommunityBuilder}
-              className="p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
-              title="Community Hub (⌘⇧B)"
-            >
-              <Users className="w-4 h-4 text-purple-600" />
-            </button>
-          )}
+          <button
+            onClick={onToggleCommunityBuilder}
+            className="p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
+            title="Community Hub (⌘⇧B)"
+          >
+            <Users className="w-4 h-4 text-purple-600" />
+          </button>
           
-          {onToggleAccessibility && (
-            <button
-              onClick={onToggleAccessibility}
-              className="p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
-              title="Accessibility Center (⌘⇧X)"
-            >
-              <Eye className="w-4 h-4 text-blue-600" />
-            </button>
-          )}
+          <button
+            onClick={onToggleAccessibility}
+            className="p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
+            title="Accessibility Center (⌘⇧X)"
+          >
+            <Eye className="w-4 h-4 text-blue-600" />
+          </button>
           
-          {onToggleDocumentation && (
-            <button
-              onClick={onToggleDocumentation}
-              className="p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
-              title="Documentation Maker"
-            >
-              <BookOpen className="w-4 h-4 text-orange-600" />
-            </button>
-          )}
+          <button
+            onClick={onToggleDocumentation}
+            className="p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
+            title="Documentation Maker"
+          >
+            <BookOpen className="w-4 h-4 text-orange-600" />
+          </button>
         </div>
         
         <button
