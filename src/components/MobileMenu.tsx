@@ -103,7 +103,7 @@ export function MobileMenu({
   onToggleAutoFix,
   showAutoFix,
   onToggleChat,
-  isMobile = true
+  isMobile = true,
   onTogglePerformanceOptimizer,
   onToggleCommunityBuilder,
   onToggleAccessibility,
