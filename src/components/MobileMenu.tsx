@@ -1,425 +1,1031 @@
-import React from 'react';
-import { 
-  X, 
-  Brain, 
-  Music, 
-  Terminal, 
-  Shield, 
-  HelpCircle, 
-  BookOpen,
-  Atom,
-  Heart,
-  Activity,
-  Eye,
-  TrendingUp,
-  Smartphone,
-  Monitor,
-  Trophy,
-  Zap,
-  Star,
-  Globe,
-  ExternalLink,
-  Award,
-  Sparkles,
-  MessageCircle,
-  Github
-} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { Header } from './components/Header';
+import { Sidebar } from './components/Sidebar';
+import { AdvancedEditor } from './components/AdvancedEditor';
+import { Terminal } from './components/Terminal';
+import { StatusBar } from './components/StatusBar';
+import { FileExplorer } from './components/FileExplorer';
+import { WelcomeScreen } from './components/WelcomeScreen';
+import { AIPanel } from './components/AIPanel';
+import { EnhancedAIPanel } from './components/EnhancedAIPanel';
+import { DatabaseViewer } from './components/DatabaseViewer';
+import { ResearchPaperViewer } from './components/ResearchPaperViewer';
+import { QuantumVisualizer } from './components/QuantumVisualizer';
+import { AIInsights } from './components/AIInsights';
+import { CocoonsViewer } from './components/CocoonsViewer';
+import { UltimateAIPanel } from './components/UltimateAIPanel';
+import { QuantumCodeVisualizer } from './components/QuantumCodeVisualizer';
+import { NeuralPredictionPanel } from './components/NeuralPredictionPanel';
+import { EmotionalCodeAnalyzer } from './components/EmotionalCodeAnalyzer';
+import { CodeEvolutionTracker } from './components/CodeEvolutionTracker';
+import { AICodeAssistant } from './components/AICodeAssistant';
+import { LanguageSelector } from './components/LanguageSelector';
+import { FirstTimeUserGuide } from './components/FirstTimeUserGuide';
+import { TooltipProvider } from './components/TooltipProvider';
+import { BeginnerHelp } from './components/BeginnerHelp';
+import { BeginnerModeToggle } from './components/BeginnerModeToggle';
+import { ContextualAIAssistant } from './components/ContextualAIAssistant';
+import { Footer } from './components/Footer';
+import { AboutModal } from './components/AboutModal';
+import { MusicPlayer } from './components/MusicPlayer';
+import { MusicPlayerMini } from './components/MusicPlayerMini';
+import { HowToGuide } from './components/HowToGuide';
+import { SecurityPanel } from './components/SecurityPanel';
+import { MobileMenu } from './components/MobileMenu';
+import { TouchGestures } from './components/TouchGestures';
+import { RevolutionaryInterface } from './components/RevolutionaryInterface';
+import { MTVStyleMusicPlayer } from './components/MTVStyleMusicPlayer';
+import { EthicalAIPanel } from './components/EthicalAIPanel';
+import { CodeHealthDashboard } from './components/CodeHealthDashboard';
+import { PerformanceMonitor } from './components/PerformanceMonitor';
+import { AutoFixPanel } from './components/AutoFixPanel';
+import { CodetteChat } from './components/CodetteChat';
+import { StreamlinedOnboarding } from './components/StreamlinedOnboarding';
+import { PerformanceOptimizer } from './components/PerformanceOptimizer';
+import { CommunityBuilder } from './components/CommunityBuilder';
+import { AccessibilityEnhancer } from './components/AccessibilityEnhancer';
+import { DocumentationMaker } from './components/DocumentationMaker';
+import { LazyLoadWrapper } from './components/LazyLoadWrapper';
+import { useTheme } from './hooks/useTheme';
+import { useFileSystem } from './hooks/useFileSystem';
+import { useFirstTimeUser } from './hooks/useFirstTimeUser';
+import { useMusic } from './hooks/useMusic';
+import { useAdvancedAI } from './hooks/useAdvancedAI';
+import { aiCodeService } from './services/aiCodeService';
+import { backendIntegration } from './services/backendIntegration';
+import { X, Crown, Sparkles, Music, Trophy, Shield, Activity, Atom, Brain } from 'lucide-react';
 
-interface MobileMenuProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onToggleAI: () => void;
-  onToggleMusic: () => void;
-  onToggleTerminal: () => void;
-  onToggleSecurity: () => void;
-  onShowHelp: () => void;
-  onShowHowTo: () => void;
-  aiPanelVisible: boolean;
-  musicPlayerVisible: boolean;
-  terminalVisible: boolean;
-  showSecurityPanel: boolean;
-  onToggleEthicalAI: () => void;
-  onToggleCodeHealth: () => void;
-  onToggleQuantumVisualizer: () => void;
-  onToggleCocoonsViewer: () => void;
-  onTogglePerformanceMonitor: () => void;
-  showEthicalAI: boolean;
-  showCodeHealth: boolean;
-  showQuantumVisualizer: boolean;
-  showCocoonsViewer: boolean;
-  showPerformanceMonitor: boolean;
-  forceMobileLayout: boolean;
-  onToggleMobileLayout: () => void;
-  codingStreak: number;
-  totalLinesCodedToday: number;
-  onToggleMTVMusicPlayer: () => void;
-  onToggleRevolutionaryInterface: () => void;
-  showMTVMusicPlayer: boolean;
-  showRevolutionaryInterface: boolean;
-  onToggleAutoFix: () => void;
-  showAutoFix: boolean;
-  onToggleChat: () => void;
-  isMobile?: boolean;
-  onTogglePerformanceOptimizer: () => void;
-  onToggleCommunityBuilder: () => void;
-  onToggleAccessibility: () => void;
-  onToggleDocumentation: () => void;
-  showPerformanceOptimizer: boolean;
-  showCommunityBuilder: boolean;
-  showAccessibilityEnhancer: boolean;
-  showDocumentationMaker: boolean;
-}
+function App() {
+  const { theme, toggleTheme } = useTheme();
+  const { 
+    files, 
+    activeFile, 
+    openFile, 
+    closeFile,
+    createFile, 
+    deleteFile, 
+    updateFileContent,
+    saveFile 
+  } = useFileSystem();
+  
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [terminalVisible, setTerminalVisible] = useState(false);
+  const [terminalHeight, setTerminalHeight] = useState(300);
+  const [aiPanelVisible, setAiPanelVisible] = useState(false);
+  const [aiPanelWidth, setAiPanelWidth] = useState(450);
+  const [selectedLanguage, setSelectedLanguage] = useState<any>(null);
+  const [showBeginnerHelp, setShowBeginnerHelp] = useState(false);
+  const [showAboutModal, setShowAboutModal] = useState(false);
+  const [showHowToGuide, setShowHowToGuide] = useState(false);
+  const [musicPlayerVisible, setMusicPlayerVisible] = useState(false);
+  const [musicPlayerMinimized, setMusicPlayerMinimized] = useState(false);
+  const [showDatabaseViewer, setShowDatabaseViewer] = useState(false);
+  const [showResearchPapers, setShowResearchPapers] = useState(false);
+  const [showUltimateAI, setShowUltimateAI] = useState(false);
+  const [cursorPosition, setCursorPosition] = useState(0);
+  const [showSecurityPanel, setShowSecurityPanel] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+  const [forceMobileLayout, setForceMobileLayout] = useState(false);
+  const [showRevolutionaryInterface, setShowRevolutionaryInterface] = useState(false);
+  const [showMTVMusicPlayer, setShowMTVMusicPlayer] = useState(false);
+  const [showEthicalAI, setShowEthicalAI] = useState(false);
+  const [showCodeHealth, setShowCodeHealth] = useState(false);
+  const [showPerformanceMonitor, setShowPerformanceMonitor] = useState(false);
+  const [showQuantumVisualizer, setShowQuantumVisualizer] = useState(false);
+  const [showCocoonsViewer, setShowCocoonsViewer] = useState(false);
+  const [showAutoFix, setShowAutoFix] = useState(false);
+  const [codingStreak, setCodingStreak] = useState(0);
+  const [totalLinesCodedToday, setTotalLinesCodedToday] = useState(0);
+  const [showCodetteChat, setShowCodetteChat] = useState(false);
+  const [showZkFetch, setShowZkFetch] = useState(false);
+  const [showStreamlinedOnboarding, setShowStreamlinedOnboarding] = useState(false);
+  const [showPerformanceOptimizer, setShowPerformanceOptimizer] = useState(false);
+  const [showCommunityBuilder, setShowCommunityBuilder] = useState(false);
+  const [showAccessibilityEnhancer, setShowAccessibilityEnhancer] = useState(false);
+  const [showDocumentationMaker, setShowDocumentationMaker] = useState(false);
+  
+  const { playerState } = useMusic();
+  const { 
+    runQuantumOptimization, 
+    conveneAegisCouncil, 
+    storeDreamMemory,
+    isProcessing: aiProcessing 
+  } = useAdvancedAI();
+  
+  const {
+    isFirstTime,
+    showBeginnerTips,
+    tourCompleted,
+    completeTour,
+    enableBeginnerMode,
+    disableBeginnerMode
+  } = useFirstTimeUser();
 
-export function MobileMenu({
-  isOpen,
-  onClose,
-  onToggleAI,
-  onToggleMusic,
-  onToggleTerminal,
-  onToggleSecurity,
-  onShowHelp,
-  onShowHowTo,
-  aiPanelVisible,
-  musicPlayerVisible,
-  terminalVisible,
-  onToggleEthicalAI,
-  onToggleCodeHealth,
-  onToggleQuantumVisualizer,
-  onToggleCocoonsViewer,
-  onTogglePerformanceMonitor,
-  showEthicalAI,
-  showCodeHealth,
-  showQuantumVisualizer,
-  showCocoonsViewer,
-  showPerformanceMonitor,
-  forceMobileLayout,
-  onToggleMobileLayout,
-  codingStreak,
-  totalLinesCodedToday,
-  onToggleMTVMusicPlayer,
-  onToggleRevolutionaryInterface,
-  showMTVMusicPlayer,
-  showRevolutionaryInterface,
-  onToggleAutoFix,
-  showAutoFix,
-  onToggleChat,
-  isMobile = true,
-  onTogglePerformanceOptimizer,
-  onToggleCommunityBuilder,
-  onToggleAccessibility,
-  onToggleDocumentation,
-  showPerformanceOptimizer,
-  showCommunityBuilder,
-  showAccessibilityEnhancer,
-  showDocumentationMaker,
-}: MobileMenuProps) {
-  if (!isOpen) return null;
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
-  const menuItems = [
-    {
-      icon: Brain,
-      label: 'AI Assistant',
-      active: aiPanelVisible,
-      action: onToggleAI,
-      description: 'Smart code assistance'
-    },
-    {
-      icon: Music,
-      label: 'Music Player',
-      active: musicPlayerVisible,
-      action: onToggleMusic,
-      description: 'Coding soundtrack'
-    },
-    {
-      icon: Terminal,
-      label: 'Terminal',
-      active: terminalVisible,
-      action: onToggleTerminal,
-      description: 'Command line interface'
-    },
-    {
-      icon: Heart,
-      label: 'Ethical AI',
-      active: showEthicalAI,
-      action: onToggleEthicalAI,
-      description: 'Virtue-driven analysis'
-    },
-    {
-      icon: Activity,
-      label: 'Code Health',
-      active: showCodeHealth,
-      action: onToggleCodeHealth,
-      description: 'Health monitoring'
-    },
-    {
-      icon: Atom,
-      label: 'Quantum Visualizer',
-      active: showQuantumVisualizer,
-      action: onToggleQuantumVisualizer,
-      description: 'Quantum analysis'
-    },
-    {
-      icon: Eye,
-      label: 'Cocoons Viewer',
-      active: showCocoonsViewer,
-      action: onToggleCocoonsViewer,
-      description: 'Memory crystallizations'
-    },
-    {
-      icon: TrendingUp,
-      label: 'Performance Monitor',
-      active: showPerformanceMonitor,
-      action: onTogglePerformanceMonitor,
-      description: 'Performance tracking'
-    },
-    {
-      icon: Shield,
-      label: 'Security',
-      active: false,
-      action: onToggleSecurity,
-      description: 'Security analysis'
-    },
-    {
-      icon: Award,
-      label: 'Music Awards',
-      active: showMTVMusicPlayer,
-      action: onToggleMTVMusicPlayer,
-      description: 'MTV-style music experience'
-    },
-    {
-      icon: Sparkles,
-      label: 'Experience Mode',
-      active: showRevolutionaryInterface,
-      action: onToggleRevolutionaryInterface,
-      description: 'Revolutionary interface'
-    },
-    {
-      icon: Zap,
-      label: 'Auto-Fix',
-      active: showAutoFix,
-      action: onToggleAutoFix,
-      description: 'Intelligent code repair'
-    },
-    {
-      icon: MessageCircle,
-      label: 'Chat with Codette',
-      active: false,
-      action: onToggleChat,
-      description: 'Ask Codette questions'
-    },
-    {
-      icon: TrendingUp,
-      label: 'Performance Optimizer',
-      active: showPerformanceOptimizer,
-      action: onTogglePerformanceOptimizer,
-      description: 'Real-time performance monitoring'
-    },
-    {
-      icon: Users,
-      label: 'Community Hub',
-      active: showCommunityBuilder,
-      action: onToggleCommunityBuilder,
-      description: 'Connect with developers'
-    },
-    {
-      icon: Eye,
-      label: 'Accessibility Center',
-      active: showAccessibilityEnhancer,
-      action: onToggleAccessibility,
-      description: 'Inclusive design tools'
-    },
-    {
-      icon: BookOpen,
-      label: 'Documentation Maker',
-      active: showDocumentationMaker,
-      action: onToggleDocumentation,
-      description: 'AI-powered documentation'
+  useEffect(() => {
+    if (isFirstTime && !tourCompleted) {
+      setShowStreamlinedOnboarding(true);
     }
-  ];
+  }, [isFirstTime, tourCompleted]);
 
-  const helpItems = [
-    {
-      icon: HelpCircle,
-      label: 'Beginner Help',
-      action: onShowHelp,
-      description: 'Get started guide'
-    },
-    {
-      icon: BookOpen,
-      label: 'How-To Guide',
-      action: onShowHowTo,
-      description: 'Complete tutorials'
+  useEffect(() => {
+    const checkDeviceType = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768 || forceMobileLayout);
+      setIsTablet(width >= 768 && width < 1024);
+      
+      // Auto-collapse sidebar on mobile (only if actually mobile, not forced)
+      if (width < 768 && !forceMobileLayout) {
+        setSidebarCollapsed(true);
+      }
+      
+      // Adjust panel sizes for tablets
+      if (width >= 768 && width < 1024) {
+        setAiPanelWidth(350);
+        setTerminalHeight(250);
+      } else if (width >= 1024) {
+        setAiPanelWidth(450);
+        setTerminalHeight(300);
+      }
+    };
+    
+    checkDeviceType();
+    window.addEventListener('resize', checkDeviceType);
+    return () => window.removeEventListener('resize', checkDeviceType);
+  }, []);
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    // Disable keyboard shortcuts on mobile
+    if (isMobile) return;
+    
+    // Ctrl/Cmd + S to save
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      if (activeFile) {
+        saveFile(activeFile.id);
+      }
     }
-  ];
+    
+    // Ctrl/Cmd + W to close file
+    if ((e.ctrlKey || e.metaKey) && e.key === 'w') {
+      e.preventDefault();
+      if (activeFile) {
+        closeFile(activeFile.id);
+      }
+    }
+    
+    // Ctrl/Cmd + ` to toggle terminal
+    if ((e.ctrlKey || e.metaKey) && e.key === '`') {
+      e.preventDefault();
+      setTerminalVisible(!terminalVisible);
+    }
+    
+    // Ctrl/Cmd + Shift + A to toggle AI panel
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'A') {
+      e.preventDefault();
+      setAiPanelVisible(!aiPanelVisible);
+    }
+    
+    // Ctrl/Cmd + Shift + M to toggle music player
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'M') {
+      e.preventDefault();
+      setMusicPlayerVisible(!musicPlayerVisible);
+    }
+    
+    // Ctrl/Cmd + Shift + D to toggle database viewer
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
+      e.preventDefault();
+      setShowDatabaseViewer(!showDatabaseViewer);
+    }
+    
+    // Ctrl/Cmd + Shift + P to toggle research papers
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'P') {
+      e.preventDefault();
+      setShowResearchPapers(!showResearchPapers);
+    }
+    
+    // Ctrl/Cmd + Shift + U to toggle ultimate AI panel
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'U') {
+      e.preventDefault();
+      setShowUltimateAI(!showUltimateAI);
+    }
+    
+    // Ctrl/Cmd + Shift + L to open language selector
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'L') {
+      e.preventDefault();
+      // Focus on language selector if available
+    }
+    
+    // Ctrl/Cmd + Shift + Z to toggle zkfetch panel
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'Z') {
+      e.preventDefault();
+      setShowZkFetch(!showZkFetch);
+    }
+    
+    // Ctrl/Cmd + Shift + O for Performance Optimizer
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'O') {
+      e.preventDefault();
+      setShowPerformanceOptimizer(!showPerformanceOptimizer);
+    }
+    
+    // Ctrl/Cmd + Shift + B for Community Builder
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'B') {
+      e.preventDefault();
+      setShowCommunityBuilder(!showCommunityBuilder);
+    }
+    
+    // Ctrl/Cmd + Shift + X for Accessibility
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'X') {
+      e.preventDefault();
+      setShowAccessibilityEnhancer(!showAccessibilityEnhancer);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [activeFile, terminalVisible, aiPanelVisible, musicPlayerVisible, showUltimateAI]);
+
+  // Track coding activity for gamification
+  useEffect(() => {
+    if (activeFile?.content) {
+      const lines = activeFile.content.split('\n').filter(line => line.trim()).length;
+      setTotalLinesCodedToday(lines);
+      
+      // Update coding streak
+      const lastCodingDate = localStorage.getItem('codette-last-coding-date');
+      const today = new Date().toDateString();
+      
+      if (lastCodingDate !== today) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        if (lastCodingDate === yesterday.toDateString()) {
+          setCodingStreak(prev => prev + 1);
+        } else {
+          setCodingStreak(1);
+        }
+        
+        localStorage.setItem('codette-last-coding-date', today);
+        localStorage.setItem('codette-coding-streak', codingStreak.toString());
+      }
+    }
+  }, [activeFile?.content]);
+
+  useEffect(() => {
+    if (activeFile) {
+      const language = aiCodeService.getLanguageFromExtension(activeFile.name);
+      setSelectedLanguage(language);
+    }
+  }, [activeFile]);
+
+  // Keyboard shortcuts for advanced features
+  useEffect(() => {
+    const handleAdvancedKeyDown = (e: KeyboardEvent) => {
+      if (isMobile) return;
+      
+      // Ctrl/Cmd + Shift + E for Ethical AI
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'E') {
+        e.preventDefault();
+        setShowEthicalAI(!showEthicalAI);
+      }
+      
+      // Ctrl/Cmd + Shift + H for Code Health
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'H') {
+        e.preventDefault();
+        setShowCodeHealth(!showCodeHealth);
+      }
+      
+      // Ctrl/Cmd + Shift + Q for Quantum Visualizer
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'Q') {
+        e.preventDefault();
+        setShowQuantumVisualizer(!showQuantumVisualizer);
+      }
+      
+      // Ctrl/Cmd + Shift + C for Cocoons Viewer
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'C') {
+        e.preventDefault();
+        setShowCocoonsViewer(!showCocoonsViewer);
+      }
+      
+      // Ctrl/Cmd + Shift + F for Auto-Fix
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'F') {
+        e.preventDefault();
+        setShowAutoFix(!showAutoFix);
+      }
+    };
+
+    document.addEventListener('keydown', handleAdvancedKeyDown);
+    return () => document.removeEventListener('keydown', handleAdvancedKeyDown);
+  }, [showEthicalAI, showCodeHealth, showQuantumVisualizer, showCocoonsViewer, isMobile]);
 
   return (
-    <div className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex ${isMobile ? '' : 'justify-center items-center'}`}>
-      <div className={`${isMobile ? 'w-80' : 'w-96 max-h-[80vh]'} bg-white dark:bg-gray-800 ${isMobile ? 'h-full' : 'rounded-2xl'} shadow-2xl overflow-y-auto`}>
-        {/* Header */}
-        <div className={`p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 ${isMobile ? '' : 'rounded-t-2xl'}`}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <Brain className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-gray-800 dark:text-white">Codette</h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{isMobile ? 'Mobile' : 'Desktop'} Menu</p>
-              </div>
+    <ErrorBoundary>
+    <TouchGestures
+      onSwipeRight={() => isMobile && setSidebarCollapsed(false)}
+      onSwipeLeft={() => isMobile && setSidebarCollapsed(true)}
+      onSwipeUp={() => isMobile && setTerminalVisible(true)}
+      onSwipeDown={() => isMobile && setTerminalVisible(false)}
+    >
+      <TooltipProvider showBeginnerTips={showBeginnerTips}>
+      <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-purple-950 transition-all duration-500">
+        <Header 
+          theme={theme}
+          onToggleTheme={toggleTheme}
+          onToggleSidebar={() => isMobile ? setShowMobileMenu(true) : setSidebarCollapsed(!sidebarCollapsed)}
+          onToggleTerminal={() => setTerminalVisible(!terminalVisible)}
+          activeFile={activeFile}
+          onSave={() => activeFile && saveFile(activeFile.id)}
+          onCloseFile={() => activeFile && closeFile(activeFile.id)}
+          onToggleAI={() => setAiPanelVisible(!aiPanelVisible)}
+          selectedLanguage={selectedLanguage}
+          onLanguageChange={setSelectedLanguage}
+          showBeginnerTips={showBeginnerTips}
+          onToggleBeginnerTips={showBeginnerTips ? disableBeginnerMode : enableBeginnerMode}
+          onShowHelp={() => setShowBeginnerHelp(true)}
+          onToggleMusic={() => setMusicPlayerVisible(!musicPlayerVisible)}
+          musicPlayerVisible={musicPlayerVisible}
+          onToggleUltimateAI={() => setShowUltimateAI(!showUltimateAI)}
+          showUltimateAI={showUltimateAI}
+          onShowHowTo={() => setShowHowToGuide(true)}
+          onShowSecurity={() => setShowSecurityPanel(true)}
+          forceMobileLayout={forceMobileLayout}
+          onToggleMobileLayout={() => setForceMobileLayout(!forceMobileLayout)}
+          onToggleAutoFix={() => setShowAutoFix(!showAutoFix)}
+          showAutoFix={showAutoFix}
+          onToggleChat={() => setShowCodetteChat(!showCodetteChat)}
+        />
+        
+        <div className={`flex flex-1 overflow-hidden ${isMobile ? 'mobile-stack' : ''}`}>
+          <Sidebar 
+            collapsed={sidebarCollapsed}
+            onCollapse={() => setSidebarCollapsed(true)}
+          >
+            <div className="file-explorer">
+              <FileExplorer
+                files={files}
+                activeFile={activeFile}
+                onFileSelect={openFile}
+                onFileCreate={createFile}
+                onFileDelete={deleteFile}
+              />
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            >
-              <X className="w-6 h-6 text-gray-500" />
-            </button>
-          </div>
-
-          {/* Stats */}
-          {(codingStreak > 0 || totalLinesCodedToday > 0) && (
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-green-100 dark:bg-green-900/20 p-3 rounded-lg text-center">
-                <Trophy className="w-5 h-5 text-green-600 mx-auto mb-1" />
-                <p className="text-lg font-bold text-green-600">{codingStreak}</p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Day Streak</p>
-              </div>
-              <div className="bg-blue-100 dark:bg-blue-900/20 p-3 rounded-lg text-center">
-                <Zap className="w-5 h-5 text-blue-600 mx-auto mb-1" />
-                <p className="text-lg font-bold text-blue-600">{totalLinesCodedToday}</p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Lines Today</p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Main Features */}
-        <div className="p-6">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Features</h3>
-          <div className="space-y-2">
-            {menuItems.map((item, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  item.action();
-                  onClose();
-                }}
-                className={`w-full flex items-center space-x-3 p-4 rounded-xl transition-all text-left ${
-                  item.active
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
-                    : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
-                }`}
-              >
-                <item.icon className="w-6 h-6" />
-                <div>
-                  <div className="font-medium">{item.label}</div>
-                  <div className={`text-xs ${item.active ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'}`}>
-                    {item.description}
+          </Sidebar>
+          
+          <div className={`flex-1 flex flex-col ${isMobile ? 'min-h-0' : ''}`}>
+            <div className="flex-1 relative">
+              {activeFile ? (
+                <div className={`flex h-full ${isMobile ? 'flex-col space-y-2' : ''}`}>
+                  <div className="flex-1 editor-area">
+                    <AdvancedEditor
+                      file={activeFile}
+                      onContentChange={(content) => updateFileContent(activeFile.id, content)}
+                      onCursorChange={(position) => setCursorPosition(position)}
+                      onSave={() => saveFile(activeFile.id)}
+                      onClose={() => closeFile(activeFile.id)}
+                      theme={theme}
+                    />
                   </div>
+                  
+                  {aiPanelVisible && !isMobile && (
+                    <div 
+                      className="border-l border-purple-200/50 dark:border-purple-700/50 bg-gradient-to-br from-white via-purple-50/30 to-blue-50/30 dark:from-gray-900 dark:via-purple-950/30 dark:to-blue-950/30 backdrop-blur-xl shadow-2xl overflow-hidden"
+                      style={{ 
+                        width: isTablet ? 350 : Math.min(aiPanelWidth, window.innerWidth * 0.4),
+                        maxWidth: '450px',
+                        minWidth: '300px'
+                      }}
+                    >
+                      <LazyLoadWrapper name="AI Panel">
+                        {showUltimateAI ? (
+                          <UltimateAIPanel
+                            currentCode={activeFile.content}
+                            language={selectedLanguage?.name.toLowerCase() || 'typescript'}
+                            cursorPosition={cursorPosition}
+                            onCodeGenerated={(code, title) => {
+                              if (title) {
+                                const fileName = `${title.toLowerCase().replace(/\s+/g, '-')}.${selectedLanguage?.extensions[0] || 'ts'}`;
+                                createFile(fileName, 'file');
+                                setTimeout(() => {
+                                  const newFile = files.find(f => f.name === fileName);
+                                  if (newFile) {
+                                    updateFileContent(newFile.id, code);
+                                    openFile(newFile);
+                                  }
+                                }, 100);
+                              } else {
+                                updateFileContent(activeFile.id, code);
+                              }
+                            }}
+                          />
+                        ) : (
+                        <div className={`h-full flex ${isTablet ? 'flex-col' : 'flex-row'} overflow-hidden`}>
+                        <div className={`${isTablet ? 'w-full border-b' : 'flex-1 border-r'} border-purple-200/30 dark:border-purple-700/30 overflow-hidden`}>
+                          <AIPanel 
+                            currentCode={activeFile.content}
+                            language={selectedLanguage?.name.toLowerCase() || 'typescript'}
+                            onCodeGenerated={(code, title) => {
+                              if (title) {
+                                // Create new file with generated code
+                                const fileName = `${title.toLowerCase().replace(/\s+/g, '-')}.${selectedLanguage?.extensions[0] || 'ts'}`;
+                                createFile(fileName, 'file');
+                                // Find the newly created file and update its content
+                                setTimeout(() => {
+                                  const newFile = files.find(f => f.name === fileName);
+                                  if (newFile) {
+                                    updateFileContent(newFile.id, code);
+                                    openFile(newFile);
+                                  }
+                                }, 100);
+                              } else {
+                                // Update current file
+                                updateFileContent(activeFile.id, code);
+                              }
+                            }}
+                          />
+                        </div>
+                        <div className={`${isTablet ? 'w-full border-b' : 'flex-1 border-r'} border-purple-200/30 dark:border-purple-700/30 overflow-hidden`}>
+                          <AICodeAssistant
+                            currentCode={activeFile.content}
+                            language={selectedLanguage?.name.toLowerCase() || 'plaintext'}
+                            onCodeChange={(content) => updateFileContent(activeFile.id, content)}
+                          />
+                        </div>
+                        <div className={`${isTablet ? 'w-full' : 'flex-1'} overflow-hidden`}>
+                          <ContextualAIAssistant
+                            currentCode={activeFile.content}
+                            language={selectedLanguage?.name.toLowerCase() || 'plaintext'}
+                            cursorPosition={{ line: 1, column: 1 }}
+                            selectedText=""
+                            onCodeSuggestion={(code) => updateFileContent(activeFile.id, code)}
+                            onExplanationRequest={(explanation) => console.log('Explanation:', explanation)}
+                          />
+                        </div>
+                      </div>
+                        )}
+                      </LazyLoadWrapper>
+                    </div>
+                  )}
+                  
+                  {/* Mobile AI Panel - Bottom Sheet */}
+                  {aiPanelVisible && isMobile && (
+                    <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-white via-purple-50/50 to-blue-50/50 dark:from-gray-900 dark:via-purple-950/50 dark:to-blue-950/50 backdrop-blur-xl border-t border-purple-200/50 dark:border-purple-700/50 z-50 max-h-96 overflow-y-auto shadow-2xl">
+                      <div className="p-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="font-semibold text-gray-800 dark:text-white">AI Assistant</h3>
+                          <button
+                            onClick={() => setAiPanelVisible(false)}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                          >
+                            <X className="w-5 h-5 text-gray-500" />
+                          </button>
+                        </div>
+                        <AICodeAssistant
+                          currentCode={activeFile.content}
+                          language={selectedLanguage?.name.toLowerCase() || 'plaintext'}
+                          onCodeChange={(content) => updateFileContent(activeFile.id, content)}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
-                {item.active && (
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse ml-auto" />
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Help Section */}
-        <div className="p-6 border-t border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Help & Support</h3>
-          <div className="space-y-2">
-            {helpItems.map((item, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  item.action();
-                  onClose();
-                }}
-                className="w-full flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-all text-left"
-              >
-                <item.icon className="w-6 h-6" />
-                <div>
-                  <div className="font-medium">{item.label}</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">{item.description}</div>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Settings */}
-        <div className={`p-6 border-t border-gray-200 dark:border-gray-700 ${isMobile ? '' : 'space-y-4'}`}>
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Settings</h3>
-          <div className="space-y-3">
-            <button
-              onClick={() => {
-                onToggleMobileLayout();
-                onClose();
-              }}
-              className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-all ${
-                forceMobileLayout
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
-              }`}
-            >
-              {forceMobileLayout ? (
-                <Smartphone className="w-5 h-5" />
               ) : (
-                <Monitor className="w-5 h-5" />
+                <div className="h-full overflow-hidden">
+                  {showRevolutionaryInterface ? (
+                    <RevolutionaryInterface
+                      currentCode={activeFile?.content || ''}
+                      language={selectedLanguage?.name.toLowerCase() || 'typescript'}
+                      onCodeGenerated={(code, title) => {
+                        if (title) {
+                          const fileName = `${title.toLowerCase().replace(/\s+/g, '-')}.${selectedLanguage?.extensions[0] || 'ts'}`;
+                          createFile(fileName, 'file');
+                          setTimeout(() => {
+                            const newFile = files.find(f => f.name === fileName);
+                            if (newFile) {
+                              updateFileContent(newFile.id, code);
+                              openFile(newFile);
+                            }
+                          }, 100);
+                        } else {
+                          // Create new file for generated code
+                          createFile('ai-generated.ts', 'file');
+                          setTimeout(() => {
+                            const newFile = files.find(f => f.name === 'ai-generated.ts');
+                            if (newFile) {
+                              updateFileContent(newFile.id, code);
+                              openFile(newFile);
+                            }
+                          }, 100);
+                        }
+                      }}
+                      isNewUser={isFirstTime}
+                    />
+                  ) : (
+                    <WelcomeScreen 
+                      onCreateFile={createFile}
+                      onOpenMusic={() => setMusicPlayerVisible(true)}
+                    />
+                  )}
+                  
+                  {aiPanelVisible && !isMobile && (
+                    <div
+                      className="absolute top-0 right-0 h-full border-l border-purple-200/50 dark:border-purple-700/50 bg-gradient-to-br from-white/95 via-purple-50/80 to-blue-50/80 dark:from-gray-900/95 dark:via-purple-950/80 dark:to-blue-950/80 backdrop-blur-xl shadow-2xl z-20 overflow-hidden"
+                      style={{ 
+                        width: isTablet ? 350 : Math.min(aiPanelWidth, window.innerWidth * 0.4),
+                        maxWidth: '450px',
+                        minWidth: '300px'
+                      }}
+                    >
+                      <div className="h-full flex flex-col">
+                        <div className={`${isTablet ? 'h-full' : 'h-1/2'} ${!isTablet ? 'border-b border-gray-200 dark:border-gray-700' : ''} overflow-hidden`}>
+                          {showUltimateAI ? (
+                            <UltimateAIPanel
+                              currentCode=""
+                              language="typescript"
+                              cursorPosition={0}
+                              onCodeGenerated={(code, title) => {
+                                if (title) {
+                                  const fileName = `${title.toLowerCase().replace(/\s+/g, '-')}.ts`;
+                                  createFile(fileName, 'file');
+                                  setTimeout(() => {
+                                    const newFile = files.find(f => f.name === fileName);
+                                    if (newFile) {
+                                      updateFileContent(newFile.id, code);
+                                      openFile(newFile);
+                                    }
+                                  }, 100);
+                                }
+                              }}
+                            />
+                          ) : (
+                            <EnhancedAIPanel 
+                              onCodeGenerated={(code, title) => {
+                                if (title) {
+                                  const fileName = `${title.toLowerCase().replace(/\s+/g, '-')}.ts`;
+                                  createFile(fileName, 'file');
+                                  setTimeout(() => {
+                                    const newFile = files.find(f => f.name === fileName);
+                                    if (newFile) {
+                                      updateFileContent(newFile.id, code);
+                                      openFile(newFile);
+                                    }
+                                  }, 100);
+                                }
+                              }}
+                            />
+                          )}
+                        </div>
+                        {!isTablet && (
+                          <div className="h-1/2 flex overflow-hidden">
+                          <div className="w-1/2 border-r border-gray-200 dark:border-gray-700 overflow-hidden">
+                            <DatabaseViewer />
+                          </div>
+                          <div className="w-1/2 overflow-hidden">
+                            <ResearchPaperViewer />
+                          </div>
+                        </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
-              <span className="font-medium">
-                {forceMobileLayout ? 'Mobile Layout' : 'Desktop Layout'}
-              </span>
-            </button>
+            </div>
             
-            {!isMobile && (
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                <h4 className="font-medium text-gray-800 dark:text-white mb-2">Desktop Features</h4>
-                <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                  <li>• All AI panels available simultaneously</li>
-                  <li>• Multi-window interface support</li>
-                  <li>• Advanced keyboard shortcuts</li>
-                  <li>• Enhanced productivity tools</li>
-                </ul>
+            {terminalVisible && !isMobile && (
+              <div 
+                className="border-t border-purple-200/50 dark:border-purple-700/50 terminal-toggle bg-gradient-to-r from-gray-900/95 via-purple-950/95 to-blue-950/95 backdrop-blur-xl shadow-2xl"
+                style={{ height: isTablet ? 250 : terminalHeight }}
+              >
+                <Terminal 
+                  onClose={() => setTerminalVisible(false)}
+                  height={isTablet ? 250 : terminalHeight}
+                  onHeightChange={isTablet ? () => {} : setTerminalHeight}
+                />
+              </div>
+            )}
+            
+            {/* Mobile Terminal - Bottom Sheet */}
+            {terminalVisible && isMobile && (
+              <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900 via-purple-950/80 to-blue-950/80 backdrop-blur-xl border-t border-purple-700/50 z-50 h-64 shadow-2xl">
+                <Terminal 
+                  onClose={() => setTerminalVisible(false)}
+                  height={256}
+                  onHeightChange={() => {}}
+                />
               </div>
             )}
           </div>
         </div>
+        
+        <div className="hidden">
+          <StatusBar 
+            activeFile={activeFile}
+            theme={theme}
+            terminalVisible={terminalVisible}
+            aiPanelVisible={aiPanelVisible}
+          />
+        </div>
 
-        {/* Footer */}
-        <div className={`p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 ${isMobile ? '' : 'rounded-b-2xl'}`}>
-          <div className="text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-              © 2025 Raiff's Bits
-            </p>
-            <div className="flex justify-center space-x-4">
-              <a 
-                href="https://www.raiffsbits.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center space-x-1 text-blue-600 hover:text-blue-700 text-sm"
-              >
-                <Globe className="w-4 h-4" />
-                <span>Website</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
-              <a 
-                href="https://github.com/raiffsbits/codette" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center space-x-1 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 text-sm"
-              >
-                <Github className="w-4 h-4" />
-                <span>GitHub</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
+        {/* Streamlined Onboarding */}
+        <StreamlinedOnboarding
+          isVisible={showStreamlinedOnboarding}
+          onComplete={() => {
+            setShowStreamlinedOnboarding(false);
+            completeTour();
+          }}
+          onCreateFile={createFile}
+          onToggleAI={() => setAiPanelVisible(true)}
+          onToggleMusic={() => setMusicPlayerVisible(true)}
+          onShowEthicalAI={() => setShowEthicalAI(true)}
+        />
+        
+        {/* Performance Optimizer */}
+        {showPerformanceOptimizer && (
+          <div className="fixed inset-4 z-50">
+            <LazyLoadWrapper name="Performance Optimizer">
+              <PerformanceOptimizer />
+            </LazyLoadWrapper>
+            <button
+              onClick={() => setShowPerformanceOptimizer(false)}
+              className="absolute top-4 right-4 p-2 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-xl hover:bg-white dark:hover:bg-gray-600 transition-all shadow-lg hover:shadow-xl"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+        )}
+        
+        {/* Community Builder */}
+        {showCommunityBuilder && (
+          <div className="fixed inset-4 z-50">
+            <LazyLoadWrapper name="Community Builder">
+              <CommunityBuilder />
+            </LazyLoadWrapper>
+            <button
+              onClick={() => setShowCommunityBuilder(false)}
+              className="absolute top-4 right-4 p-2 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-xl hover:bg-white dark:hover:bg-gray-600 transition-all shadow-lg hover:shadow-xl"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+        )}
+        
+        {/* Accessibility Enhancer */}
+        <AccessibilityEnhancer
+          isVisible={showAccessibilityEnhancer}
+          onClose={() => setShowAccessibilityEnhancer(false)}
+        />
+        
+        {/* Documentation Maker */}
+        {showDocumentationMaker && activeFile && (
+          <div className="fixed inset-4 z-50">
+            <LazyLoadWrapper name="Documentation Maker">
+              <DocumentationMaker
+                currentCode={activeFile.content}
+                language={selectedLanguage?.name.toLowerCase() || 'plaintext'}
+                onDocumentationGenerated={(docs) => {
+                  const fileName = `${activeFile.name.split('.')[0]}-docs.md`;
+                  createFile(fileName, 'file');
+                  setTimeout(() => {
+                    const newFile = files.find(f => f.name === fileName);
+                    if (newFile) {
+                      updateFileContent(newFile.id, docs);
+                      openFile(newFile);
+                    }
+                  }, 100);
+                }}
+              />
+            </LazyLoadWrapper>
+            <button
+              onClick={() => setShowDocumentationMaker(false)}
+              className="absolute top-4 right-4 p-2 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-xl hover:bg-white dark:hover:bg-gray-600 transition-all shadow-lg hover:shadow-xl"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+        )}
+        
+        {/* First Time User Experience */}
+        {!showStreamlinedOnboarding && (
+          <FirstTimeUserGuide
+            isFirstTime={isFirstTime}
+            onComplete={completeTour}
+          />
+        )}
+        
+        <BeginnerHelp
+          isVisible={showBeginnerHelp}
+          onClose={() => setShowBeginnerHelp(false)}
+        />
+        
+        <HowToGuide
+          isVisible={showHowToGuide}
+          onClose={() => setShowHowToGuide(false)}
+        />
+        
+        <AboutModal
+          isVisible={showAboutModal}
+          onClose={() => setShowAboutModal(false)}
+        />
+        
+        <SecurityPanel
+          isVisible={showSecurityPanel}
+          onClose={() => setShowSecurityPanel(false)}
+          currentCode={activeFile?.content || ''}
+          language={selectedLanguage?.name.toLowerCase() || 'plaintext'}
+          onSecurityFix={(fixedCode) => {
+            if (activeFile) {
+              updateFileContent(activeFile.id, fixedCode);
+            }
+          }}
+        />
+        
+        {/* Music Player */}
+        {musicPlayerVisible && !musicPlayerMinimized && !isMobile && (
+          <MusicPlayer
+            isMinimized={false}
+            onToggleMinimize={() => setMusicPlayerMinimized(true)}
+            onClose={() => setMusicPlayerVisible(false)}
+            currentLanguage={selectedLanguage?.name.toLowerCase() || 'typescript'}
+            codeComplexity={activeFile ? Math.min(activeFile.content.length / 1000, 1) : 0.5}
+          />
+        )}
+        
+        {/* Mobile Music Player - Bottom Sheet */}
+        {musicPlayerVisible && isMobile && (
+          <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-white via-purple-50/50 to-pink-50/50 dark:from-gray-800 dark:via-purple-950/50 dark:to-pink-950/50 backdrop-blur-xl border-t border-purple-200/50 dark:border-purple-700/50 z-50 max-h-80 overflow-y-auto shadow-2xl">
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-gray-800 dark:text-white">Music Player</h3>
+                <button
+                  onClick={() => setMusicPlayerVisible(false)}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              <MusicPlayerMini
+                onExpand={() => {}}
+                onClose={() => setMusicPlayerVisible(false)}
+              />
             </div>
           </div>
+        )}
+        
+        {/* Revolutionary MTV-Style Interface */}
+        
+        {/* Auto-Fix Panel */}
+        <AutoFixPanel
+          isVisible={showAutoFix}
+          onClose={() => setShowAutoFix(false)}
+          currentCode={activeFile?.content || ''}
+          language={selectedLanguage?.name.toLowerCase() || 'plaintext'}
+          onCodeFixed={(fixedCode, explanation) => {
+            if (activeFile) {
+              updateFileContent(activeFile.id, fixedCode);
+              // Show success notification
+              alert(`Auto-fix applied: ${explanation}`);
+            }
+          }}
+        />
+        
+        {/* Codette Chat */}
+        <CodetteChat
+          isVisible={showCodetteChat}
+          onClose={() => setShowCodetteChat(false)}
+          currentCode={activeFile?.content || ''}
+          language={selectedLanguage?.name.toLowerCase() || 'typescript'}
+          onCodeGenerated={(code, title) => {
+            if (title) {
+              const fileName = `${title.toLowerCase().replace(/\s+/g, '-')}.${selectedLanguage?.extensions[0] || 'ts'}`;
+              createFile(fileName, 'file');
+              setTimeout(() => {
+                const newFile = files.find(f => f.name === fileName);
+                if (newFile) {
+                  updateFileContent(newFile.id, code);
+                  openFile(newFile);
+                }
+              }, 100);
+            } else if (activeFile) {
+              updateFileContent(activeFile.id, code);
+            } else {
+              // Create new file if no active file
+              createFile('codette-generated.ts', 'file');
+              setTimeout(() => {
+                const newFile = files.find(f => f.name === 'codette-generated.ts');
+                if (newFile) {
+                  updateFileContent(newFile.id, code);
+                  openFile(newFile);
+                }
+              }, 100);
+            }
+          }}
+        />
+        
+        {/* MTV-Style Music Player */}
+        {showMTVMusicPlayer && (
+          <MTVStyleMusicPlayer
+            isVisible={showMTVMusicPlayer}
+            onClose={() => setShowMTVMusicPlayer(false)}
+            currentLanguage={selectedLanguage?.name.toLowerCase() || 'typescript'}
+            codeComplexity={activeFile ? Math.min(activeFile.content.length / 1000, 1) : 0.5}
+          />
+        )}
+        
+        {/* zkfetch Panel */}
+        {showZkFetch && (
+          <ZkFetchPanel
+            isVisible={showZkFetch}
+            onClose={() => setShowZkFetch(false)}
+          />
+        )}
+        
+        {/* Floating Advanced Panels */}
+        {showEthicalAI && (
+          <div className="fixed inset-4 bg-gradient-to-br from-white/95 via-green-50/80 to-blue-50/80 dark:from-gray-800/95 dark:via-green-950/80 dark:to-blue-950/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-green-200/50 dark:border-green-700/50 z-50 overflow-hidden">
+            <div className="h-full">
+              <EthicalAIPanel
+                onCodeGenerated={(code, title) => {
+                  if (title) {
+                    const fileName = `${title.toLowerCase().replace(/\s+/g, '-')}.${selectedLanguage?.extensions[0] || 'ts'}`;
+                    createFile(fileName, 'file');
+                    setTimeout(() => {
+                      const newFile = files.find(f => f.name === fileName);
+                      if (newFile) {
+                        updateFileContent(newFile.id, code);
+                        openFile(newFile);
+                      }
+                    }, 100);
+                  } else if (activeFile) {
+                    updateFileContent(activeFile.id, code);
+                  }
+                }}
+              />
+            </div>
+            <button
+              onClick={() => setShowEthicalAI(false)}
+              className="absolute top-4 right-4 p-2 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-xl hover:bg-white dark:hover:bg-gray-600 transition-all shadow-lg hover:shadow-xl"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+        )}
+        
+        {showCodeHealth && activeFile && (
+          <div className="fixed inset-4 bg-gradient-to-br from-white/95 via-blue-50/80 to-purple-50/80 dark:from-gray-800/95 dark:via-blue-950/80 dark:to-purple-950/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-blue-200/50 dark:border-blue-700/50 z-50 overflow-hidden">
+            <div className="h-full overflow-y-auto">
+              <CodeHealthDashboard
+                currentCode={activeFile.content}
+                language={selectedLanguage?.name.toLowerCase() || 'plaintext'}
+              />
+            </div>
+            <button
+              onClick={() => setShowCodeHealth(false)}
+              className="absolute top-4 right-4 p-2 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-xl hover:bg-white dark:hover:bg-gray-600 transition-all shadow-lg hover:shadow-xl"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+        )}
+        
+        {showPerformanceMonitor && activeFile && (
+          <div className="fixed inset-4 bg-gradient-to-br from-white/95 via-orange-50/80 to-red-50/80 dark:from-gray-800/95 dark:via-orange-950/80 dark:to-red-950/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-orange-200/50 dark:border-orange-700/50 z-50 overflow-hidden">
+            <div className="h-full overflow-y-auto">
+              <PerformanceMonitor
+                currentCode={activeFile.content}
+                language={selectedLanguage?.name.toLowerCase() || 'plaintext'}
+              />
+            </div>
+            <button
+              onClick={() => setShowPerformanceMonitor(false)}
+              className="absolute top-4 right-4 p-2 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-xl hover:bg-white dark:hover:bg-gray-600 transition-all shadow-lg hover:shadow-xl"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+        )}
+        
+        {showQuantumVisualizer && (
+          <div className="fixed inset-4 bg-gradient-to-br from-white/95 via-purple-50/80 to-indigo-50/80 dark:from-gray-800/95 dark:via-purple-950/80 dark:to-indigo-950/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-purple-200/50 dark:border-purple-700/50 z-50 overflow-hidden">
+            <div className="h-full overflow-y-auto p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3">
+                  <Atom className="w-6 h-6 text-purple-600" />
+                  <h2 className="text-xl font-bold text-gray-800 dark:text-white">Quantum Code Visualizer</h2>
+                </div>
+                <button
+                  onClick={() => setShowQuantumVisualizer(false)}
+                  className="p-2 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-xl hover:bg-white dark:hover:bg-gray-600 transition-all shadow-lg hover:shadow-xl"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              <QuantumVisualizer />
+              {activeFile && (
+                <div className="mt-6">
+                  <QuantumCodeVisualizer
+                    currentCode={activeFile.content}
+                    language={selectedLanguage?.name.toLowerCase() || 'typescript'}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {showCocoonsViewer && (
+          <div className="fixed inset-4 bg-gradient-to-br from-white/95 via-pink-50/80 to-purple-50/80 dark:from-gray-800/95 dark:via-pink-950/80 dark:to-purple-950/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-pink-200/50 dark:border-pink-700/50 z-50 overflow-hidden">
+            <div className="h-full overflow-y-auto p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3">
+                  <Brain className="w-6 h-6 text-purple-600" />
+                  <h2 className="text-xl font-bold text-gray-800 dark:text-white">Quantum Cocoons</h2>
+                </div>
+                <button
+                  onClick={() => setShowCocoonsViewer(false)}
+                  className="p-2 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-xl hover:bg-white dark:hover:bg-gray-600 transition-all shadow-lg hover:shadow-xl"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              <CocoonsViewer />
+            </div>
+          </div>
+        )}
+        
+        {/* Mini Music Player */}
+        {musicPlayerVisible && musicPlayerMinimized && playerState.currentTrack && !isMobile && (
+          <MusicPlayerMini
+            onExpand={() => setMusicPlayerMinimized(false)}
+            onClose={() => setMusicPlayerVisible(false)}
+          />
+        )}
+        
+        {/* Copyright Watermark */}
+        <div className={`copyright-watermark ${isMobile ? 'mobile-hidden' : ''} z-0`}>
+          © 2025 Raiff's Bits
         </div>
+        
+        {/* Mobile Menu */}
+        <MobileMenu
+          isOpen={showMobileMenu}
+          onClose={() => {
+            setShowMobileMenu(false);
+            if (isMobile) setSidebarCollapsed(true);
+          }}
+          onToggleAI={() => setAiPanelVisible(!aiPanelVisible)}
+          onToggleMusic={() => setMusicPlayerVisible(!musicPlayerVisible)}
+          onToggleTerminal={() => setTerminalVisible(!terminalVisible)}
+          onToggleSecurity={() => setShowSecurityPanel(!showSecurityPanel)}
+          onShowHelp={() => setShowBeginnerHelp(true)}
+          onShowHowTo={() => setShowHowToGuide(true)}
+          aiPanelVisible={aiPanelVisible}
+          musicPlayerVisible={musicPlayerVisible}
+          terminalVisible={terminalVisible}
+          showSecurityPanel={showSecurityPanel}
+          onToggleEthicalAI={() => setShowEthicalAI(!showEthicalAI)}
+          onToggleCodeHealth={() => setShowCodeHealth(!showCodeHealth)}
+          onToggleQuantumVisualizer={() => setShowQuantumVisualizer(!showQuantumVisualizer)}
+          onToggleCocoonsViewer={() => setShowCocoonsViewer(!showCocoonsViewer)}
+          onTogglePerformanceMonitor={() => setShowPerformanceMonitor(!showPerformanceMonitor)}
+          showEthicalAI={showEthicalAI}
+          showCodeHealth={showCodeHealth}
+          showQuantumVisualizer={showQuantumVisualizer}
+          showCocoonsViewer={showCocoonsViewer}
+          showPerformanceMonitor={showPerformanceMonitor}
+          forceMobileLayout={forceMobileLayout}
+          onToggleMobileLayout={() => setForceMobileLayout(!forceMobileLayout)}
+          codingStreak={codingStreak}
+          totalLinesCodedToday={totalLinesCodedToday}
+          onToggleMTVMusicPlayer={() => setShowMTVMusicPlayer(!showMTVMusicPlayer)}
+          onToggleRevolutionaryInterface={() => setShowRevolutionaryInterface(!showRevolutionaryInterface)}
+          showMTVMusicPlayer={showMTVMusicPlayer}
+          showRevolutionaryInterface={showRevolutionaryInterface}
+          onToggleAutoFix={() => setShowAutoFix(!showAutoFix)}
+          showAutoFix={showAutoFix}
+          onToggleChat={() => setShowCodetteChat(!showCodetteChat)}
+          onTogglePerformanceOptimizer={() => setShowPerformanceOptimizer(!showPerformanceOptimizer)}
+          onToggleCommunityBuilder={() => setShowCommunityBuilder(!showCommunityBuilder)}
+          onToggleAccessibility={() => setShowAccessibilityEnhancer(!showAccessibilityEnhancer)}
+          onToggleDocumentation={() => setShowDocumentationMaker(!showDocumentationMaker)}
+          showPerformanceOptimizer={showPerformanceOptimizer}
+          showCommunityBuilder={showCommunityBuilder}
+          showAccessibilityEnhancer={showAccessibilityEnhancer}
+          showDocumentationMaker={showDocumentationMaker}
+          isMobile={isMobile}
+        />
+        
       </div>
-      
-      {/* Overlay */}
-      {isMobile && <div className="flex-1" onClick={onClose} />}
-    </div>
+    </TooltipProvider>
+    </TouchGestures>
+    </ErrorBoundary>
   );
 }
+
+export default App;
