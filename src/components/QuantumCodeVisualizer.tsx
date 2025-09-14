@@ -16,7 +16,7 @@ export function QuantumCodeVisualizer({ currentCode, language }: QuantumCodeVisu
   const [quantumStates, setQuantumStates] = useState<any[]>([]);
 
   useEffect(() => {
-    if (currentCode.trim()) {
+    if (currentCode && currentCode.trim()) {
       analyzeCode();
     }
   }, [currentCode, language]);
