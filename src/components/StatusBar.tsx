@@ -10,7 +10,7 @@ interface StatusBarProps {
   aiPanelVisible: boolean;
 }
 
-export function StatusBar({ activeFile, isMobile, theme, focusMode }: StatusBarProps) {
+export function StatusBar({ activeFile, theme, terminalVisible, focusMode, aiPanelVisible }: StatusBarProps) {
   const getFileStats = () => {
     if (!activeFile) return null;
     
