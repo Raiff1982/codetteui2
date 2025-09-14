@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { musicService } from '../services/musicService';
 
 export interface Track {
   id: string;
@@ -35,98 +36,78 @@ export interface MusicPlayerState {
   currentPlaylist: Playlist | null;
 }
 
-// Mock music service for frontend-only mode
-const mockMusicService = {
-  getState: (): MusicPlayerState => ({
-    currentTrack: null,
-    isPlaying: false,
-    currentTime: 0,
-    volume: 0.7,
-    shuffle: false,
-    repeat: 'none' as const,
-    queue: [],
-    currentPlaylist: null
-  }),
-  
-  getCodingPlaylists: (): Playlist[] => [
-    {
-      id: 'focus',
-      name: 'Focus Music',
-      description: 'Concentration tracks for deep coding',
-      tracks: [],
-      isPublic: true,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
-  ],
-  
-  getStreamingServices: () => [],
-  
-  on: () => {},
-  off: () => {},
-  
-  play: async () => {},
-  pause: () => {},
-  stop: () => {},
-  next: () => {},
-  previous: () => {},
-  setVolume: () => {},
-  seek: () => {},
-  toggleShuffle: () => {},
-  toggleRepeat: () => {},
-  playPlaylist: () => {},
-  searchTracks: async () => [],
-  connectStreamingService: async () => false,
-  getAIRecommendations: async () => [],
-  createPlaylist: () => ({ id: '', name: '', description: '', tracks: [], isPublic: false, createdAt: new Date(), updatedAt: new Date() }),
-  addToPlaylist: () => {},
-  downloadTrack: async () => false
-};
-
 export function useMusic() {
-  const [playerState, setPlayerState] = useState<MusicPlayerState>(mockMusicService.getState());
-  const [playlists, setPlaylists] = useState<Playlist[]>(mockMusicService.getCodingPlaylists());
+  const [playerState, setPlayerState] = useState<MusicPlayerState>(() => musicService.getState());
+  const [playlists, setPlaylists] = useState<Playlist[]>(() => musicService.getCodingPlaylists());
   const [searchResults, setSearchResults] = useState<Track[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [aiRecommendations, setAiRecommendations] = useState<Track[]>([]);
-  const [streamingServices, setStreamingServices] = useState(mockMusicService.getStreamingServices());
+  const [streamingServices, setStreamingServices] = useState(() => musicService.getStreamingServices());
   const [generatedTracks, setGeneratedTracks] = useState<any[]>([]);
   const [isGeneratingMusic, setIsGeneratingMusic] = useState(false);
 
+  // Set up event listeners for music service
+  useEffect(() => {
+    const handleStateChange = (newState: MusicPlayerState) => {
+      setPlayerState(newState);
+    };
+
+    const handlePlaylistsChange = (newPlaylists: Playlist[]) => {
+      setPlaylists(newPlaylists);
+    };
+
+    musicService.on('state-changed', handleStateChange);
+    musicService.on('playlists-changed', handlePlaylistsChange);
+
+    return () => {
+      musicService.off('state-changed', handleStateChange);
+      musicService.off('playlists-changed', handlePlaylistsChange);
+    };
+  }, []);
+
   const play = useCallback(async () => {
-    await mockMusicService.play();
+    await musicService.play();
+    setPlayerState(musicService.getState());
   }, []);
 
   const pause = useCallback(() => {
-    mockMusicService.pause();
+    musicService.pause();
+    setPlayerState(musicService.getState());
   }, []);
 
   const stop = useCallback(() => {
-    mockMusicService.stop();
+    musicService.stop();
+    setPlayerState(musicService.getState());
   }, []);
 
   const next = useCallback(() => {
-    mockMusicService.next();
+    musicService.next();
+    setPlayerState(musicService.getState());
   }, []);
 
   const previous = useCallback(() => {
-    mockMusicService.previous();
+    musicService.previous();
+    setPlayerState(musicService.getState());
   }, []);
 
   const setVolume = useCallback((volume: number) => {
-    mockMusicService.setVolume(volume);
+    musicService.setVolume(volume);
+    setPlayerState(musicService.getState());
   }, []);
 
   const seek = useCallback((time: number) => {
-    mockMusicService.seek(time);
+    musicService.seek(time);
+    setPlayerState(musicService.getState());
   }, []);
 
   const toggleShuffle = useCallback(() => {
-    mockMusicService.toggleShuffle();
+    musicService.toggleShuffle();
+    setPlayerState(musicService.getState());
   }, []);
 
   const toggleRepeat = useCallback(() => {
-    mockMusicService.toggleRepeat();
+    musicService.toggleRepeat();
+    setPlayerState(musicService.getState());
   }, []);
 
   const generateAIMusic = useCallback(async (options: any) => {
@@ -152,37 +133,23 @@ export function useMusic() {
   const generateAdaptiveMusic = useCallback(async (currentCode: string, language: string, complexity: number) => {
     setIsGeneratingMusic(true);
     try {
-      // Mock adaptive music generation
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      const mockTrack = {
-        id: `adaptive-${Date.now()}`,
-        title: `Adaptive ${language} Music`,
-        artist: 'Codette AI',
-        duration: 300
-      };
-      setGeneratedTracks(prev => [...prev, mockTrack]);
-      return mockTrack;
+      const track = await musicService.generateAdaptiveMusic(currentCode, language, complexity);
+      setGeneratedTracks(prev => [...prev, track]);
+      return track;
     } catch (error) {
       console.error('Adaptive music generation failed:', error);
       throw error;
     } finally {
       setIsGeneratingMusic(false);
     }
-  }, [play]);
+  }, []);
 
   const generateCodingPlaylist = useCallback(async (scenario: 'deep-focus' | 'debugging' | 'creative' | 'learning') => {
     setIsGeneratingMusic(true);
     try {
-      // Mock coding playlist generation
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      const mockTracks = Array.from({ length: 5 }, (_, i) => ({
-        id: `${scenario}-${i}`,
-        title: `${scenario} Track ${i + 1}`,
-        artist: 'Codette AI',
-        duration: 180 + i * 30
-      }));
-      setGeneratedTracks(prev => [...prev, ...mockTracks]);
-      return mockTracks;
+      const tracks = await musicService.generateCodingPlaylist(scenario);
+      setGeneratedTracks(prev => [...prev, ...tracks]);
+      return tracks;
     } catch (error) {
       console.error('Coding playlist generation failed:', error);
       throw error;
@@ -192,17 +159,19 @@ export function useMusic() {
   }, []);
 
   const clearGeneratedMusic = useCallback(() => {
+    musicService.clearGeneratedTracks();
     setGeneratedTracks([]);
   }, []);
 
   const playPlaylist = useCallback((playlist: Playlist) => {
-    mockMusicService.playPlaylist(playlist);
+    musicService.playPlaylist(playlist);
+    setPlayerState(musicService.getState());
   }, []);
 
   const searchTracks = useCallback(async (query: string, service?: string) => {
     setIsLoading(true);
     try {
-      const results = await mockMusicService.searchTracks(query, service);
+      const results = await musicService.searchTracks(query, service);
       setSearchResults(results);
     } catch (error) {
       console.error('Search failed:', error);
@@ -214,7 +183,10 @@ export function useMusic() {
   const connectStreamingService = useCallback(async (service: string, credentials?: any) => {
     setIsLoading(true);
     try {
-      const success = await mockMusicService.connectStreamingService(service, credentials);
+      const success = await musicService.connectStreamingService(service, credentials);
+      if (success) {
+        setStreamingServices(musicService.getStreamingServices());
+      }
       return success;
     } catch (error) {
       console.error('Service connection failed:', error);
@@ -232,7 +204,7 @@ export function useMusic() {
   }) => {
     setIsLoading(true);
     try {
-      const recommendations = await mockMusicService.getAIRecommendations(codeContext);
+      const recommendations = await musicService.getAIRecommendations(codeContext);
       setAiRecommendations(recommendations);
       return recommendations;
     } catch (error) {
@@ -244,17 +216,20 @@ export function useMusic() {
   }, []);
 
   const createPlaylist = useCallback((name: string, description: string = '') => {
-    return mockMusicService.createPlaylist(name, description);
+    const playlist = musicService.createPlaylist(name, description);
+    setPlaylists(musicService.getCodingPlaylists());
+    return playlist;
   }, []);
 
   const addToPlaylist = useCallback((playlistId: string, track: Track) => {
-    mockMusicService.addToPlaylist(playlistId, track);
+    musicService.addToPlaylist(playlistId, track);
+    setPlaylists(musicService.getCodingPlaylists());
   }, []);
 
   const downloadTrack = useCallback(async (track: Track) => {
     setIsLoading(true);
     try {
-      const success = await mockMusicService.downloadTrack(track);
+      const success = await musicService.downloadTrack(track);
       return success;
     } catch (error) {
       console.error('Download failed:', error);
@@ -264,7 +239,7 @@ export function useMusic() {
     }
   }, []);
 
-  const formatTime = useCallback((seconds: number): string => {
+  const formatTime = useCallback((seconds: number = 0): string => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
