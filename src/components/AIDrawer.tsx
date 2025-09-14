@@ -1,5 +1,6 @@
 import React, { useState, Suspense } from 'react';
 import { X, Brain, BarChart3, Atom, Shield, Sparkles, Crown, Activity } from 'lucide-react';
+import { aiCodeService } from '../services/aiCodeService';
 
 // Lazy load heavy AI components
 const LazyEnhancedAIPanel = React.lazy(() => 
@@ -123,7 +124,10 @@ export function AIDrawer({ isOpen, onClose, activeFile }: AIDrawerProps) {
           {activeTab === 'analyze' && (
             <Suspense fallback={<LoadingFallback name="Code Analysis" />}>
               {loadedTabs.has('analyze') && (
-                <LazyCodeHealthDashboard />
+                <LazyCodeHealthDashboard 
+                  currentCode={activeFile?.content || ''}
+                  language={activeFile?.name ? aiCodeService.getLanguageFromExtension(activeFile.name) : 'javascript'}
+                />
               )}
             </Suspense>
           )}
