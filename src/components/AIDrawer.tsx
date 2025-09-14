@@ -146,7 +146,10 @@ export function AIDrawer({ isOpen, onClose, activeFile }: AIDrawerProps) {
           {activeTab === 'ethics' && (
             <Suspense fallback={<LoadingFallback name="Ethics Panel" />}>
               {loadedTabs.has('ethics') && (
-                <LazyUltimateAIPanel />
+                <LazyUltimateAIPanel 
+                  currentCode={activeFile?.content || ''}
+                  language={activeFile?.name ? aiCodeService.getLanguageFromExtension(activeFile.name)?.name || 'plaintext' : 'plaintext'}
+                />
               )}
             </Suspense>
           )}
