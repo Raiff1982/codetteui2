@@ -135,7 +135,10 @@ export function AIDrawer({ isOpen, onClose, activeFile }: AIDrawerProps) {
           {activeTab === 'visualize' && (
             <Suspense fallback={<LoadingFallback name="Quantum Visualizer" />}>
               {loadedTabs.has('visualize') && (
-                <LazyQuantumCodeVisualizer />
+                <LazyQuantumCodeVisualizer 
+                  currentCode={activeFile?.content || ''}
+                  language={activeFile?.name ? aiCodeService.getLanguageFromExtension(activeFile.name) : 'plaintext'}
+                />
               )}
             </Suspense>
           )}
