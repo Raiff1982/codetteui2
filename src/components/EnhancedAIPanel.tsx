@@ -29,18 +29,24 @@ import {
 } from 'lucide-react';
 
 interface EnhancedAIPanelProps {
-  currentCode?: string;
-  language?: string;
+  activeFile?: {
+    name: string;
+    content: string;
+  } | null;
   onCodeGenerated?: (code: string, title?: string) => void;
   onMusicGenerated?: (track: any) => void;
 }
 
 export function EnhancedAIPanel({ 
-  currentCode = '', 
-  language = 'typescript', 
+  activeFile,
   onCodeGenerated,
   onMusicGenerated 
 }: EnhancedAIPanelProps) {
+  // Derive currentCode and language from activeFile
+  const currentCode = activeFile?.content || '';
+  const language = activeFile?.name ? 
+    activeFile.name.split('.').pop()?.toLowerCase() || 'plaintext' : 
+    'plaintext';
   const {
     isProcessing,
     lastQuantumResult,
