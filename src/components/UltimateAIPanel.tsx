@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Brain, Atom, Heart, GitBranch, Eye, Zap, Activity, Target } from 'lucide-react';
+import { Brain, Atom, Heart, GitBranch, Eye, Zap, Activity, Target, Shield } from 'lucide-react';
 import { QuantumCodeVisualizer } from './QuantumCodeVisualizer';
 import { NeuralPredictionPanel } from './NeuralPredictionPanel';
 import { EmotionalCodeAnalyzer } from './EmotionalCodeAnalyzer';
