@@ -252,17 +252,17 @@ class AegisCouncil:
             # Calculate virtue scores with proper weighted normalization
             for virtue in self.virtues.keys():
                 weighted_sum = 0.0
-                total_weight = 0.0
+                total_virtue_weight = 0.0
                 
                 for agent_name, agent in self.agents.items():
                     vote = agent_votes[agent_name]
                     virtue_weight = agent.virtue_weights.get(virtue, 0.25)
-                    agent_weight = virtue_weight * agent.influence
+                    agent_weight = virtue_weight * agent.influence * agent.reliability
                     
                     weighted_sum += vote["virtue_assessment"].get(virtue, 0.5) * agent_weight
-                    total_weight += agent_weight
+                    total_virtue_weight += agent_weight
                 
-                virtue_scores[virtue] = weighted_sum / total_weight if total_weight > 0 else 0.5
+                virtue_scores[virtue] = weighted_sum / total_virtue_weight if total_virtue_weight > 0 else 0.5
             
             # Calculate consensus strength
             consensus_strength = self._calculate_consensus(agent_votes)

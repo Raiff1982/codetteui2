@@ -409,19 +409,18 @@ class NeuralCodePredictor:
         """Learn from user interactions to improve predictions"""
         try:
             # Store interaction
-            cursor = self.conn.cursor()
-            cursor.execute("""
+            await self.conn.execute("""
                 INSERT INTO prediction_history 
-                (user_id, code_context, prediction, accepted, confidence, language, timestamp)
+                (user_id, code_context_redacted, prediction, accepted, confidence, language, timestamp)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
                 user_id,
-                code_context[:500],  # Limit context size
+                self._redact_code_context(code_context)[:500],  # Limit context size
                 prediction,
                 accepted,
                 0.8,  # Default confidence
                 language,
-                datetime.utcnow().isoformat()
+                datetime.utcnow().isoformat() + "Z"
             ))
             
             # Update user profile
@@ -431,7 +430,7 @@ class NeuralCodePredictor:
             if accepted:
                 await self._update_patterns(prediction, language, code_context)
             
-            self.conn.commit()
+            await self.conn.commit()
             logger.info(f"📚 Learned from interaction: {user_id} - {accepted}")
             
         except Exception as e:
