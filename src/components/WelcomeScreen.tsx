@@ -215,7 +215,14 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
       icon: Sparkles,
       title: 'AI Music Experience',
       description: 'Revolutionary adaptive music that responds to your code',
-      action: () => onOpenMusic?.()
+      action: () => {
+        console.log('Opening music player...');
+        if (onOpenMusic) {
+          onOpenMusic();
+        } else {
+          console.warn('Music player not available');
+        }
+      }
     },
     {
       icon: Brain,
