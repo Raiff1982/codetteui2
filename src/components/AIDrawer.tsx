@@ -88,7 +88,7 @@ export function AIDrawer({ isOpen, onClose, activeFile }: AIDrawerProps) {
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-200 dark:border-gray-700">
+        <div className="flex border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -97,7 +97,7 @@ export function AIDrawer({ isOpen, onClose, activeFile }: AIDrawerProps) {
               <button
                 key={tab.id}
                 onClick={() => handleTabClick(tab.id)}
-                className={`flex-1 flex items-center justify-center gap-2 p-3 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                className={`flex-1 flex items-center justify-center gap-2 p-3 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 whitespace-nowrap min-w-0 ${
                   isActive
                     ? 'text-purple-600 dark:text-purple-400 border-b-2 border-purple-600 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/20'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800'
@@ -105,7 +105,7 @@ export function AIDrawer({ isOpen, onClose, activeFile }: AIDrawerProps) {
                 title={tab.description}
               >
                 <Icon className="w-4 h-4" />
-                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="hidden sm:inline truncate">{tab.label}</span>
               </button>
             );
           })}

@@ -30,19 +30,19 @@ export function StatusBar({ activeFile, theme, terminalVisible, focusMode, aiPan
       <div className="flex items-center space-x-6">
         <div className="flex items-center space-x-1">
           <GitBranch className="w-3 h-3" />
-          <span className="font-medium">main</span>
+          <span className="font-medium whitespace-nowrap">main</span>
           <span className="text-gray-300">•</span>
-          <span className="font-medium">© Raiff's Bits</span>
+          <span className="font-medium whitespace-nowrap">© Raiff's Bits</span>
         </div>
         
         <div className="flex items-center space-x-1">
           <CheckCircle className="w-3 h-3 text-green-300" />
-          <span className="font-medium">No issues</span>
+          <span className="font-medium whitespace-nowrap">No issues</span>
         </div>
         
         {activeFile && (
           <div className="flex items-center space-x-1">
-            <span className="font-medium">{activeFile.name}</span>
+            <span className="font-medium whitespace-nowrap truncate max-w-32">{activeFile.name}</span>
             {activeFile.modified && (
               <AlertCircle className="w-3 h-3 text-orange-300" />
             )}
@@ -51,7 +51,7 @@ export function StatusBar({ activeFile, theme, terminalVisible, focusMode, aiPan
       </div>
       
       {focusMode && (
-        <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400">
+        <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 whitespace-nowrap">
           <div className="w-2 h-2 bg-purple-600 rounded-full animate-pulse" />
           <span className="font-medium">Focus Mode</span>
         </div>
@@ -59,26 +59,26 @@ export function StatusBar({ activeFile, theme, terminalVisible, focusMode, aiPan
       
       <div className="flex items-center space-x-6">
         {stats && (
-          <div className="flex items-center space-x-4">
-            <span className="font-medium">{stats.lines} lines</span>
-            <span className="font-medium">{stats.words} words</span>
-            <span className="font-medium">{stats.chars} characters</span>
+          <div className="flex items-center space-x-4 text-spacing-fix">
+            <span className="font-medium whitespace-nowrap">{stats.lines} lines</span>
+            <span className="font-medium whitespace-nowrap">{stats.words} words</span>
+            <span className="font-medium whitespace-nowrap">{stats.chars} chars</span>
           </div>
         )}
         
         <div className="flex items-center space-x-1">
           <Wifi className="w-3 h-3" />
-          <span className="font-medium">Connected</span>
+          <span className="font-medium whitespace-nowrap">Connected</span>
         </div>
         
-        <span className="capitalize font-medium">{theme}</span>
+        <span className="capitalize font-medium whitespace-nowrap">{theme}</span>
         
         {terminalVisible && (
-          <span className="text-green-300 font-medium">Terminal</span>
+          <span className="text-green-300 font-medium whitespace-nowrap">Terminal</span>
         )}
         
         {aiPanelVisible && (
-          <span className="text-purple-300 font-medium">AI Core</span>
+          <span className="text-purple-300 font-medium whitespace-nowrap">AI Core</span>
         )}
       </div>
     </div>

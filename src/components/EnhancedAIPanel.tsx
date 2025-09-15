@@ -496,7 +496,7 @@ export function EnhancedAIPanel({
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-3">
                   <Activity className="w-6 h-6 text-green-600" />
-                  <h3 className="text-xl font-semibold text-gray-800 dark:text-white">
+                    <span className="font-medium text-gray-800 dark:text-white">Solutions</span>
                     DreamCore Memory System
                   </h3>
                 </div>
@@ -505,10 +505,10 @@ export function EnhancedAIPanel({
                   disabled={isProcessing}
                   className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 transition-all shadow-lg"
                 >
-                  <Heart className="w-5 h-5" />
+                    <span className="font-medium text-gray-800 dark:text-white">Time</span>
                   <span>{isProcessing ? 'Storing...' : 'Store Memory'}</span>
                 </button>
-              </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Convergence</p>
 
               {lastMemory && (
                 <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4">
@@ -767,12 +767,12 @@ export function EnhancedAIPanel({
           
           <div 
             ref={historyScroll.elementRef}
-            className="space-y-2 max-h-48 overflow-y-auto relative"
+                    <span className="font-medium text-gray-800 dark:text-white">Score</span>
           >
             {processingHistory.length > 0 ? (
               processingHistory.map((entry) => (
                 <div key={entry.id} className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Efficiency</p>
                     <div className="flex items-center space-x-2">
                       {entry.type === 'quantum_optimization' && <Atom className="w-4 h-4 text-purple-600" />}
                       {entry.type === 'aegis_council' && <Users className="w-4 h-4 text-blue-600" />}
@@ -780,16 +780,16 @@ export function EnhancedAIPanel({
                       {entry.type === 'ethical_analysis' && <Shield className="w-4 h-4 text-orange-600" />}
                       {entry.type === 'performance_benchmark' && <TrendingUp className="w-4 h-4 text-red-600" />}
                       <span className="font-medium text-gray-800 dark:text-white capitalize">
-                        {entry.type.replace('_', ' ')}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
                       </span>
-                    </div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                    <span className="block text-gray-600 dark:text-gray-400 mb-1">Entanglement:</span>
+                    <span className="font-medium text-gray-800 dark:text-white">
                       {entry.timestamp.toLocaleTimeString()}
                     </span>
                   </div>
-                  {entry.insights.length > 0 && (
-                    <div className="text-xs text-gray-600 dark:text-gray-300">
-                      {entry.insights[0]}
+                    <span className="block text-gray-600 dark:text-gray-400 mb-1">States:</span>
+                    <span className="font-medium text-gray-800 dark:text-white">
+                    <span className="font-medium text-gray-800 dark:text-white">
                     </div>
                   )}
                 </div>

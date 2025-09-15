@@ -65,19 +65,19 @@ export function UltimateAIPanel({
         </div>
 
         {/* Revolutionary Panel Navigation */}
-        <div className="grid grid-cols-3 md:grid-cols-6 gap-2 bg-gray-100 dark:bg-gray-700 rounded-xl p-2">
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-3 bg-gray-100 dark:bg-gray-700 rounded-xl p-3">
           {panels.map(panel => (
             <button
               key={panel.id}
               onClick={() => setActivePanel(panel.id as any)}
-              className={`flex flex-col items-center space-y-2 px-4 py-4 rounded-lg text-sm font-medium transition-all transform hover:scale-105 ${
+              className={`flex flex-col items-center space-y-2 px-3 py-3 rounded-lg text-xs font-medium transition-all transform hover:scale-105 ${
                 activePanel === panel.id
                   ? `bg-${panel.color}-500 text-gray-50 shadow-lg scale-105`
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600'
               }`}
             >
-              <panel.icon className="w-6 h-6" />
-              <span>{panel.label}</span>
+              <panel.icon className="w-5 h-5" />
+              <span className="text-center leading-tight">{panel.label}</span>
               {activePanel === panel.id && (
                 <div className="w-2 h-2 bg-gray-50 rounded-full animate-pulse" />
               )}

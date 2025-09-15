@@ -314,9 +314,9 @@ export function AdvancedEditor({ file, onContentChange, onCursorChange, onSave, 
           </div>
           
           {language && !isMobile && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 ml-3">
               <button 
-                className="px-3 py-1.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs font-medium rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 transition-all duration-200 hover:scale-105 cursor-pointer border border-transparent hover:border-blue-300 dark:hover:border-blue-600"
+                className="px-3 py-1.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs font-medium rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 transition-all duration-200 hover:scale-105 cursor-pointer border border-transparent hover:border-blue-300 dark:hover:border-blue-600 whitespace-nowrap"
                 onClick={() => console.log(`Language: ${language.name}`)}
                 title={`${language.name} - Click for language options`}
               >
@@ -324,7 +324,7 @@ export function AdvancedEditor({ file, onContentChange, onCursorChange, onSave, 
               </button>
               {language.hasLSP && (
                 <button 
-                  className="px-3 py-1.5 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 text-xs font-medium rounded-full hover:bg-green-200 dark:hover:bg-green-800 transition-all duration-200 hover:scale-105 cursor-pointer border border-transparent hover:border-green-300 dark:hover:border-green-600 animate-pulse"
+                  className="px-3 py-1.5 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 text-xs font-medium rounded-full hover:bg-green-200 dark:hover:bg-green-800 transition-all duration-200 hover:scale-105 cursor-pointer border border-transparent hover:border-green-300 dark:hover:border-green-600 animate-pulse whitespace-nowrap"
                   onClick={() => console.log('LSP Status: Active')}
                   title="Language Server Protocol - Active"
                 >
@@ -333,7 +333,7 @@ export function AdvancedEditor({ file, onContentChange, onCursorChange, onSave, 
               )}
               {language.aiSupported && (
                 <button 
-                  className="px-3 py-1.5 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 text-xs font-medium rounded-full hover:bg-purple-200 dark:hover:bg-purple-800 transition-all duration-200 hover:scale-105 cursor-pointer border border-transparent hover:border-purple-300 dark:hover:border-purple-600 relative overflow-hidden group"
+                  className="px-3 py-1.5 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 text-xs font-medium rounded-full hover:bg-purple-200 dark:hover:bg-purple-800 transition-all duration-200 hover:scale-105 cursor-pointer border border-transparent hover:border-purple-300 dark:hover:border-purple-600 relative overflow-hidden group whitespace-nowrap"
                   onClick={() => console.log('AI Features: Enabled')}
                   title="AI-Powered Features - Click to configure"
                 >
@@ -345,7 +345,7 @@ export function AdvancedEditor({ file, onContentChange, onCursorChange, onSave, 
           )}
           
           {language && !isMobile && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 ml-2">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" title="Language detection active"></div>
               <span className="text-xs text-gray-500 dark:text-gray-400">
                 .{language.extensions[0]}

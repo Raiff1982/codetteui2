@@ -196,6 +196,8 @@ textarea:focus-visible {
   @apply hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600;
   @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
   @apply active:scale-[0.98] active:transition-transform active:duration-75;
+  word-spacing: normal;
+  letter-spacing: 0.025em;
 }
 
 .btn-primary {
@@ -212,6 +214,8 @@ textarea:focus-visible {
 .card-modern {
   @apply bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700;
   @apply shadow-sm hover:shadow-md transition-shadow duration-200;
+  word-spacing: normal;
+  letter-spacing: 0.025em;
 }
 
 /* Modern input styles */
@@ -220,6 +224,29 @@ textarea:focus-visible {
   @apply rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400;
   @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
   @apply transition-all duration-200;
+  word-spacing: normal;
+  letter-spacing: 0.025em;
+}
+
+/* Fix text spacing issues */
+.text-spacing-fix {
+  word-spacing: normal;
+  letter-spacing: 0.025em;
+  white-space: normal;
+}
+
+/* Prevent text blending in flex containers */
+.flex-text-safe {
+  min-width: 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Ensure proper spacing in grid layouts */
+.grid-text-safe > * {
+  min-width: 0;
+  word-spacing: normal;
+  letter-spacing: 0.025em;
 }
 
 /* Smooth transitions for theme switching */
