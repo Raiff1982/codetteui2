@@ -1,188 +1,477 @@
-// Performance Optimizer - Centralized Performance Enhancement
-export interface PerformanceMetrics {
-  execution_time: number;
-  memory_usage: number;
-  cpu_utilization: number;
-  network_efficiency: number;
-  render_performance: number;
-  user_experience_score: number;
-  optimization_opportunities: string[];
-}
+"""
+Codette AI Backend - Complete Implementation
+FastAPI-based backend with all AI systems integrated
+"""
 
-export interface OptimizationSuggestion {
-  type: 'memory' | 'cpu' | 'network' | 'rendering' | 'algorithm';
-  description: string;
-  impact: 'low' | 'medium' | 'high';
-  implementation: string;
-  estimated_improvement: number;
-  difficulty: 'easy' | 'medium' | 'hard';
-}
+import os
+import asyncio
+import logging
+from datetime import datetime
+from typing import Dict, Any, List, Optional
+from contextlib import asynccontextmanager
 
-class PerformanceOptimizer {
-  private performanceObserver: PerformanceObserver | null = null;
-  private metrics: PerformanceMetrics[] = [];
-  private isMonitoring = false;
+from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
+import uvicorn
 
-  startMonitoring(): void {
-    if (this.isMonitoring) return;
-    
-    this.isMonitoring = true;
-    
-    if ('PerformanceObserver' in window) {
-      this.performanceObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntries();
-        this.processPerformanceEntries(entries);
-      });
-      
-      this.performanceObserver.observe({ 
-        entryTypes: ['measure', 'navigation', 'resource', 'paint'] 
-      });
-    }
-    
-    this.startMemoryMonitoring();
-    this.startRenderMonitoring();
-  }
+# Import AI systems
+from ai_systems.dreamcore_memory import DreamCoreMemory
+from ai_systems.nexus_signal_engine import NexusSignalEngine
+from ai_systems.aegis_council import AegisCouncil
+from ai_systems.quantum_optimizer import QuantumMultiObjectiveOptimizer
+from ai_systems.ethical_governance import EthicalAIGovernance
+from ai_systems.neural_predictor import NeuralCodePredictor
+from ai_systems.music_generator import AIComposer
 
-  stopMonitoring(): void {
-    this.isMonitoring = false;
-    
-    if (this.performanceObserver) {
-      this.performanceObserver.disconnect();
-      this.performanceObserver = null;
-    }
-  }
+# Database and utilities
+from database.connection import DatabaseManager
+from utils.logger import setup_logger
+from utils.security import SecurityManager
+from utils.rate_limiter import RateLimiter
 
-  async analyzeCodePerformance(code: string, language: string): Promise<OptimizationSuggestion[]> {
-    const suggestions: OptimizationSuggestion[] = [];
-    
-    if (code.includes('new Array(') || code.includes('Array.from(')) {
-      suggestions.push({
-        type: 'memory',
-        description: 'Large array allocations detected - consider lazy loading or pagination',
-        impact: 'high',
-        implementation: 'Use virtual scrolling or implement pagination for large datasets',
-        estimated_improvement: 0.4,
-        difficulty: 'medium'
-      });
-    }
-    
-    if (code.includes('for') && code.includes('for')) {
-      suggestions.push({
-        type: 'cpu',
-        description: 'Nested loops detected - potential O(n²) complexity',
-        impact: 'high',
-        implementation: 'Consider using Map/Set for lookups or optimize algorithm complexity',
-        estimated_improvement: 0.6,
-        difficulty: 'medium'
-      });
-    }
-    
-    if (code.includes('fetch') && !code.includes('Promise.all')) {
-      suggestions.push({
-        type: 'network',
-        description: 'Sequential API calls detected - consider parallel execution',
-        impact: 'medium',
-        implementation: 'Use Promise.all() or Promise.allSettled() for concurrent requests',
-        estimated_improvement: 0.3,
-        difficulty: 'easy'
-      });
-    }
-    
-    return suggestions;
-  }
+# Setup logging
+logger = setup_logger(__name__)
 
-  async benchmarkCode(code: string, iterations: number = 1000): Promise<{
-    average_time: number;
-    min_time: number;
-    max_time: number;
-    memory_delta: number;
-  }> {
-    const times: number[] = [];
-    const initialMemory = (performance as any).memory?.usedJSHeapSize || 0;
+# Global AI systems
+ai_systems = {}
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Initialize and cleanup AI systems"""
+    logger.info("🚀 Starting Codette AI Backend...")
     
-    const testFunction = new Function('return ' + code);
-    
-    for (let i = 0; i < iterations; i++) {
-      const start = performance.now();
-      try {
-        testFunction();
-      } catch (error) {
-        // Handle execution errors gracefully
-      }
-      const end = performance.now();
-      times.push(end - start);
+    try:
+        # Initialize database
+        db_manager = DatabaseManager()
+        await db_manager.initialize()
+        app.state.db = db_manager
+        
+        # Initialize AI systems
+        logger.info("🧠 Initializing AI Systems...")
+        
+        ai_systems['dreamcore'] = DreamCoreMemory()
+        await ai_systems['dreamcore'].initialize()
+        
+        ai_systems['nexus'] = NexusSignalEngine()
+        ai_systems['nexus'].initialize()
+        
+        ai_systems['aegis'] = AegisCouncil()
+        await ai_systems['aegis'].initialize()
+        
+        ai_systems['quantum'] = QuantumMultiObjectiveOptimizer()
+        ai_systems['quantum'].initialize()
+        
+        ai_systems['ethical'] = EthicalAIGovernance()
+        ai_systems['ethical'].initialize()
+        
+        ai_systems['neural'] = NeuralCodePredictor()
+        ai_systems['neural'].initialize()
+        
+        ai_systems['music'] = AIComposer()
+        ai_systems['music'].initialize()
+        
+        app.state.ai_systems = ai_systems
+        
+        logger.info("✅ All AI systems initialized successfully")
+        logger.info("🌟 Codette AI Backend ready for connections")
+        
+        yield
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize backend: {e}")
+        raise
+    finally:
+        # Cleanup
+        logger.info("🔄 Shutting down AI systems...")
+        for system_name, system in ai_systems.items():
+            try:
+                if hasattr(system, 'shutdown'):
+                    await system.shutdown()
+                logger.info(f"✅ {system_name} shutdown complete")
+            except Exception as e:
+                logger.error(f"❌ Error shutting down {system_name}: {e}")
+
+# Create FastAPI app
+app = FastAPI(
+    title="Codette AI Backend",
+    description="Revolutionary AI-powered development environment backend",
+    version="5.0.0",
+    lifespan=lifespan
+)
+
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "https://majestic-boba-3770ba.netlify.app"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Security and rate limiting
+security_manager = SecurityManager()
+rate_limiter = RateLimiter()
+
+# Pydantic models for API requests/responses
+class QuantumOptimizationRequest(BaseModel):
+    objectives: List[str] = Field(..., description="Optimization objectives")
+    dimension: int = Field(20, description="Problem dimension")
+    code_context: Optional[str] = Field(None, description="Code context for optimization")
+
+class CouncilRequest(BaseModel):
+    input_text: str = Field(..., description="Text for council analysis")
+    overrides: Dict[str, Any] = Field(default_factory=dict, description="Agent overrides")
+
+class MemoryRequest(BaseModel):
+    emotion_tag: str = Field(..., description="Emotion tag for memory")
+    content: str = Field(..., description="Memory content")
+    emotional_weight: float = Field(0.5, description="Emotional weight (0-1)")
+
+class CodeAnalysisRequest(BaseModel):
+    code: str = Field(..., description="Code to analyze")
+    language: str = Field(..., description="Programming language")
+
+class MusicGenerationRequest(BaseModel):
+    genre: str = Field("ambient", description="Music genre")
+    mood: str = Field("focused", description="Music mood")
+    duration: int = Field(300, description="Duration in seconds")
+    tempo: int = Field(80, description="Tempo in BPM")
+    complexity: float = Field(0.5, description="Complexity level (0-1)")
+    coding_context: Optional[Dict[str, Any]] = Field(None, description="Coding context")
+
+# Health check endpoint
+@app.get("/")
+async def root():
+    return {
+        "message": "Codette AI Backend",
+        "version": "5.0.0",
+        "status": "operational",
+        "ai_systems": list(ai_systems.keys()),
+        "timestamp": datetime.utcnow().isoformat()
     }
+
+@app.get("/api/health")
+async def health_check():
+    """Health check endpoint"""
+    system_status = {}
     
-    const finalMemory = (performance as any).memory?.usedJSHeapSize || 0;
+    for name, system in ai_systems.items():
+        try:
+            status = system.is_active() if hasattr(system, 'is_active') else True
+            system_status[name] = "active" if status else "inactive"
+        except Exception as e:
+            system_status[name] = f"error: {str(e)}"
     
     return {
-      average_time: times.reduce((sum, time) => sum + time, 0) / times.length,
-      min_time: Math.min(...times),
-      max_time: Math.max(...times),
-      memory_delta: finalMemory - initialMemory
-    };
-  }
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "ai_systems": system_status,
+        "database": "connected"
+    }
 
-  getCurrentMetrics(): PerformanceMetrics {
-    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-    
-    return {
-      execution_time: navigation ? navigation.loadEventEnd - navigation.loadEventStart : 0,
-      memory_usage: (performance as any).memory?.usedJSHeapSize || 0,
-      cpu_utilization: 0.5,
-      network_efficiency: navigation ? 1000 / (navigation.responseEnd - navigation.requestStart) : 1,
-      render_performance: 60,
-      user_experience_score: 0.85,
-      optimization_opportunities: [
-        'Enable code splitting for faster initial load',
-        'Implement service worker for offline functionality',
-        'Use Web Workers for heavy computations',
-        'Optimize bundle size with tree shaking'
-      ]
-    };
-  }
-
-  private processPerformanceEntries(entries: PerformanceEntry[]): void {
-    entries.forEach(entry => {
-      if (entry.entryType === 'measure') {
-        console.log(`Performance measure: ${entry.name} took ${entry.duration}ms`);
-      }
-    });
-  }
-
-  private startMemoryMonitoring(): void {
-    if ('memory' in performance) {
-      setInterval(() => {
-        const memInfo = (performance as any).memory;
-        if (memInfo) {
-          console.log(`Memory usage: ${(memInfo.usedJSHeapSize / 1024 / 1024).toFixed(2)}MB`);
+# Quantum Optimization API
+@app.post("/api/quantum/optimize")
+async def quantum_optimize(request: QuantumOptimizationRequest):
+    """Run quantum-inspired multi-objective optimization"""
+    try:
+        quantum_system = ai_systems.get('quantum')
+        if not quantum_system:
+            raise HTTPException(status_code=503, detail="Quantum system not available")
+        
+        result = await quantum_system.optimize(
+            objectives=request.objectives,
+            dimension=request.dimension,
+            code_context=request.code_context
+        )
+        
+        return {
+            "success": True,
+            "data": result,
+            "timestamp": datetime.utcnow().isoformat()
         }
-      }, 5000);
-    }
-  }
+        
+    except Exception as e:
+        logger.error(f"Quantum optimization failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Quantum optimization failed: {str(e)}")
 
-  private startRenderMonitoring(): void {
-    let frameCount = 0;
-    let lastTime = performance.now();
-    
-    const measureFPS = () => {
-      frameCount++;
-      const currentTime = performance.now();
-      
-      if (currentTime - lastTime >= 1000) {
-        const fps = frameCount;
-        console.log(`FPS: ${fps}`);
-        frameCount = 0;
-        lastTime = currentTime;
-      }
-      
-      if (this.isMonitoring) {
-        requestAnimationFrame(measureFPS);
-      }
-    };
-    
-    requestAnimationFrame(measureFPS);
-  }
-}
+# Aegis Council API
+@app.post("/api/council/convene")
+async def convene_council(request: CouncilRequest):
+    """Convene the Aegis Council for ethical decision making"""
+    try:
+        aegis_system = ai_systems.get('aegis')
+        if not aegis_system:
+            raise HTTPException(status_code=503, detail="Aegis Council not available")
+        
+        decision = await aegis_system.convene(
+            input_text=request.input_text,
+            overrides=request.overrides
+        )
+        
+        return {
+            "success": True,
+            "data": decision,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Council convening failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Council convening failed: {str(e)}")
 
-export const performanceOptimizer = new PerformanceOptimizer();
+# DreamCore Memory API
+@app.post("/api/memory/store")
+async def store_memory(request: MemoryRequest):
+    """Store memory in DreamCore system"""
+    try:
+        dreamcore_system = ai_systems.get('dreamcore')
+        if not dreamcore_system:
+            raise HTTPException(status_code=503, detail="DreamCore system not available")
+        
+        memory_id = await dreamcore_system.store_memory(
+            emotion_tag=request.emotion_tag,
+            content=request.content,
+            emotional_weight=request.emotional_weight
+        )
+        
+        return {
+            "success": True,
+            "data": {
+                "memory_id": memory_id,
+                "stored_at": datetime.utcnow().isoformat()
+            },
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Memory storage failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Memory storage failed: {str(e)}")
+
+@app.get("/api/memory/retrieve")
+async def retrieve_memories(emotion_tag: Optional[str] = None, limit: int = 10):
+    """Retrieve memories from DreamCore system"""
+    try:
+        dreamcore_system = ai_systems.get('dreamcore')
+        if not dreamcore_system:
+            raise HTTPException(status_code=503, detail="DreamCore system not available")
+        
+        memories = await dreamcore_system.retrieve_memories(
+            emotion_tag=emotion_tag,
+            limit=limit
+        )
+        
+        return {
+            "success": True,
+            "data": memories,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Memory retrieval failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Memory retrieval failed: {str(e)}")
+
+# Code Analysis APIs
+@app.post("/api/analysis/ethical")
+async def analyze_code_ethics(request: CodeAnalysisRequest):
+    """Analyze code for ethical compliance"""
+    try:
+        ethical_system = ai_systems.get('ethical')
+        if not ethical_system:
+            raise HTTPException(status_code=503, detail="Ethical system not available")
+        
+        analysis = await ethical_system.analyze_code(
+            code=request.code,
+            language=request.language
+        )
+        
+        return {
+            "success": True,
+            "data": analysis,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Ethical analysis failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Ethical analysis failed: {str(e)}")
+
+@app.post("/api/analysis/neural")
+async def neural_code_prediction(request: CodeAnalysisRequest):
+    """Generate neural code predictions"""
+    try:
+        neural_system = ai_systems.get('neural')
+        if not neural_system:
+            raise HTTPException(status_code=503, detail="Neural system not available")
+        
+        predictions = await neural_system.predict_next_lines(
+            code=request.code,
+            language=request.language,
+            num_predictions=3
+        )
+        
+        return {
+            "success": True,
+            "data": predictions,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Neural prediction failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Neural prediction failed: {str(e)}")
+
+# Nexus Signal Processing API
+@app.post("/api/nexus/process")
+async def process_signal(request: Dict[str, str]):
+    """Process signal through Nexus engine"""
+    try:
+        nexus_system = ai_systems.get('nexus')
+        if not nexus_system:
+            raise HTTPException(status_code=503, detail="Nexus system not available")
+        
+        signal = request.get('signal', '')
+        result = nexus_system.process(signal)
+        
+        return {
+            "success": True,
+            "data": result,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Signal processing failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Signal processing failed: {str(e)}")
+
+# Music Generation API
+@app.post("/api/music/generate")
+async def generate_music(request: MusicGenerationRequest):
+    """Generate adaptive music"""
+    try:
+        music_system = ai_systems.get('music')
+        if not music_system:
+            raise HTTPException(status_code=503, detail="Music system not available")
+        
+        track = await music_system.compose(
+            genre=request.genre,
+            mood=request.mood,
+            duration=request.duration,
+            tempo=request.tempo,
+            complexity=request.complexity,
+            coding_context=request.coding_context
+        )
+        
+        return {
+            "success": True,
+            "data": track,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Music generation failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Music generation failed: {str(e)}")
+
+# Comprehensive AI Analysis
+@app.post("/api/analysis/comprehensive")
+async def comprehensive_analysis(request: CodeAnalysisRequest):
+    """Run comprehensive AI analysis using all systems"""
+    try:
+        results = {}
+        
+        # Quantum optimization
+        if 'quantum' in ai_systems:
+            quantum_result = await ai_systems['quantum'].optimize(
+                objectives=["performance", "maintainability"],
+                code_context=request.code
+            )
+            results['quantum'] = quantum_result
+        
+        # Ethical analysis
+        if 'ethical' in ai_systems:
+            ethical_result = await ai_systems['ethical'].analyze_code(
+                code=request.code,
+                language=request.language
+            )
+            results['ethical'] = ethical_result
+        
+        # Nexus signal processing
+        if 'nexus' in ai_systems:
+            nexus_result = ai_systems['nexus'].process(request.code)
+            results['nexus'] = nexus_result
+        
+        # Neural predictions
+        if 'neural' in ai_systems:
+            neural_result = await ai_systems['neural'].predict_next_lines(
+                code=request.code,
+                language=request.language
+            )
+            results['neural'] = neural_result
+        
+        return {
+            "success": True,
+            "data": results,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Comprehensive analysis failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Comprehensive analysis failed: {str(e)}")
+
+# System Status API
+@app.get("/api/status")
+async def get_system_status():
+    """Get detailed system status"""
+    try:
+        status = {
+            "backend_version": "5.0.0",
+            "uptime": datetime.utcnow().isoformat(),
+            "ai_systems": {},
+            "database": "connected",
+            "memory_usage": "normal",
+            "cpu_usage": "normal"
+        }
+        
+        for name, system in ai_systems.items():
+            try:
+                status["ai_systems"][name] = {
+                    "active": system.is_active() if hasattr(system, 'is_active') else True,
+                    "status": "operational"
+                }
+            except Exception as e:
+                status["ai_systems"][name] = {
+                    "active": False,
+                    "status": f"error: {str(e)}"
+                }
+        
+        return status
+        
+    except Exception as e:
+        logger.error(f"Status check failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Status check failed: {str(e)}")
+
+# Error handler
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    logger.error(f"Unhandled exception: {exc}")
+    return JSONResponse(
+        status_code=500,
+        content={
+            "success": False,
+            "error": "Internal server error",
+            "message": "An unexpected error occurred",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    )
+
+if __name__ == "__main__":
+    # Load environment variables
+    port = int(os.getenv("API_PORT", "8000"))
+    host = os.getenv("API_HOST", "0.0.0.0")
+    
+    logger.info(f"🚀 Starting Codette AI Backend on {host}:{port}")
+    
+    uvicorn.run(
+        "main:app",
+        host=host,
+        port=port,
+        reload=True,
+        log_level="info"
+    )
