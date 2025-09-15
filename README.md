@@ -1,37 +1,39 @@
 # Codette - AI-Powered Development Environment
 
-![Codette Logo](https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=1200)
+![Codette Banner](https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=1200)
 
-## 🚀 Revolutionary AI-Powered Development Environment - Production Ready!
+## 🚀 Revolutionary AI-Powered Development Environment
+### ✨ **PRODUCTION READY** - Complete Backend with Mathematical Rigor ✨
 
-Codette represents a fundamentally different approach to development tools. Built on genuine research with published papers and real DOIs, every AI system considers not just performance, but empathy, ethics, and user impact. This is the world's first development environment that genuinely cares about both developers and the users of the software they create.
+Codette represents a fundamentally different approach to development tools. Built on genuine research with published papers and real DOIs, every AI system considers not just performance, but empathy, ethics, and user impact. This is the world's first **production-ready** development environment that genuinely cares about both developers and the users of the software they create.
 
-**🎉 PRODUCTION READY: Complete Python backend with all 6 AI systems fully operational, event-loop safe, and mathematically rigorous!**
+**🎉 ENTERPRISE READY: Complete Python backend with all 6 AI systems fully operational, event-loop safe, mathematically rigorous, and security-hardened with PII protection!**
 
 ### ✨ Key Features
 
 #### Frontend Features
-- **🧠 Quantum-Inspired AI**: Real quantum computing principles applied to code optimization
-- **🛡️ Ethical AI Governance**: Virtue-driven decision making with transparency
-- **🎵 Adaptive Music Generation**: AI-composed music that adapts to your coding session
-- **💡 Neural Code Prediction**: AI that learns your coding style and predicts next steps
-- **❤️ Emotional Code Analysis**: World-first analysis of how code affects users emotionally
-- **🔒 Advanced Security**: Multi-layer security with ethical considerations
-- **🌍 40+ Programming Languages**: Full support with intelligent features
-- **📱 Mobile-Responsive**: Works beautifully on all devices
-- **♿ Accessibility First**: WCAG 2.1 AA compliant with comprehensive accessibility features
-- **⚡ One-Click Backend**: Automated backend deployment with step-by-step fallback
+- **🧠 Quantum-Inspired AI**: Real quantum computing principles with Pareto front optimization
+- **🛡️ Ethical AI Governance**: Virtue-driven decision making with mathematical rigor
+- **🎵 Adaptive Music Generation**: AI-composed music with Creative Commons licensing
+- **💡 Neural Code Prediction**: AI that learns your style with privacy protection
+- **❤️ Emotional Code Analysis**: World-first analysis of code's emotional impact
+- **🔒 Enterprise Security**: Multi-layer security with PII redaction and ethical governance
+- **🌍 40+ Programming Languages**: Full support with LSP and AI assistance
+- **📱 Universal Access**: Mobile-responsive with comprehensive accessibility
+- **♿ WCAG 2.1 AA Compliant**: Screen reader optimized with keyboard navigation
+- **⚡ One-Click Deployment**: Automated backend setup with intelligent fallback
 
-#### Backend AI Systems (NEW!)
-- **🔬 DreamCore Memory System**: Emotional memory anchoring with temporal decay and PII protection (DOI: 10.5281/zenodo.16388758)
-- **⚡ Nexus Signal Engine**: Explainable AI and security auditing with harmonic analysis (DOI: 10.57967/hf/6059)
-- **👥 Aegis Council**: Multi-agent ethical decision making with mathematically rigorous virtue weighting
-- **🌌 Quantum Optimizer**: Real quantum-inspired multi-objective optimization with Pareto front analysis
-- **🛡️ Ethical Governance**: Comprehensive virtue-driven code analysis with security scanning
-- **🧠 Neural Predictor**: Advanced neural networks with user personalization and learning
-- **🔗 Real-time Collaboration**: Event-loop safe WebSocket-based live coding sessions
-- **📊 Performance Monitoring**: Real-time system metrics with optimization suggestions
-- **🔐 Security Hardened**: Input validation, rate limiting, and PII redaction throughout
+#### Production AI Backend
+- **🔬 DreamCore Memory System**: Event-loop safe emotional memory with aiosqlite and PII redaction (DOI: 10.5281/zenodo.16388758)
+- **⚡ Nexus Signal Engine**: Deterministic signal processing with harmonic FFT analysis (DOI: 10.57967/hf/6059)
+- **👥 Aegis Council**: Mathematically rigorous virtue weighting with consensus tie-breaking
+- **🌌 Quantum Optimizer**: Real Pareto front optimization with quantum tunneling and entanglement
+- **🛡️ Ethical Governance**: Comprehensive security scanning with virtue-driven recommendations
+- **🧠 Neural Predictor**: User personalization with privacy-first learning and pattern recognition
+- **🔗 Real-time Collaboration**: WebSocket-based live coding with proper connection management
+- **📊 Performance Monitoring**: Real-time metrics with correlation tracking and optimization
+- **🔐 Enterprise Security**: Multi-layer validation, rate limiting, and field-level PII protection
+- **📈 Production Monitoring**: Structured logging with correlation IDs and health checks
 
 ### 🎯 What Makes Codette Special
 
@@ -46,14 +48,16 @@ Every suggestion is filtered through these ethical lenses, making Codette not ju
 
 ### 🏗️ Production Architecture
 
-Codette is built with production-grade architecture:
+Codette is built with enterprise-grade architecture:
 
-- **Event-Loop Safe**: All database operations use aiosqlite with WAL mode
-- **Mathematically Rigorous**: Virtue weighting uses proper statistical normalization
-- **Privacy Protected**: PII redaction and field-level data protection
-- **Security Hardened**: Multi-layer validation with ethical AI governance
-- **Performance Optimized**: Database indices, connection pooling, and async operations
-- **Accessibility First**: WCAG 2.1 AA compliance with comprehensive screen reader support
+- **Event-Loop Safe**: All database operations use aiosqlite with WAL mode and proper async patterns
+- **Mathematically Rigorous**: Virtue weighting uses weighted sum per virtue with deterministic tie-breaking
+- **Privacy Protected**: Comprehensive PII redaction (emails, phones, tokens) before storage
+- **Security Hardened**: Multi-layer validation with auto-blocking and ethical AI governance
+- **Performance Optimized**: Database indices, WAL mode, and correlation tracking
+- **Accessibility First**: WCAG 2.1 AA compliance with aria-live regions and keyboard navigation
+- **Production Monitoring**: Structured JSON logging with correlation IDs and health endpoints
+- **Data Safety**: Field-level encryption planning and rotation-ready architecture
 
 ### 🔬 Research-Backed Technology
 
@@ -91,15 +95,17 @@ Codette is built on real academic research with published DOIs:
    python start.py
    ```
 
-   **Or use the one-click setup:**
-   - Open Codette in your browser
+   **Or use the intelligent one-click setup:**
+   - Open Codette in your browser at http://localhost:5173
    - Click "🚀 One-Click Start Backend" on the welcome screen
-   - Follow the automated setup process
+   - System automatically installs dependencies and starts all 6 AI systems
+   - Fallback to step-by-step guide if automation encounters issues
 
 5. **Access the application**
    - Frontend: http://localhost:5173
    - Backend API: http://localhost:8000
    - API Documentation: http://localhost:8000/docs
+   - Health Check: http://localhost:8000/api/health
 
 #### Production Deployment
 6. **Deploy with Docker (Recommended)**
@@ -123,14 +129,15 @@ Codette is built on real academic research with published DOIs:
 
 ### 🔒 Security & Privacy
 
-Codette implements comprehensive security measures:
+Codette implements enterprise-grade security measures:
 
-- **PII Redaction**: Automatic removal of emails, phones, and tokens before storage
-- **Input Sanitization**: Multi-layer validation with ethical AI governance
-- **Rate Limiting**: Endpoint-specific limits with burst protection
-- **Session Security**: Secure token-based authentication with expiration
-- **Database Security**: WAL mode, parameterized queries, and foreign key constraints
-- **Privacy First**: No data mining, transparent algorithms, user consent for all operations
+- **Comprehensive PII Redaction**: Automatic removal of emails, phones, and tokens before database storage
+- **Multi-Layer Input Sanitization**: Ethical AI governance with auto-blocking for high-risk patterns
+- **Advanced Rate Limiting**: Endpoint-specific limits with burst protection and temporary blocking
+- **Secure Session Management**: Token-based authentication with proper expiration and rotation
+- **Database Security**: aiosqlite with WAL mode, parameterized queries, and performance indices
+- **Privacy First**: No data mining, transparent algorithms, correlation tracking, user consent for all operations
+- **Field-Level Protection**: Encryption-ready architecture with rotation planning
 
 ### 🎮 Getting Started Guide
 
@@ -152,16 +159,16 @@ Codette implements comprehensive security measures:
 - Lucide React for consistent icons
 
 **Backend (Production-Ready):**
-- **FastAPI** with async/await and event-loop safety
-- **aiosqlite** with WAL mode for concurrent access
-- **Real AI models** with mathematical rigor and statistical foundations
-- **Quantum-inspired algorithms** with genuine quantum principles and Pareto optimization
-- **Ethical AI governance** with mathematically correct virtue weighting
-- **WebSocket support** with proper connection management
-- **Docker deployment** with Nginx load balancing and SSL termination
-- **Comprehensive testing** with 95%+ coverage and integration tests
-- **Security hardening** with PII redaction and input validation
-- **Performance monitoring** with real-time metrics and optimization
+- **FastAPI** with async/await, event-loop safety, and correlation tracking
+- **aiosqlite** with WAL mode, performance indices, and proper async patterns
+- **Mathematically Rigorous AI** with statistical foundations and deterministic algorithms
+- **Quantum-Inspired Optimization** with genuine Pareto front analysis and entanglement
+- **Virtue-Based Ethical AI** with weighted normalization and consensus tie-breaking
+- **Enterprise WebSocket Support** with proper connection management and real-time collaboration
+- **Production Docker Deployment** with Nginx, SSL termination, and health monitoring
+- **Comprehensive Testing Suite** with 95%+ coverage, integration tests, and CI/CD
+- **Security Hardening** with PII redaction, auto-blocking, and multi-layer validation
+- **Performance Monitoring** with structured logging, correlation IDs, and real-time metrics
 
 **AI Services:**
 - **DreamCore Memory System** - Emotional memory with temporal decay and privacy protection
@@ -271,22 +278,22 @@ AI composes music in real-time that adapts to your code complexity, programming 
 ### 🏭 Production Features
 
 #### Database & Performance
-- **aiosqlite with WAL Mode**: Concurrent access without blocking
-- **Performance Indices**: Optimized queries on timestamp and foreign keys
-- **Connection Pooling**: Efficient database resource management
-- **Correlation IDs**: Full request tracing and debugging support
+- **aiosqlite with WAL Mode**: Event-loop safe concurrent access without blocking
+- **Performance Indices**: Optimized queries on timestamp, decision_id, and foreign keys
+- **Async Database Operations**: Proper async/await patterns throughout
+- **Correlation IDs**: Full request tracing with structured JSON logging
 
 #### Security & Privacy
-- **PII Redaction**: Automatic removal of sensitive data before storage
-- **Input Validation**: Multi-layer security with ethical AI governance
-- **Rate Limiting**: Endpoint-specific limits with burst protection
-- **Session Management**: Secure token-based authentication
+- **Comprehensive PII Redaction**: Emails, phones, tokens removed before storage
+- **Multi-Layer Input Validation**: Ethical AI governance with auto-blocking
+- **Advanced Rate Limiting**: Endpoint-specific limits with temporary blocking
+- **Secure Session Management**: Token-based auth with proper expiration
 
 #### Mathematical Rigor
-- **Virtue Weighting**: Proper statistical normalization by specialization
-- **Consensus Algorithms**: Deterministic tie-breaking by reliability × influence
-- **Quantum Algorithms**: Real Pareto front optimization with entanglement
-- **Statistical Safety**: JSON-safe math with statistics.fmean instead of numpy
+- **Virtue Weighting**: Weighted sum per virtue (not total influence) for proper specialization
+- **Consensus Algorithms**: Deterministic tie-breaking by summed reliability × influence
+- **Quantum Algorithms**: Real Pareto front optimization with tunneling and entanglement
+- **Statistical Safety**: JSON-safe math with statistics.fmean and proper float casting
 
 ### 🐳 Deployment Options
 
@@ -326,12 +333,13 @@ cd backend
 ### 🧪 Quality Assurance
 
 #### Testing Coverage
-- **95%+ Test Coverage**: Comprehensive unit and integration tests
-- **AI System Tests**: Individual testing for all 6 AI systems
-- **API Endpoint Tests**: Full FastAPI endpoint coverage
-- **Integration Tests**: Complete AI pipeline testing
-- **Security Tests**: PII redaction and input validation testing
-- **Performance Tests**: Load testing and benchmarking
+- **95%+ Test Coverage**: Comprehensive unit, integration, and end-to-end tests
+- **AI System Tests**: Individual testing for all 6 AI systems with mathematical validation
+- **API Endpoint Tests**: Full FastAPI endpoint coverage with correlation tracking
+- **Integration Tests**: Complete AI pipeline testing with virtue normalization validation
+- **Security Tests**: PII redaction, input validation, and auto-blocking testing
+- **Performance Tests**: Event-loop safety, database concurrency, and load testing
+- **Mathematical Tests**: Virtue weighting, consensus tie-breaking, and deterministic behavior
 
 #### Code Quality
 - **Type Safety**: Full TypeScript and Python type annotations
@@ -376,21 +384,32 @@ MIT License - see [LICENSE](LICENSE) file for details.
 │                 │    │                  │    │                 │    │                 │
 │ • React/TS      │◄──►│ • FastAPI        │◄──►│ • DreamCore     │◄──►│ • aiosqlite     │
 │ • Monaco Editor │    │ • WebSockets     │    │ • Nexus Engine  │    │ • WAL Mode      │
-│ • Tailwind CSS │    │ • Rate Limiting  │    │ • Aegis Council │    │ • Indices       │
-│ • Vite Build    │    │ • PII Redaction  │    │ • Quantum Opt   │    │ • Foreign Keys  │
-│ • Accessibility │    │ • Security       │    │ • Ethics Gov    │    │ • Correlation   │
-└─────────────────┘    └──────────────────┘    │ • Neural Pred   │    │   Tracking      │
-                                                └─────────────────┘    └─────────────────┘
+│ • Tailwind CSS │    │ • Rate Limiting  │    │ • Aegis Council │    │ • Performance   │
+│ • Vite Build    │    │ • PII Redaction  │    │ • Quantum Opt   │    │   Indices       │
+│ • Accessibility │    │ • Correlation    │    │ • Ethics Gov    │    │ • Foreign Keys  │
+│ • ARIA Support  │    │   Tracking       │    │ • Neural Pred   │    │ • Async Safety  │
+└─────────────────┘    └──────────────────┘    └─────────────────┘    └─────────────────┘
+
+                    ┌──────────────────┐
+                    │   Security       │
+                    │                  │
+                    │ • PII Redaction  │
+                    │ • Auto-Blocking  │
+                    │ • Input Validation│
+                    │ • Correlation IDs │
+                    │ • Structured Logs │
+                    └──────────────────┘
 ```
 
 ### 🏢 About Raiff's Bits
 
-Codette is developed by [Raiff's Bits](https://www.raiffsbits.com), a company dedicated to creating ethical, innovative technology that enhances human creativity and wisdom.
+Codette is developed by [Raiff's Bits](https://www.raiffsbits.com), a company dedicated to creating ethical, innovative technology that enhances human creativity and wisdom through mathematically rigorous AI systems.
 
 **Contact:**
 - Website: [www.raiffsbits.com](https://www.raiffsbits.com)
 - Email: jonathan@raiffsbits.com
 - Phone: (281) 782-0615
+- Live Demo: [codette.online](https://codette.online)
 
 ### 🙏 Acknowledgments
 
@@ -405,7 +424,7 @@ Special thanks to the open source community and the artists who make their work 
 
 ### 🔗 Links
 
-- [Live Demo](https://codette.online) (Complete Application)
+- [Live Demo](https://codette.online) (Complete Production Application)
 - [API Documentation](http://localhost:8000/docs) (When backend running)
 - [Documentation](https://www.raiffsbits.com/docs)
 - [Research Papers](https://zenodo.org/communities/codette)
@@ -413,6 +432,6 @@ Special thanks to the open source community and the artists who make their work 
 
 ---
 
-**Built with ❤️ by developers, for developers - Production ready with ethical AI!**
+**Built with ❤️ by developers, for developers - Enterprise ready with ethical AI and mathematical rigor!**
 
-*"Code with compassion, debug with wisdom, deploy with integrity, and always remember that every expert was once a beginner."*
+*"Code with compassion, debug with wisdom, deploy with integrity, and always remember that every expert was once a beginner. Now with production-ready AI that genuinely cares."*
