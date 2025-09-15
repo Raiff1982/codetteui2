@@ -768,7 +768,7 @@ export function MusicPlayer({
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full" />
                 <span className="text-xs text-green-600 dark:text-green-400">
-                  {musicService.getOfflineTracks().length} tracks downloaded
+                  {mockMusicService.getOfflineTracks().length} tracks downloaded
                 </span>
               </div>
             </div>

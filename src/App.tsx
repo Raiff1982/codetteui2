@@ -434,7 +434,10 @@ function App() {
                 ) : (
                   <WelcomeScreen 
                     onCreateFile={handleFileCreate}
-                    onOpenMusic={() => setShowMusicPlayer(true)}
+                    onOpenMusic={() => {
+                      console.log('Music player requested from welcome screen');
+                      setShowMusicPlayer(true);
+                    }}
                   />
                 )}
                 

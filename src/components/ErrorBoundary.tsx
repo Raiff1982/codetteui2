@@ -119,6 +119,14 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       const { error, errorInfo, isRecovering, recoveryAttempts, showDetails } = this.state;
+      
+      // Log error details for debugging
+      console.error('Error Boundary caught error:', {
+        message: error?.message,
+        stack: error?.stack,
+        componentStack: errorInfo?.componentStack
+      });
+      
       return (
         <>
           {/* Non-blocking Error Banner */}
