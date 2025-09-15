@@ -11,11 +11,11 @@ import json
 import sqlite3
 import hashlib
 import numpy as np
+import os
 from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, asdict
 import logging
-import os
 
 logger = logging.getLogger(__name__)
 
@@ -84,6 +84,9 @@ class DreamCoreMemory:
     
     async def _create_tables(self):
         """Create database tables for memory storage"""
+        if not self.conn:
+            raise RuntimeError("Database connection not established")
+            
         cursor = self.conn.cursor()
         
         cursor.execute("""

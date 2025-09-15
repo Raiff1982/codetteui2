@@ -14,7 +14,11 @@ import sqlite3
 import os
 from datetime import datetime
 from typing import Dict, Any, List, Optional
-from scipy.fft import fft, fftfreq
+try:
+    from scipy.fft import fft, fftfreq
+except ImportError:
+    # Fallback to numpy if scipy not available
+    from numpy.fft import fft, fftfreq
 import re
 
 logger = logging.getLogger(__name__)
