@@ -103,7 +103,8 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
 
   const checkBackendStatus = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/health', {
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiBaseUrl}/api/health`, {
         method: 'GET',
         signal: AbortSignal.timeout(5000)
       });
@@ -122,7 +123,8 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
     setIsStartingBackend(true);
     try {
       // Try to start the backend using shell commands
-      const response = await fetch('/api/start-backend', {
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiBaseUrl}/api/start-backend`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
@@ -479,6 +481,10 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
                 </a>
                 <button
                   onClick={() => window.open('http://localhost:8000/docs', '_blank')}
+                  onClick={() => {
+                    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+                    window.open(`${apiBaseUrl}/docs`, '_blank');
+                  }}
                   className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
                 >
                   🔗 API Documentation

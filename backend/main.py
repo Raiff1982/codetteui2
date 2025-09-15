@@ -18,6 +18,9 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 import uvicorn
 
+# Import configuration
+from config.settings import settings, get_ai_system_config
+
 # Import AI systems
 from ai_systems.dreamcore_memory import DreamCoreMemory
 from ai_systems.nexus_signal_engine import NexusSignalEngine
@@ -29,15 +32,16 @@ from ai_systems.music_generator import AIComposer
 
 # Database and utilities
 from database.connection import DatabaseManager
-from utils.logger import setup_logger
+from utils.logging_config import setup_logging, get_logger
 from utils.security import SecurityManager
 from utils.rate_limiter import RateLimiter
 from utils.websocket_manager import WebSocketManager
 import subprocess
 import sys
 
-# Setup logging
-logger = setup_logger(__name__)
+# Setup logging with correlation tracking
+setup_logging()
+logger = get_logger(__name__)
 
 # Global AI systems
 ai_systems = {}
@@ -57,22 +61,24 @@ async def lifespan(app: FastAPI):
         # Initialize AI systems
         logger.info("🧠 Initializing AI Systems...")
         
-        ai_systems['dreamcore'] = DreamCoreMemory()
+        ai_config = get_ai_system_config()
+        
+        ai_systems['dreamcore'] = DreamCoreMemory(ai_config['dreamcore']['db_path'])
         await ai_systems['dreamcore'].initialize()
         
-        ai_systems['nexus'] = NexusSignalEngine()
+        ai_systems['nexus'] = NexusSignalEngine(ai_config['nexus']['db_path'])
         await ai_systems['nexus'].initialize()
         
-        ai_systems['aegis'] = AegisCouncil()
+        ai_systems['aegis'] = AegisCouncil(ai_config['aegis']['db_path'])
         await ai_systems['aegis'].initialize()
         
-        ai_systems['quantum'] = QuantumMultiObjectiveOptimizer()
+        ai_systems['quantum'] = QuantumMultiObjectiveOptimizer(ai_config['quantum']['db_path'])
         await ai_systems['quantum'].initialize()
         
-        ai_systems['ethical'] = EthicalAIGovernance()
+        ai_systems['ethical'] = EthicalAIGovernance(ai_config['ethical']['db_path'])
         await ai_systems['ethical'].initialize()
         
-        ai_systems['neural'] = NeuralCodePredictor()
+        ai_systems['neural'] = NeuralCodePredictor(ai_config['neural']['db_path'])
         await ai_systems['neural'].initialize()
         
         ai_systems['music'] = AIComposer()
@@ -111,7 +117,7 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://majestic-boba-3770ba.netlify.app"],
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

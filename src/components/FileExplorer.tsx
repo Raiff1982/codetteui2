@@ -15,7 +15,8 @@ import {
   Music,
   Video,
   Archive,
-  Settings
+  Settings,
+  Palette
 } from 'lucide-react';
 import { FileType } from '../types/file';
 

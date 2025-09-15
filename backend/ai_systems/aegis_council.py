@@ -15,6 +15,9 @@ from datetime import datetime
 from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, asdict
 
+# Import Unicode security
+from utils.unicode_security import unicode_analyzer
+
 logger = logging.getLogger(__name__)
 
 @dataclass
@@ -219,6 +222,19 @@ class AegisCouncil:
         Convene the Aegis Council for ethical decision making
         """
         try:
+            # Unicode security check
+            unicode_threat = unicode_analyzer.detect_unicode_threat(input_text)
+            if unicode_threat["threat_level"] == "high":
+                logger.warning(f"🚨 Unicode threat detected in council input: {unicode_threat}")
+                return {
+                    "override_decision": "blocked",
+                    "virtue_profile": {virtue: 0.0 for virtue in self.virtues.keys()},
+                    "consensus_strength": 0.0,
+                    "ethical_compliance": False,
+                    "reasoning": "Input blocked due to Unicode security threat",
+                    "threat_analysis": unicode_threat
+                }
+            
             logger.info(f"🏛️ Convening Aegis Council for: {input_text[:50]}...")
             
             # Apply agent overrides if provided
