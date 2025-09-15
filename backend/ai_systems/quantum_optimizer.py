@@ -1,5 +1,5 @@
 """
-Quantum Multi-Objective Optimizer - Real Implementation
+Quantum Multi-Objective Optimizer - Production Implementation
 Based on genuine quantum computing principles and optimization algorithms
 
 This implements actual quantum-inspired optimization with real mathematical foundations.
@@ -11,10 +11,11 @@ import logging
 import time
 import random
 import math
-from typing import List, Tuple, Dict, Any, Callable, Optional
-from scipy.optimize import differential_evolution
 import sqlite3
 import os
+import json
+from datetime import datetime
+from typing import List, Tuple, Dict, Any, Callable, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +99,16 @@ class QuantumInspiredOptimizer:
         
         duration = time.time() - start_time
         return self.pareto_front, duration
+    
+    def calculate_coherence(self) -> float:
+        """Calculate quantum coherence of population"""
+        if not self.population:
+            return 0.0
+        
+        # Calculate population coherence
+        population_array = np.array(self.population)
+        coherence = 1.0 - np.mean(np.std(population_array, axis=0))
+        return max(0.0, min(1.0, coherence))
 
 class QuantumMultiObjectiveOptimizer:
     """Main quantum optimizer class with real implementations"""
@@ -176,7 +187,7 @@ class QuantumMultiObjectiveOptimizer:
                 "entanglement_factor": optimizer.entanglement_factor,
                 "tunneling_events": optimizer.tunneling_events,
                 "superposition_states": len(optimizer.population),
-                "quantum_coherence": self._calculate_coherence(pareto_front)
+                "quantum_coherence": optimizer.calculate_coherence()
             }
             
             result = {
@@ -240,57 +251,47 @@ class QuantumMultiObjectiveOptimizer:
         return float(result)
     
     def _ackley_function(self, x: np.ndarray) -> float:
-        """Ackley function - highly multimodal"""
+        """Ackley function - highly multimodal optimization"""
         a, b, c = 20, 0.2, 2 * np.pi
         n = len(x)
         sum1 = np.sum(x**2)
         sum2 = np.sum(np.cos(c * x))
         return float(-a * np.exp(-b * np.sqrt(sum1 / n)) - np.exp(sum2 / n) + a + np.e)
     
-    def _calculate_optimization_score(self, pareto_front: List[Tuple]) -> float:
-        """Calculate real optimization score based on Pareto front quality"""
+    def _calculate_optimization_score(self, pareto_front: List[Tuple[np.ndarray, np.ndarray]]) -> float:
+        """Calculate optimization quality score"""
         if not pareto_front:
             return 0.0
         
         # Calculate hypervolume indicator (simplified)
-        solutions = [solution for solution, _ in pareto_front]
-        objectives = [obj for _, obj in pareto_front]
+        objectives = np.array([obj for _, obj in pareto_front])
         
-        # Diversity metric
-        if len(solutions) > 1:
-            diversity = np.mean([
-                np.linalg.norm(sol1 - sol2)
-                for i, sol1 in enumerate(solutions)
-                for j, sol2 in enumerate(solutions)
-                if i < j
-            ])
-        else:
-            diversity = 0.0
+        # Normalize objectives
+        min_vals = np.min(objectives, axis=0)
+        max_vals = np.max(objectives, axis=0)
         
-        # Convergence metric (normalized)
-        convergence = 1.0 / (1.0 + np.mean([np.mean(np.abs(obj)) for obj in objectives]))
+        if np.any(max_vals - min_vals == 0):
+            return 0.5  # Default score for degenerate case
         
-        return float(min(1.0, (diversity * 0.3 + convergence * 0.7)))
-    
-    def _calculate_coherence(self, pareto_front: List[Tuple]) -> float:
-        """Calculate quantum coherence of solutions"""
-        if not pareto_front:
-            return 0.0
+        normalized = (objectives - min_vals) / (max_vals - min_vals)
         
-        solutions = np.array([solution for solution, _ in pareto_front])
-        coherence = 1.0 - np.mean(np.std(solutions, axis=0))
-        return max(0.0, min(1.0, coherence))
+        # Calculate diversity and convergence
+        diversity = np.mean(np.std(normalized, axis=0))
+        convergence = 1.0 / (1.0 + np.mean(np.linalg.norm(normalized, axis=1)))
+        
+        return float(0.5 * diversity + 0.5 * convergence)
     
     async def _store_result(self, objectives: List[str], dimension: int, result: Dict[str, Any]):
         """Store optimization result in database"""
         try:
-            import json
-            result_id = f"opt_{int(time.time())}"
-            
             cursor = self.conn.cursor()
+            
+            result_id = f"opt_{int(time.time() * 1000)}"
+            
             cursor.execute("""
                 INSERT INTO optimization_results 
-                (id, objectives, dimension, pareto_front_size, convergence_time, optimization_score, quantum_metrics, timestamp)
+                (id, objectives, dimension, pareto_front_size, convergence_time, 
+                 optimization_score, quantum_metrics, timestamp)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 result_id,
@@ -300,24 +301,47 @@ class QuantumMultiObjectiveOptimizer:
                 result["convergence_time"],
                 result["optimization_score"],
                 json.dumps(result["quantum_metrics"]),
-                datetime.utcnow().isoformat()
+                datetime.now().isoformat()
             ))
             
             self.conn.commit()
+            logger.info(f"📊 Stored optimization result: {result_id}")
             
         except Exception as e:
             logger.error(f"❌ Failed to store optimization result: {e}")
     
-    def is_active(self) -> bool:
-        """Check if quantum optimizer is active"""
-        return self.is_initialized and self.conn is not None
-    
-    async def shutdown(self):
-        """Shutdown quantum optimizer"""
+    async def get_optimization_history(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """Get recent optimization history"""
         try:
-            if self.conn:
-                self.conn.close()
-                self.conn = None
-            logger.info("🔄 Quantum optimizer shutdown complete")
+            cursor = self.conn.cursor()
+            
+            cursor.execute("""
+                SELECT * FROM optimization_results 
+                ORDER BY timestamp DESC 
+                LIMIT ?
+            """, (limit,))
+            
+            results = []
+            for row in cursor.fetchall():
+                results.append({
+                    "id": row[0],
+                    "objectives": json.loads(row[1]),
+                    "dimension": row[2],
+                    "pareto_front_size": row[3],
+                    "convergence_time": row[4],
+                    "optimization_score": row[5],
+                    "quantum_metrics": json.loads(row[6]),
+                    "timestamp": row[7]
+                })
+            
+            return results
+            
         except Exception as e:
-            logger.error(f"❌ Quantum optimizer shutdown error: {e}")
+            logger.error(f"❌ Failed to get optimization history: {e}")
+            return []
+    
+    def cleanup(self):
+        """Cleanup resources"""
+        if self.conn:
+            self.conn.close()
+            logger.info("🧹 Quantum optimizer cleanup completed")
