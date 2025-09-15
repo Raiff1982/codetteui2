@@ -62,12 +62,13 @@ class TestDreamCoreMemory:
 class TestNexusSignalEngine:
     """Test Nexus Signal Engine"""
     
-    def test_signal_processing(self, temp_db):
+    @pytest.mark.asyncio
+    async def test_signal_processing(self, temp_db):
         """Test basic signal processing"""
         nexus = NexusSignalEngine(db_path=temp_db)
-        nexus.initialize()
+        await nexus.initialize()
         
-        result = nexus.process("Test signal for ethical analysis")
+        result = await nexus.process("Test signal for processing")
         
         assert "signal_hash" in result
         assert "ethics_score" in result
@@ -79,15 +80,17 @@ class TestNexusSignalEngine:
         assert "Colleen" in result["perspectives"]
         assert "Luke" in result["perspectives"]
         assert "Kellyanne" in result["perspectives"]
+        assert nexus.is_active()
     
-    def test_risk_assessment(self, temp_db):
+    @pytest.mark.asyncio
+    async def test_risk_assessment(self, temp_db):
         """Test risk assessment functionality"""
         nexus = NexusSignalEngine(db_path=temp_db)
-        nexus.initialize()
+        await nexus.initialize()
         
         # Test high-risk signal
         risky_signal = "eval(userInput); document.innerHTML = data;"
-        result = nexus.process(risky_signal)
+        result = await nexus.process(risky_signal)
         
         risk_assessment = result["risk_assessment"]
         assert risk_assessment["risk_level"] == "high"
@@ -157,23 +160,13 @@ class TestEthicalGovernance:
     @pytest.mark.asyncio
     async def test_code_analysis(self, temp_db):
         """Test ethical code analysis"""
-        ethical = EthicalAIGovernance(db_path=temp_db)
-        ethical.initialize()
+        ethical = EthicalAIGovernance(db_path=":memory:")
+        await ethical.initialize()
         
-        # Test secure, accessible code
-        good_code = """
-        function handleUserInput(input) {
-            // Validate and sanitize input
-            if (!input || typeof input !== 'string') {
-                throw new Error('Invalid input provided');
-            }
-            
-            const sanitized = input.trim();
-            return sanitized;
-        }
-        """
-        
-        result = await ethical.analyze_code(good_code, "javascript")
+        result = await ethical.analyze_code(
+            code="function test() { return 'hello'; }",
+            language="javascript"
+        )
         
         assert result["ethical_score"] > 0.5
         assert "virtue_scores" in result
@@ -208,11 +201,11 @@ class TestNeuralPredictor:
     @pytest.mark.asyncio
     async def test_code_prediction(self, temp_db):
         """Test code prediction functionality"""
-        neural = NeuralCodePredictor(db_path=temp_db)
-        neural.initialize()
+        neural = NeuralCodePredictor(db_path=":memory:")
+        await neural.initialize()
         
         predictions = await neural.predict_next_lines(
-            code="function calculateSum(a, b) {",
+            code="function test",
             language="javascript",
             num_predictions=3
         )
@@ -223,6 +216,7 @@ class TestNeuralPredictor:
             assert "confidence" in prediction
             assert "type" in prediction
             assert 0 <= prediction["confidence"] <= 1
+        assert neural.is_active()
     
     @pytest.mark.asyncio
     async def test_user_profile_building(self, temp_db):
@@ -245,6 +239,78 @@ class TestNeuralPredictor:
         assert 0 <= profile.creativity_index <= 1
         assert isinstance(profile.focus_areas, list)
         assert isinstance(profile.preferred_patterns, list)
+
+class TestVirtueNormalization:
+    """Test virtue score normalization fixes"""
+    
+    @pytest.mark.asyncio
+    async def test_weighted_virtue_normalization(self, temp_db):
+        """Test that virtue scores are properly weighted by specialization"""
+        council = AegisCouncil(db_path=temp_db)
+        await council.initialize()
+        
+        # Test with input that should trigger different agent specializations
+        decision = await council.convene(
+            input_text="Implement secure user authentication with accessibility features",
+            overrides={}
+        )
+        
+        virtue_profile = decision["virtue_profile"]
+        
+        # Integrity should be high due to security context
+        assert virtue_profile["integrity"] > 0.5
+        # Compassion should be high due to accessibility context
+        assert virtue_profile["compassion"] > 0.5
+        
+        # Verify all virtues are properly normalized (0-1 range)
+        for virtue, score in virtue_profile.items():
+            assert 0 <= score <= 1, f"Virtue {virtue} score {score} out of range"
+
+class TestConsensusBreaking:
+    """Test consensus tie-breaking logic"""
+    
+    @pytest.mark.asyncio
+    async def test_consensus_tie_breaking(self, temp_db):
+        """Test that consensus ties are broken by reliability"""
+        council = AegisCouncil(db_path=temp_db)
+        await council.initialize()
+        
+        # Create a scenario that might cause ties
+        decision = await council.convene(
+            input_text="Neutral statement that could go either way",
+            overrides={}
+        )
+        
+        # Should have a definitive decision, not random
+        assert decision["override_decision"] in ["strongly_approve", "approve", "review_required", "reject"]
+        assert 0 <= decision["consensus_strength"] <= 1
+
+class TestDataSafety:
+    """Test PII redaction and data safety"""
+    
+    @pytest.mark.asyncio
+    async def test_pii_redaction(self, temp_db):
+        """Test that PII is redacted before storage"""
+        dreamcore = DreamCoreMemory(db_path=temp_db)
+        await dreamcore.initialize()
+        
+        # Store memory with PII
+        pii_content = "Contact john.doe@example.com or call 555-123-4567 for API key abc123def456ghi789"
+        memory_id = await dreamcore.store_memory(
+            emotion_tag="test",
+            content=pii_content,
+            emotional_weight=0.5
+        )
+        
+        # Retrieve and verify redaction
+        memories = await dreamcore.retrieve_memories(emotion_tag="test")
+        stored_content = memories[0]["content"]
+        
+        assert "[EMAIL_REDACTED]" in stored_content
+        assert "[PHONE_REDACTED]" in stored_content
+        assert "[TOKEN_REDACTED]" in stored_content
+        assert "john.doe@example.com" not in stored_content
+        assert "555-123-4567" not in stored_content
 
 # Integration tests
 class TestIntegration:
