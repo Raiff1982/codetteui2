@@ -103,7 +103,11 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
 
   const checkBackendStatus = async () => {
     try {
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+      if (!apiBaseUrl) {
+        setBackendStatus('disconnected');
+        return;
+      }
       const response = await fetch(`${apiBaseUrl}/api/health`, {
         method: 'GET',
         signal: AbortSignal.timeout(5000)
@@ -123,7 +127,10 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
     setIsStartingBackend(true);
     try {
       // Try to start the backend using shell commands
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+      if (!apiBaseUrl) {
+        throw new Error('API base URL not configured');
+      }
       const response = await fetch(`${apiBaseUrl}/api/start-backend`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
@@ -174,7 +181,7 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
     {
       title: 'Verify Connection',
       description: 'Check that all systems are operational',
-      command: 'Visit http://localhost:8000/api/health',
+      command: `Visit ${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/health`,
       icon: CheckCircle2
     }
   ];
@@ -334,7 +341,7 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
                 </span>
                 {backendStatus === 'connected' && (
                   <a 
-                    href="http://localhost:8000/docs" 
+                    href={`${import.meta.env.VITE_API_BASE_URL || window.location.origin}/docs`}
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-green-600 hover:text-green-700 text-xs underline"
@@ -480,9 +487,8 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
                   📚 Full Setup Guide
                 </a>
                 <button
-                  onClick={() => window.open('http://localhost:8000/docs', '_blank')}
                   onClick={() => {
-                    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+                    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || window.location.origin;
                     window.open(`${apiBaseUrl}/docs`, '_blank');
                   }}
                   className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
