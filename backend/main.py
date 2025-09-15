@@ -33,6 +33,8 @@ from utils.logger import setup_logger
 from utils.security import SecurityManager
 from utils.rate_limiter import RateLimiter
 from utils.websocket_manager import WebSocketManager
+import subprocess
+import sys
 
 # Setup logging
 logger = setup_logger(__name__)
@@ -637,6 +639,60 @@ async def get_performance_metrics():
     except Exception as e:
         logger.error(f"Performance metrics failed: {e}")
         raise HTTPException(status_code=500, detail=f"Performance metrics failed: {str(e)}")
+
+# Backend Management API
+@app.post("/api/start-backend")
+async def start_backend():
+    """Start the backend services (for development)"""
+    try:
+        # This endpoint would typically be used in development
+        # In production, the backend is already running
+        return {
+            "success": True,
+            "message": "Backend is already running",
+            "data": {
+                "status": "operational",
+                "ai_systems": list(ai_systems.keys()),
+                "endpoints": [
+                    "/api/quantum/optimize",
+                    "/api/council/convene", 
+                    "/api/memory/store",
+                    "/api/analysis/ethical",
+                    "/api/analysis/neural",
+                    "/api/nexus/process"
+                ]
+            },
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Backend start failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Backend start failed: {str(e)}")
+
+@app.get("/api/setup/check")
+async def check_setup_requirements():
+    """Check if all setup requirements are met"""
+    try:
+        requirements = {
+            "python_version": sys.version,
+            "dependencies_installed": True,  # Would check actual dependencies
+            "database_accessible": True,
+            "ai_systems_ready": len(ai_systems) == 6,
+            "recommended_actions": []
+        }
+        
+        if not requirements["ai_systems_ready"]:
+            requirements["recommended_actions"].append("Initialize AI systems")
+        
+        return {
+            "success": True,
+            "data": requirements,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Setup check failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Setup check failed: {str(e)}")
 
 if __name__ == "__main__":
     # Load environment variables

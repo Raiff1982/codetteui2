@@ -63,6 +63,9 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
   const [isTablet, setIsTablet] = useState(false);
   const [showQuickActionsMenu, setShowQuickActionsMenu] = useState(false);
   const [backendStatus, setBackendStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking');
+  const [showBackendSetup, setShowBackendSetup] = useState(false);
+  const [isStartingBackend, setIsStartingBackend] = useState(false);
+  const [setupStep, setSetupStep] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -86,6 +89,64 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
     return () => clearInterval(interval);
   }, []);
 
+  const startBackend = async () => {
+    setIsStartingBackend(true);
+    try {
+      // Try to start the backend using shell commands
+      const response = await fetch('/api/start-backend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (response.ok) {
+        // Wait a moment then check status
+        setTimeout(() => {
+          checkBackendStatus();
+          setIsStartingBackend(false);
+        }, 3000);
+      } else {
+        throw new Error('Backend start failed');
+      }
+    } catch (error) {
+      console.error('Failed to start backend:', error);
+      setIsStartingBackend(false);
+      // Show manual setup instructions instead
+      setShowBackendSetup(true);
+    }
+  };
+
+  const setupSteps = [
+    {
+      title: 'Open Terminal',
+      description: 'Open a new terminal window or use the integrated terminal',
+      command: 'Press ⌘` to open terminal in Codette',
+      icon: TerminalIcon
+    },
+    {
+      title: 'Navigate to Backend',
+      description: 'Change to the backend directory',
+      command: 'cd backend',
+      icon: Folder
+    },
+    {
+      title: 'Install Dependencies',
+      description: 'Install Python packages (this may take a few minutes)',
+      command: 'pip install -r requirements.txt',
+      icon: Database
+    },
+    {
+      title: 'Start AI Backend',
+      description: 'Launch all 6 AI systems and the FastAPI server',
+      command: 'python start.py',
+      icon: Server
+    },
+    {
+      title: 'Verify Connection',
+      description: 'Check that all systems are operational',
+      command: 'Visit http://localhost:8000/api/health',
+      icon: CheckCircle2
+    }
+  ];
   useEffect(() => {
     // Close menu when clicking outside
     const handleClickOutside = (event: MouseEvent) => {
@@ -485,16 +546,112 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
                   href="https://github.com/raiffsbits/codette#backend-setup"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                 >
-                  Setup Guide
+                    📚 Full Setup Guide
                 </a>
                 <button
                   onClick={() => window.open('http://localhost:8000/docs', '_blank')}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
                 >
-                  Try API Docs
+                    🔗 API Documentation
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step-by-Step Setup Modal */}
+          {showBackendSetup && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Server className="w-6 h-6 text-blue-600" />
+                      <h3 className="text-xl font-bold text-gray-800 dark:text-white">Backend Setup Guide</h3>
+                    </div>
+                    <button
+                      onClick={() => setShowBackendSetup(false)}
+                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    >
+                      <span className="text-gray-500 text-xl">×</span>
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="p-6">
+                  <div className="space-y-6">
+                    {setupSteps.map((step, index) => (
+                      <div key={index} className={`flex items-start space-x-4 p-4 rounded-xl transition-all duration-200 ${
+                        setupStep === index 
+                          ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700' 
+                          : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'
+                      }`}>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                          setupStep > index 
+                            ? 'bg-green-500 text-white' 
+                            : setupStep === index 
+                            ? 'bg-blue-500 text-white' 
+                            : 'bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
+                        }`}>
+                          {setupStep > index ? '✓' : index + 1}
+                        </div>
+                        
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <step.icon className="w-5 h-5 text-blue-600" />
+                            <h4 className="font-semibold text-gray-800 dark:text-white">{step.title}</h4>
+                          </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                            {step.description}
+                          </p>
+                          <div className="bg-gray-800 text-green-400 p-3 rounded-lg font-mono text-sm">
+                            {step.command}
+                          </div>
+                          
+                          {setupStep === index && (
+                            <button
+                              onClick={() => setSetupStep(index + 1)}
+                              className="mt-3 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
+                            >
+                              Mark as Complete
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="mt-6 bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <CheckCircle2 className="w-5 h-5 text-green-600" />
+                      <h4 className="font-medium text-gray-800 dark:text-white">What You'll Get</h4>
+                    </div>
+                    <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
+                      <li>• 6 fully functional AI systems with real research backing</li>
+                      <li>• Real-time collaboration with WebSocket support</li>
+                      <li>• Quantum-inspired code optimization algorithms</li>
+                      <li>• Ethical AI governance with virtue-based decision making</li>
+                      <li>• Neural code prediction that learns your style</li>
+                      <li>• Comprehensive API with auto-generated documentation</li>
+                    </ul>
+                  </div>
+                </div>
+                
+                <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-between">
+                  <button
+                    onClick={() => setSetupStep(0)}
+                    className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+                  >
+                    Reset Steps
+                  </button>
+                  <button
+                    onClick={() => setShowBackendSetup(false)}
+                    className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                  >
+                    Close Guide
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -511,7 +668,7 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
               {features.map((feature, index) => (
                 <div
                   key={index}
-                  className={`${isMobile ? '' : 'flex-shrink-0 w-64'} bg-gradient-to-br from-white/90 via-blue-50/60 to-purple-50/60 dark:from-gray-800/90 dark:via-blue-950/60 dark:to-purple-950/60 backdrop-blur-sm rounded-2xl ${isMobile ? 'p-5' : 'p-6'} shadow-lg hover:shadow-2xl transition-all duration-300 border border-blue-200/50 dark:border-purple-700/50 group hover-lift`}
+              <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800 shadow-lg">
                 >
                   <feature.icon className={`${isMobile ? 'w-7 h-7' : 'w-8 h-8'} text-blue-600 dark:text-purple-400 mx-auto ${isMobile ? 'mb-3' : 'mb-4'} group-hover:text-purple-600 dark:group-hover:text-pink-400 transition-all duration-200 group-hover:scale-110`} />
                   <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-gray-900 dark:text-white mb-2 tracking-tight`}>
@@ -556,19 +713,40 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
                 { keys: '⌘⇧Q', desc: 'Quantum Analysis', category: 'ai' }
               ].map((shortcut, index) => (
                 <div
-                  key={index}
-                  className={`${isMobile ? 'p-3' : 'p-4'} bg-gradient-to-br from-white/90 via-gray-50/60 to-blue-50/60 dark:from-gray-800/90 dark:via-gray-750/60 dark:to-blue-950/60 backdrop-blur-sm rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border border-gray-200/50 dark:border-gray-700/50 group`}
-                >
+                  Deploy the complete Python backend to access all 6 AI systems, real-time collaboration, 
+                  and production-grade features. The backend includes DreamCore Memory, Nexus Signal Engine, 
+                  Aegis Council, Quantum Optimizer, Ethical Governance, and Neural Predictor.
                   <div className="flex items-center justify-between">
-                    <kbd className={`${isMobile ? 'px-2 py-1' : 'px-3 py-2'} bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-lg font-mono ${isMobile ? 'text-xs' : 'text-sm'} font-semibold text-gray-800 dark:text-gray-200 shadow-inner border border-gray-300 dark:border-gray-500`}>
-                      {shortcut.keys}
-                    </kbd>
-                    <span className={`${isMobile ? 'text-sm' : 'text-sm'} text-gray-700 dark:text-gray-300 font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors`}>
-                      {shortcut.desc}
-                    </span>
-                  </div>
+                
+                <div className="flex flex-col sm:flex-row gap-3 mb-4">
+                  <button
+                    onClick={startBackend}
+                    disabled={isStartingBackend}
+                    className="flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 font-medium"
+                  >
+                    {isStartingBackend ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Starting Backend...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-5 h-5" />
+                        <span>🚀 One-Click Start Backend</span>
+                      </>
+                    )}
+                  </button>
+                  
+                  <button
+                    onClick={() => setShowBackendSetup(!showBackendSetup)}
+                    className="flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 font-medium"
+                  >
+                    <Settings className="w-5 h-5" />
+                    <span>Step-by-Step Setup</span>
+                  </button>
                 </div>
-              ))}
+                
+                <div className="flex space-x-3">
               
               {/* Auto-scroll indicator */}
               <div className="absolute top-2 right-2 flex items-center space-x-2 bg-gradient-to-r from-white/80 to-gray-50/80 dark:from-gray-800/80 dark:to-gray-750/80 backdrop-blur-xl rounded-full px-3 py-1.5 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
