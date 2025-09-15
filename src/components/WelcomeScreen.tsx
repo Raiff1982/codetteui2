@@ -486,4 +486,6 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
                 </h3>
               </div>
               <p className="text-blue-700 dark:text-blue-300 mb-4 text-sm leading-relaxed">
-                Deploy
+                Deploy the complete Python backend with all 6 AI systems to unlock the full power of Codette. 
+                Follow the setup guide below to get started with quantum optimization, ethical governance, and real-time collaboration.
+              </p>
