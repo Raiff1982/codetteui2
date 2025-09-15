@@ -350,13 +350,13 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
               Welcome to Codette
             </h1>
             <p className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-600 dark:text-gray-400 ${isMobile ? 'max-w-full' : 'max-w-3xl'} mx-auto leading-relaxed font-medium`}>
-              The world's first AI development environment built on genuine research with published DOIs. 
-              Codette combines revolutionary AI systems, ethical governance, and emotional intelligence to create 
-              a development experience that's not just intelligent, but genuinely caring about developers and users alike.
+              The world's first production-ready AI development environment built on genuine research with published DOIs. 
+              Codette combines 6 revolutionary AI systems, mathematical rigor, and emotional intelligence to create 
+              a development experience that's not just intelligent, but genuinely caring and ethically sound.
             </p>
             <div className={`${isMobile ? 'mt-3' : 'mt-4'} text-center`}>
               <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-500 dark:text-gray-500 font-medium`}>
-                Built on real academic research by <a href="https://www.raiffsbits.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 font-medium transition-colors underline">Raiff's Bits</a> • 
+                Production-ready with mathematical rigor by <a href="https://www.raiffsbits.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 font-medium transition-colors underline">Raiff's Bits</a> • 
                 <a href="https://codette.online" target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:text-purple-700 font-medium transition-colors underline ml-1">
                   Live Demo
                 </a>
@@ -429,12 +429,12 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
                 </h3>
               </div>
               <p className="text-blue-700 dark:text-blue-300 mb-4 text-sm leading-relaxed">
-                Deploy the complete Python backend to access all 6 AI systems, real-time collaboration, 
-                and production-grade features. The backend includes DreamCore Memory, Nexus Signal Engine, 
-                Aegis Council, Quantum Optimizer, Ethical Governance, and Neural Predictor.
+                Deploy the production-ready Python backend to access all 6 AI systems with mathematical rigor, 
+                real-time collaboration, and enterprise-grade features. The backend includes event-loop safe 
+                operations, PII protection, and mathematically correct virtue-based decision making.
               </p>
               <div className="bg-blue-100 dark:bg-blue-900/30 rounded-lg p-4 mb-4">
-                <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">Quick Setup:</h4>
+                <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">Production Setup:</h4>
                 <div className="space-y-2 text-sm text-blue-800 dark:text-blue-200 font-mono">
                   <div>1. <code className="bg-blue-200 dark:bg-blue-800 px-2 py-1 rounded">cd backend</code></div>
                   <div>2. <code className="bg-blue-200 dark:bg-blue-800 px-2 py-1 rounded">pip install -r requirements.txt</code></div>
@@ -555,12 +555,12 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
                       <h4 className="font-medium text-gray-800 dark:text-white">What You'll Get</h4>
                     </div>
                     <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
-                      <li>• 6 fully functional AI systems with real research backing</li>
-                      <li>• Real-time collaboration with WebSocket support</li>
-                      <li>• Quantum-inspired code optimization algorithms</li>
-                      <li>• Ethical AI governance with virtue-based decision making</li>
-                      <li>• Neural code prediction that learns your style</li>
-                      <li>• Comprehensive API with auto-generated documentation</li>
+                      <li>• 6 production-ready AI systems with mathematical rigor and research backing</li>
+                      <li>• Event-loop safe real-time collaboration with WebSocket support</li>
+                      <li>• Quantum-inspired optimization with Pareto front analysis</li>
+                      <li>• Ethical AI governance with mathematically correct virtue weighting</li>
+                      <li>• Neural code prediction with user personalization and privacy protection</li>
+                      <li>• Comprehensive API with auto-generated docs and correlation tracking</li>
                     </ul>
                   </div>
                 </div>
@@ -771,7 +771,7 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
               Ready to Start?
             </h2>
             <p className={`${isMobile ? 'text-base' : 'text-lg'} text-gray-600 dark:text-gray-400 mb-8 font-medium`}>
-              Create your first file and experience the future of AI-powered development
+              Create your first file and experience production-ready AI-powered development with ethical governance
             </p>
             <div className={`flex ${isMobile ? 'flex-col space-y-3' : 'flex-row justify-center space-x-4'}`}>
               <button
