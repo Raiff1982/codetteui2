@@ -89,6 +89,35 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    // Close menu when clicking outside
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowQuickActionsMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const checkBackendStatus = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/health', {
+        method: 'GET',
+        signal: AbortSignal.timeout(5000)
+      });
+      
+      if (response.ok) {
+        setBackendStatus('connected');
+      } else {
+        setBackendStatus('disconnected');
+      }
+    } catch (error) {
+      setBackendStatus('disconnected');
+    }
+  };
+
   const startBackend = async () => {
     setIsStartingBackend(true);
     try {
@@ -147,34 +176,6 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
       icon: CheckCircle2
     }
   ];
-  useEffect(() => {
-    // Close menu when clicking outside
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setShowQuickActionsMenu(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const checkBackendStatus = async () => {
-    try {
-      const response = await fetch('http://localhost:8000/api/health', {
-        method: 'GET',
-        timeout: 5000
-      } as any);
-      
-      if (response.ok) {
-        setBackendStatus('connected');
-      } else {
-        setBackendStatus('disconnected');
-      }
-    } catch (error) {
-      setBackendStatus('disconnected');
-    }
-  };
 
   const quickActions = [
     {
@@ -418,107 +419,6 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
             </div>
           </div>
 
-          {/* Quick Actions */}
-          <div className={`${isMobile ? 'mb-8' : 'mb-16'}`}>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-semibold text-gray-900 dark:text-white tracking-tight`}>
-                Quick Start
-              </h2>
-              
-              {/* Popdown Menu Button */}
-              <div className="relative" ref={menuRef}>
-                <button
-                  onClick={() => setShowQuickActionsMenu(!showQuickActionsMenu)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-600 text-white rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
-                >
-                  <Settings className="w-5 h-5" />
-                  <span className="font-medium">Quick Actions</span>
-                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showQuickActionsMenu ? 'rotate-180' : ''}`} />
-                </button>
-                
-                {/* Popdown Menu */}
-                {showQuickActionsMenu && (
-                  <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto">
-                    <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-                      <h3 className="font-semibold text-gray-800 dark:text-white">Quick Actions Menu</h3>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">Choose an action to get started</p>
-                    </div>
-                    
-                    <div className="p-2 space-y-1">
-                      {quickActions.map((action, index) => (
-                        <button
-                          key={index}
-                          onClick={() => {
-                            action.action();
-                            setShowQuickActionsMenu(false);
-                          }}
-                          className="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
-                        >
-                          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <action.icon className="w-4 h-4 text-white" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-gray-800 dark:text-white text-sm">
-                              {action.title}
-                            </h4>
-                            <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
-                              {action.description}
-                            </p>
-                          </div>
-                          <Play className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                        </button>
-                      ))}
-                    </div>
-                    
-                    <div className="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
-                      <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
-                        <span>{quickActions.length} actions available</span>
-                        <button
-                          onClick={() => setShowQuickActionsMenu(false)}
-                          className="text-purple-600 hover:text-purple-700 font-medium"
-                        >
-                          Close Menu
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            {/* Traditional Grid for Mobile/Tablet */}
-            {(isMobile || isTablet) && (
-              <div 
-                ref={quickActionsScroll.elementRef}
-                className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-6 pb-4 overflow-y-auto ${isMobile ? 'max-h-64' : 'max-h-96'} relative`}
-              >
-                {quickActions.slice(0, 4).map((action, index) => (
-                  <button
-                    key={index}
-                    onClick={action.action}
-                    className={`${isMobile ? 'p-5' : 'p-6'} bg-gradient-to-br from-white/90 via-blue-50/60 to-purple-50/60 dark:from-gray-800/90 dark:via-blue-950/60 dark:to-purple-950/60 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-blue-200/50 dark:border-purple-700/50 group cursor-pointer touch-target hover-lift focus:outline-none focus:ring-2 focus:ring-purple-500`}
-                  >
-                    <action.icon className={`${isMobile ? 'w-7 h-7' : 'w-8 h-8'} text-blue-600 dark:text-purple-400 mx-auto ${isMobile ? 'mb-3' : 'mb-4'} group-hover:text-purple-600 dark:group-hover:text-pink-400 transition-all duration-200 group-hover:scale-110`} />
-                    <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-gray-900 dark:text-white mb-2 tracking-tight`}>
-                      {action.title}
-                    </h3>
-                    <p className={`${isMobile ? 'text-sm' : 'text-sm'} text-gray-600 dark:text-gray-400 font-medium group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors`}>
-                      {action.description}
-                    </p>
-                  </button>
-                ))}
-                
-                {/* Auto-scroll indicator */}
-                <div className="absolute top-2 right-2 flex items-center space-x-2 bg-gradient-to-r from-white/80 to-blue-50/80 dark:from-gray-800/80 dark:to-purple-950/80 backdrop-blur-xl rounded-full px-3 py-1.5 shadow-lg border border-blue-200/50 dark:border-purple-700/50">
-                  <div className={`w-2 h-2 rounded-full ${quickActionsScroll.isPaused ? 'bg-yellow-500' : 'bg-green-500 animate-pulse'}`} />
-                  <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">
-                    {quickActionsScroll.isPaused ? 'Paused' : 'Auto-scrolling'}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* Backend Setup Instructions */}
           {backendStatus === 'disconnected' && (
             <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800 shadow-lg">
@@ -541,20 +441,47 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
                   <div>3. <code className="bg-blue-200 dark:bg-blue-800 px-2 py-1 rounded">python start.py</code></div>
                 </div>
               </div>
+              <div className="flex flex-col sm:flex-row gap-3 mb-4">
+                <button
+                  onClick={startBackend}
+                  disabled={isStartingBackend}
+                  className="flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 font-medium"
+                >
+                  {isStartingBackend ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Starting Backend...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-5 h-5" />
+                      <span>🚀 One-Click Start Backend</span>
+                    </>
+                  )}
+                </button>
+                
+                <button
+                  onClick={() => setShowBackendSetup(!showBackendSetup)}
+                  className="flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 font-medium"
+                >
+                  <Settings className="w-5 h-5" />
+                  <span>Step-by-Step Setup</span>
+                </button>
+              </div>
               <div className="flex space-x-3">
                 <a
                   href="https://github.com/raiffsbits/codette#backend-setup"
                   target="_blank"
                   rel="noopener noreferrer"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                 >
-                    📚 Full Setup Guide
+                  📚 Full Setup Guide
                 </a>
                 <button
                   onClick={() => window.open('http://localhost:8000/docs', '_blank')}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
                 >
-                    🔗 API Documentation
+                  🔗 API Documentation
                 </button>
               </div>
             </div>
@@ -656,6 +583,107 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
             </div>
           )}
 
+          {/* Quick Actions */}
+          <div className={`${isMobile ? 'mb-8' : 'mb-16'}`}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-semibold text-gray-900 dark:text-white tracking-tight`}>
+                Quick Start
+              </h2>
+              
+              {/* Popdown Menu Button */}
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setShowQuickActionsMenu(!showQuickActionsMenu)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-600 text-white rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
+                >
+                  <Settings className="w-5 h-5" />
+                  <span className="font-medium">Quick Actions</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showQuickActionsMenu ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {/* Popdown Menu */}
+                {showQuickActionsMenu && (
+                  <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto">
+                    <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+                      <h3 className="font-semibold text-gray-800 dark:text-white">Quick Actions Menu</h3>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">Choose an action to get started</p>
+                    </div>
+                    
+                    <div className="p-2 space-y-1">
+                      {quickActions.map((action, index) => (
+                        <button
+                          key={index}
+                          onClick={() => {
+                            action.action();
+                            setShowQuickActionsMenu(false);
+                          }}
+                          className="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
+                        >
+                          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <action.icon className="w-4 h-4 text-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-gray-800 dark:text-white text-sm">
+                              {action.title}
+                            </h4>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                              {action.description}
+                            </p>
+                          </div>
+                          <Play className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        </button>
+                      ))}
+                    </div>
+                    
+                    <div className="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+                      <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                        <span>{quickActions.length} actions available</span>
+                        <button
+                          onClick={() => setShowQuickActionsMenu(false)}
+                          className="text-purple-600 hover:text-purple-700 font-medium"
+                        >
+                          Close Menu
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Traditional Grid for Mobile/Tablet */}
+            {(isMobile || isTablet) && (
+              <div 
+                ref={quickActionsScroll.elementRef}
+                className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-6 pb-4 overflow-y-auto ${isMobile ? 'max-h-64' : 'max-h-96'} relative`}
+              >
+                {quickActions.slice(0, 4).map((action, index) => (
+                  <button
+                    key={index}
+                    onClick={action.action}
+                    className={`${isMobile ? 'p-5' : 'p-6'} bg-gradient-to-br from-white/90 via-blue-50/60 to-purple-50/60 dark:from-gray-800/90 dark:via-blue-950/60 dark:to-purple-950/60 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-blue-200/50 dark:border-purple-700/50 group cursor-pointer touch-target hover-lift focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                  >
+                    <action.icon className={`${isMobile ? 'w-7 h-7' : 'w-8 h-8'} text-blue-600 dark:text-purple-400 mx-auto ${isMobile ? 'mb-3' : 'mb-4'} group-hover:text-purple-600 dark:group-hover:text-pink-400 transition-all duration-200 group-hover:scale-110`} />
+                    <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-gray-900 dark:text-white mb-2 tracking-tight`}>
+                      {action.title}
+                    </h3>
+                    <p className={`${isMobile ? 'text-sm' : 'text-sm'} text-gray-600 dark:text-gray-400 font-medium group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors`}>
+                      {action.description}
+                    </p>
+                  </button>
+                ))}
+                
+                {/* Auto-scroll indicator */}
+                <div className="absolute top-2 right-2 flex items-center space-x-2 bg-gradient-to-r from-white/80 to-blue-50/80 dark:from-gray-800/80 dark:to-purple-950/80 backdrop-blur-xl rounded-full px-3 py-1.5 shadow-lg border border-blue-200/50 dark:border-purple-700/50">
+                  <div className={`w-2 h-2 rounded-full ${quickActionsScroll.isPaused ? 'bg-yellow-500' : 'bg-green-500 animate-pulse'}`} />
+                  <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                    {quickActionsScroll.isPaused ? 'Paused' : 'Auto-scrolling'}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Features Grid */}
           <div className={`${isMobile ? 'mb-8' : 'mb-16'}`}>
             <h2 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-semibold text-gray-900 dark:text-white mb-8 tracking-tight`}>
@@ -668,7 +696,7 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
               {features.map((feature, index) => (
                 <div
                   key={index}
-              <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800 shadow-lg">
+                  className={`${isMobile ? 'p-5' : 'p-6 min-w-64'} bg-gradient-to-br from-white/90 via-blue-50/60 to-purple-50/60 dark:from-gray-800/90 dark:via-blue-950/60 dark:to-purple-950/60 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-blue-200/50 dark:border-purple-700/50 group cursor-pointer hover-lift`}
                 >
                   <feature.icon className={`${isMobile ? 'w-7 h-7' : 'w-8 h-8'} text-blue-600 dark:text-purple-400 mx-auto ${isMobile ? 'mb-3' : 'mb-4'} group-hover:text-purple-600 dark:group-hover:text-pink-400 transition-all duration-200 group-hover:scale-110`} />
                   <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-gray-900 dark:text-white mb-2 tracking-tight`}>
@@ -713,40 +741,19 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
                 { keys: '⌘⇧Q', desc: 'Quantum Analysis', category: 'ai' }
               ].map((shortcut, index) => (
                 <div
-                  Deploy the complete Python backend to access all 6 AI systems, real-time collaboration, 
-                  and production-grade features. The backend includes DreamCore Memory, Nexus Signal Engine, 
-                  Aegis Council, Quantum Optimizer, Ethical Governance, and Neural Predictor.
+                  key={index}
+                  className={`${isMobile ? 'p-3' : 'p-4'} bg-gradient-to-br from-white/90 via-gray-50/60 to-blue-50/60 dark:from-gray-800/90 dark:via-gray-750/60 dark:to-blue-950/60 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200/50 dark:border-gray-700/50 group hover-lift`}
+                >
                   <div className="flex items-center justify-between">
-                
-                <div className="flex flex-col sm:flex-row gap-3 mb-4">
-                  <button
-                    onClick={startBackend}
-                    disabled={isStartingBackend}
-                    className="flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 font-medium"
-                  >
-                    {isStartingBackend ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>Starting Backend...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Play className="w-5 h-5" />
-                        <span>🚀 One-Click Start Backend</span>
-                      </>
-                    )}
-                  </button>
-                  
-                  <button
-                    onClick={() => setShowBackendSetup(!showBackendSetup)}
-                    className="flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 font-medium"
-                  >
-                    <Settings className="w-5 h-5" />
-                    <span>Step-by-Step Setup</span>
-                  </button>
+                    <kbd className={`${isMobile ? 'px-2 py-1' : 'px-3 py-2'} bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded font-mono ${isMobile ? 'text-xs' : 'text-sm'} font-semibold shadow-sm`}>
+                      {shortcut.keys}
+                    </kbd>
+                    <span className={`${isMobile ? 'text-sm' : 'text-base'} text-gray-700 dark:text-gray-300 font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors`}>
+                      {shortcut.desc}
+                    </span>
+                  </div>
                 </div>
-                
-                <div className="flex space-x-3">
+              ))}
               
               {/* Auto-scroll indicator */}
               <div className="absolute top-2 right-2 flex items-center space-x-2 bg-gradient-to-r from-white/80 to-gray-50/80 dark:from-gray-800/80 dark:to-gray-750/80 backdrop-blur-xl rounded-full px-3 py-1.5 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
