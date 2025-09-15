@@ -6,13 +6,15 @@ FastAPI-based backend with all AI systems integrated
 import os
 import asyncio
 import logging
+import json
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 import uvicorn
 
@@ -30,12 +32,14 @@ from database.connection import DatabaseManager
 from utils.logger import setup_logger
 from utils.security import SecurityManager
 from utils.rate_limiter import RateLimiter
+from utils.websocket_manager import WebSocketManager
 
 # Setup logging
 logger = setup_logger(__name__)
 
 # Global AI systems
 ai_systems = {}
+websocket_manager = WebSocketManager()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -85,6 +89,7 @@ async def lifespan(app: FastAPI):
     finally:
         # Cleanup
         logger.info("🔄 Shutting down AI systems...")
+        await websocket_manager.disconnect_all()
         for system_name, system in ai_systems.items():
             try:
                 if hasattr(system, 'shutdown'):
@@ -113,6 +118,22 @@ app.add_middleware(
 # Security and rate limiting
 security_manager = SecurityManager()
 rate_limiter = RateLimiter()
+
+# Additional Pydantic models
+class CodeAnalysisRequest(BaseModel):
+    code: str = Field(..., description="Code to analyze")
+    language: str = Field(..., description="Programming language")
+    analysis_types: List[str] = Field(default=["quality", "security", "ethics"], description="Types of analysis to perform")
+
+class WebSocketMessage(BaseModel):
+    type: str = Field(..., description="Message type")
+    data: Dict[str, Any] = Field(default_factory=dict, description="Message data")
+    timestamp: Optional[str] = Field(default=None, description="Message timestamp")
+
+class CollaborationRequest(BaseModel):
+    session_id: str = Field(..., description="Collaboration session ID")
+    user_name: str = Field(..., description="User name")
+    code_changes: Optional[Dict[str, Any]] = Field(None, description="Code changes")
 
 # Pydantic models for API requests/responses
 class QuantumOptimizationRequest(BaseModel):
@@ -460,6 +481,162 @@ async def global_exception_handler(request, exc):
             "timestamp": datetime.utcnow().isoformat()
         }
     )
+
+# WebSocket endpoint for real-time collaboration
+@app.websocket("/ws/{session_id}")
+async def websocket_endpoint(websocket: WebSocket, session_id: str):
+    """WebSocket endpoint for real-time collaboration"""
+    await websocket_manager.connect(websocket, session_id)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            message = json.loads(data)
+            
+            # Broadcast to all clients in session
+            await websocket_manager.broadcast_to_session(session_id, message)
+            
+    except WebSocketDisconnect:
+        websocket_manager.disconnect(websocket, session_id)
+    except Exception as e:
+        logger.error(f"WebSocket error: {e}")
+        websocket_manager.disconnect(websocket, session_id)
+
+# Additional API Endpoints
+
+@app.post("/api/analysis/comprehensive")
+async def comprehensive_analysis(request: CodeAnalysisRequest):
+    """Run comprehensive AI analysis using all systems"""
+    try:
+        results = {}
+        
+        # Quantum optimization
+        if 'quantum' in request.analysis_types and 'quantum' in ai_systems:
+            quantum_result = await ai_systems['quantum'].optimize(
+                objectives=["performance", "maintainability"],
+                code_context=request.code
+            )
+            results['quantum'] = quantum_result
+        
+        # Ethical analysis
+        if 'ethics' in request.analysis_types and 'ethical' in ai_systems:
+            ethical_result = await ai_systems['ethical'].analyze_code(
+                code=request.code,
+                language=request.language
+            )
+            results['ethical'] = ethical_result
+        
+        # Nexus signal processing
+        if 'security' in request.analysis_types and 'nexus' in ai_systems:
+            nexus_result = ai_systems['nexus'].process(request.code)
+            results['nexus'] = nexus_result
+        
+        # Neural predictions
+        if 'neural' in request.analysis_types and 'neural' in ai_systems:
+            neural_result = await ai_systems['neural'].predict_next_lines(
+                code=request.code,
+                language=request.language
+            )
+            results['neural'] = neural_result
+        
+        return {
+            "success": True,
+            "data": results,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Comprehensive analysis failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Comprehensive analysis failed: {str(e)}")
+
+@app.post("/api/collaboration/create")
+async def create_collaboration_session(request: CollaborationRequest):
+    """Create a new collaboration session"""
+    try:
+        session_info = await websocket_manager.create_session(
+            request.session_id,
+            request.user_name
+        )
+        
+        return {
+            "success": True,
+            "data": session_info,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Collaboration session creation failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Session creation failed: {str(e)}")
+
+@app.get("/api/collaboration/sessions")
+async def get_active_sessions():
+    """Get list of active collaboration sessions"""
+    try:
+        sessions = websocket_manager.get_active_sessions()
+        
+        return {
+            "success": True,
+            "data": sessions,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to get sessions: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get sessions: {str(e)}")
+
+@app.post("/api/code/validate")
+async def validate_code(request: CodeAnalysisRequest):
+    """Validate code for security and quality issues"""
+    try:
+        validation_result = security_manager.validate_code_input(
+            request.code, 
+            request.language
+        )
+        
+        return {
+            "success": True,
+            "data": validation_result,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Code validation failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Code validation failed: {str(e)}")
+
+@app.get("/api/metrics/performance")
+async def get_performance_metrics():
+    """Get system performance metrics"""
+    try:
+        metrics = {
+            "ai_systems_status": {},
+            "database_connections": len(app.state.db.connections) if hasattr(app.state, 'db') else 0,
+            "active_websockets": websocket_manager.get_connection_count(),
+            "memory_usage": "normal",
+            "cpu_usage": "normal",
+            "uptime": datetime.utcnow().isoformat()
+        }
+        
+        # Get AI system status
+        for name, system in ai_systems.items():
+            try:
+                metrics["ai_systems_status"][name] = {
+                    "active": system.is_active() if hasattr(system, 'is_active') else True,
+                    "status": "operational"
+                }
+            except Exception as e:
+                metrics["ai_systems_status"][name] = {
+                    "active": False,
+                    "status": f"error: {str(e)}"
+                }
+        
+        return {
+            "success": True,
+            "data": metrics,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Performance metrics failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Performance metrics failed: {str(e)}")
 
 if __name__ == "__main__":
     # Load environment variables
