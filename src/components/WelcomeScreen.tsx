@@ -489,3 +489,129 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
                 Deploy the complete Python backend with all 6 AI systems to unlock the full power of Codette. 
                 Follow the setup guide below to get started with quantum optimization, ethical governance, and real-time collaboration.
               </p>
+              <div className="bg-blue-100 dark:bg-blue-900/30 rounded-lg p-4 mb-4">
+                <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">Backend Setup Steps:</h4>
+                <ol className="text-sm text-blue-800 dark:text-blue-200 space-y-1 text-left">
+                  <li>1. <code className="bg-blue-200 dark:bg-blue-800 px-1 rounded">cd backend</code></li>
+                  <li>2. <code className="bg-blue-200 dark:bg-blue-800 px-1 rounded">pip install -r requirements.txt</code></li>
+                  <li>3. <code className="bg-blue-200 dark:bg-blue-800 px-1 rounded">python start.py</code></li>
+                </ol>
+              </div>
+            </div>
+          )}
+
+          {/* Features Grid */}
+          <div className={`${isMobile ? 'mb-8' : 'mb-16'}`}>
+            <h2 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-semibold text-gray-900 dark:text-white mb-6 tracking-tight`}>
+              Revolutionary Features
+            </h2>
+            
+            <div 
+              ref={featuresScroll.elementRef}
+              className={`${isMobile ? 'grid grid-cols-1 gap-4' : 'flex space-x-6 overflow-x-auto pb-4'} relative`}
+            >
+              {features.map((feature, index) => (
+                <div
+                  key={index}
+                  className={`${isMobile ? 'w-full' : 'min-w-64 w-64'} ${isMobile ? 'p-4' : 'p-6'} bg-gradient-to-br from-white/90 via-blue-50/60 to-purple-50/60 dark:from-gray-800/90 dark:via-blue-950/60 dark:to-purple-950/60 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-blue-200/50 dark:border-purple-700/50 group cursor-pointer hover-lift`}
+                >
+                  <feature.icon className={`${isMobile ? 'w-6 h-6' : 'w-8 h-8'} text-blue-600 dark:text-purple-400 mx-auto ${isMobile ? 'mb-3' : 'mb-4'} group-hover:text-purple-600 dark:group-hover:text-pink-400 transition-all duration-200 group-hover:scale-110`} />
+                  <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-gray-900 dark:text-white mb-2 tracking-tight`}>
+                    {feature.title}
+                  </h3>
+                  <p className={`${isMobile ? 'text-sm' : 'text-sm'} text-gray-600 dark:text-gray-400 font-medium group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors`}>
+                    {feature.description}
+                  </p>
+                </div>
+              ))}
+              
+              {/* Auto-scroll indicator for features */}
+              {!isMobile && (
+                <div className="absolute top-2 right-2 flex items-center space-x-2 bg-gradient-to-r from-white/80 to-blue-50/80 dark:from-gray-800/80 dark:to-purple-950/80 backdrop-blur-xl rounded-full px-3 py-1.5 shadow-lg border border-blue-200/50 dark:border-purple-700/50">
+                  <div className={`w-2 h-2 rounded-full ${featuresScroll.isPaused ? 'bg-yellow-500' : 'bg-green-500 animate-pulse'}`} />
+                  <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                    {featuresScroll.isPaused ? 'Paused' : 'Auto-scrolling'}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Keyboard Shortcuts */}
+          <div className={`${isMobile ? 'mb-8' : 'mb-16'}`}>
+            <h2 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-semibold text-gray-900 dark:text-white mb-6 tracking-tight`}>
+              Keyboard Shortcuts
+            </h2>
+            
+            <div 
+              ref={shortcutsScroll.elementRef}
+              className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2 md:grid-cols-3'} gap-4 ${isMobile ? 'max-h-48' : 'max-h-64'} overflow-y-auto relative`}
+            >
+              {[
+                { keys: '⌘K', desc: 'Command Palette', category: 'navigation' },
+                { keys: '⌘S', desc: 'Save File', category: 'file' },
+                { keys: '⌘⇧A', desc: 'AI Assistant', category: 'ai' },
+                { keys: '⌘`', desc: 'Toggle Terminal', category: 'view' },
+                { keys: '⌘I', desc: 'Optimize Code', category: 'ai' },
+                { keys: '⌘⇧F', desc: 'Focus Mode', category: 'view' },
+                { keys: '⌘⇧M', desc: 'Music Player', category: 'ai' },
+                { keys: '⌘⇧Q', desc: 'Quantum Analysis', category: 'ai' },
+                { keys: '⌘T', desc: 'Toggle Theme', category: 'view' }
+              ].map((shortcut, index) => (
+                <div key={index} className={`${isMobile ? 'p-3' : 'p-4'} bg-gradient-to-br from-white/80 via-gray-50/60 to-blue-50/60 dark:from-gray-800/80 dark:via-gray-750/60 dark:to-purple-950/60 backdrop-blur-sm rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border border-gray-200/50 dark:border-gray-700/50 group`}>
+                  <div className="flex items-center justify-between">
+                    <kbd className={`${isMobile ? 'px-2 py-1' : 'px-3 py-2'} bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg font-mono ${isMobile ? 'text-xs' : 'text-sm'} font-semibold text-gray-800 dark:text-gray-200 shadow-sm group-hover:shadow-md transition-all`}>
+                      {shortcut.keys}
+                    </kbd>
+                    <span className={`${isMobile ? 'text-sm' : 'text-sm'} text-gray-700 dark:text-gray-300 font-medium ml-3 group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors`}>
+                      {shortcut.desc}
+                    </span>
+                  </div>
+                </div>
+              ))}
+              
+              {/* Auto-scroll indicator for shortcuts */}
+              <div className="absolute top-2 right-2 flex items-center space-x-2 bg-gradient-to-r from-white/80 to-gray-50/80 dark:from-gray-800/80 dark:to-gray-750/80 backdrop-blur-xl rounded-full px-3 py-1.5 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
+                <div className={`w-2 h-2 rounded-full ${shortcutsScroll.isPaused ? 'bg-yellow-500' : 'bg-green-500 animate-pulse'}`} />
+                <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                  {shortcutsScroll.isPaused ? 'Paused' : 'Auto-scrolling'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className={`text-center ${isMobile ? 'mt-8' : 'mt-16'}`}>
+            <div className={`${isMobile ? 'p-6' : 'p-8'} bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl shadow-lg border border-purple-200/50 dark:border-purple-700/50 backdrop-blur-sm`}>
+              <div className="flex items-center justify-center space-x-3 mb-4">
+                <Heart className="w-6 h-6 text-red-500 animate-pulse" />
+                <span className={`${isMobile ? 'text-lg' : 'text-xl'} font-bold text-gray-900 dark:text-white`}>
+                  Built with Genuine Care
+                </span>
+                <Heart className="w-6 h-6 text-red-500 animate-pulse" />
+              </div>
+              <p className={`${isMobile ? 'text-sm' : 'text-base'} text-gray-700 dark:text-gray-300 font-medium leading-relaxed`}>
+                Codette isn't just another development tool. It's built on real research, genuine innovation, 
+                and a deep commitment to making coding more ethical, accessible, and joyful for everyone.
+              </p>
+              <div className={`${isMobile ? 'mt-4' : 'mt-6'} flex items-center justify-center space-x-6 text-sm text-gray-600 dark:text-gray-400`}>
+                <div className="flex items-center space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                  <span>Research-Backed</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                  <span>Ethically Designed</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                  <span>Open Source</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
