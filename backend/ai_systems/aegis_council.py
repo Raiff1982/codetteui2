@@ -7,11 +7,12 @@ import asyncio
 import json
 import logging
 import numpy as np
-import sqlite3
+import aiosqlite
 import os
 import hashlib
+import statistics
 from datetime import datetime
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, asdict
 
 logger = logging.getLogger(__name__)
@@ -51,7 +52,7 @@ class AegisCouncil:
         self.agents: Dict[str, Agent] = {}
         self.decision_history: List[Dict[str, Any]] = []
         self.is_initialized = False
-        self.conn: Optional[sqlite3.Connection] = None
+        self.conn: Optional[aiosqlite.Connection] = None
         
         # Virtue definitions
         self.virtues = {
@@ -62,15 +63,23 @@ class AegisCouncil:
         }
         
         # Ensure data directory exists
-        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+        db_dir = os.path.dirname(self.db_path)
+        if db_dir:  # Guard against empty dirname
+            os.makedirs(db_dir, exist_ok=True)
     
     async def initialize(self):
         """Initialize the Aegis Council"""
         try:
             logger.info("Initializing Aegis Council...")
             
-            # Create database connection
-            self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
+            # Create database connection with WAL mode
+            self.conn = await aiosqlite.connect(self.db_path)
+            
+            # Enable WAL mode and performance optimizations
+            await self.conn.execute("PRAGMA journal_mode=WAL")
+            await self.conn.execute("PRAGMA synchronous=NORMAL")
+            await self.conn.execute("PRAGMA foreign_keys=ON")
+            
             await self._create_tables()
             
             # Initialize agents
@@ -88,12 +97,10 @@ class AegisCouncil:
     
     async def _create_tables(self):
         """Create database tables"""
-        cursor = self.conn.cursor()
-        
-        cursor.execute("""
+        await self.conn.execute("""
             CREATE TABLE IF NOT EXISTS council_decisions (
                 id TEXT PRIMARY KEY,
-                input_text TEXT NOT NULL,
+                input_text_redacted TEXT NOT NULL,
                 decision_data TEXT NOT NULL,
                 timestamp TEXT NOT NULL,
                 consensus_strength REAL NOT NULL,
@@ -101,7 +108,7 @@ class AegisCouncil:
             )
         """)
         
-        cursor.execute("""
+        await self.conn.execute("""
             CREATE TABLE IF NOT EXISTS agent_votes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 decision_id TEXT NOT NULL,
@@ -112,7 +119,18 @@ class AegisCouncil:
             )
         """)
         
-        self.conn.commit()
+        # Add performance indices
+        await self.conn.execute("""
+            CREATE INDEX IF NOT EXISTS idx_council_decisions_timestamp 
+            ON council_decisions (timestamp DESC)
+        """)
+        
+        await self.conn.execute("""
+            CREATE INDEX IF NOT EXISTS idx_agent_votes_decision_id 
+            ON agent_votes (decision_id)
+        """)
+        
+        await self.conn.commit()
         logger.info("📊 Aegis Council database tables created")
     
     def _initialize_agents(self):
@@ -209,22 +227,26 @@ class AegisCouncil:
             
             # Collect agent votes
             agent_votes = {}
-            virtue_scores = {virtue: 0.0 for virtue in self.virtues.keys()}
+            virtue_scores = {}
             
             for agent_name, agent in self.agents.items():
                 vote = await self._get_agent_vote(agent, input_text)
                 agent_votes[agent_name] = vote
-                
-                # Accumulate virtue scores weighted by agent influence
-                for virtue, score in vote["virtue_assessment"].items():
-                    if virtue in virtue_scores:
-                        weight = agent.virtue_weights.get(virtue, 0.25) * agent.influence
-                        virtue_scores[virtue] += score * weight
             
-            # Normalize virtue scores
-            total_influence = sum(agent.influence for agent in self.agents.values())
-            for virtue in virtue_scores:
-                virtue_scores[virtue] /= total_influence
+            # Calculate virtue scores with proper weighted normalization
+            for virtue in self.virtues.keys():
+                weighted_sum = 0.0
+                total_weight = 0.0
+                
+                for agent_name, agent in self.agents.items():
+                    vote = agent_votes[agent_name]
+                    virtue_weight = agent.virtue_weights.get(virtue, 0.25)
+                    agent_weight = virtue_weight * agent.influence
+                    
+                    weighted_sum += vote["virtue_assessment"].get(virtue, 0.5) * agent_weight
+                    total_weight += agent_weight
+                
+                virtue_scores[virtue] = weighted_sum / total_weight if total_weight > 0 else 0.5
             
             # Calculate consensus strength
             consensus_strength = self._calculate_consensus(agent_votes)
@@ -233,7 +255,9 @@ class AegisCouncil:
             decision_result = self._make_final_decision(agent_votes, virtue_scores, consensus_strength)
             
             # Create decision record
+            decision_id = hashlib.sha256(f"{input_text}{datetime.utcnow().isoformat()}".encode()).hexdigest()[:16]
             decision = {
+                "decision_id": decision_id,
                 "override_decision": decision_result["decision"],
                 "scores": list(virtue_scores.items()),
                 "virtue_profile": virtue_scores,
@@ -243,13 +267,13 @@ class AegisCouncil:
                 "reasoning": decision_result["reasoning"],
                 "dissenting_opinions": decision_result["dissenting_opinions"],
                 "agent_votes": agent_votes,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.utcnow().isoformat() + "Z"  # Proper UTC timestamp
             }
             
             # Store decision
-            await self._store_decision(input_text, decision)
+            await self._store_decision(self._redact_input(input_text), decision)
             
-            logger.info(f"⚖️ Council decision: {decision['override_decision']} (consensus: {consensus_strength:.2f})")
+            logger.info(f"⚖️ [{decision_id}] Council decision: {decision['override_decision']} (consensus: {consensus_strength:.2f})")
             return decision
             
         except Exception as e:
@@ -412,15 +436,28 @@ class AegisCouncil:
         if not rec_counts:
             return 0.0
         
-        # Calculate consensus as percentage of agents agreeing with majority
+        # Find majority recommendation with tie-breaking
         max_count = max(rec_counts.values())
-        consensus = max_count / len(recommendations)
+        majority_recs = [rec for rec, count in rec_counts.items() if count == max_count]
+        
+        # Tie-breaking: pick recommendation with highest sum of reliabilities
+        if len(majority_recs) > 1:
+            rec_reliability_sums = {}
+            for rec in majority_recs:
+                reliability_sum = sum(
+                    self.agents[agent_name].reliability * self.agents[agent_name].influence
+                    for agent_name, vote in agent_votes.items()
+                    if vote["recommendation"] == rec
+                )
+                rec_reliability_sums[rec] = reliability_sum
+            
+            majority_rec = max(rec_reliability_sums.keys(), key=lambda k: rec_reliability_sums[k])
+        else:
+            majority_rec = majority_recs[0]
         
         # Weight by agent reliability
         weighted_consensus = 0.0
         total_reliability = 0.0
-        
-        majority_rec = max(rec_counts.keys(), key=lambda k: rec_counts[k])
         
         for agent_name, vote in agent_votes.items():
             agent = self.agents[agent_name]
@@ -447,7 +484,7 @@ class AegisCouncil:
         majority_decision = max(rec_counts.keys(), key=lambda k: rec_counts[k]) if rec_counts else "review_required"
         
         # Calculate overall virtue score
-        overall_virtue = np.mean(list(virtue_scores.values()))
+        overall_virtue = statistics.fmean(virtue_scores.values()) if virtue_scores else 0.5
         
         # Determine temporal forecast
         if consensus_strength > 0.85 and overall_virtue > 0.8:
@@ -541,20 +578,35 @@ class AegisCouncil:
         else:
             return f"Meta-analysis shows {avg_virtue:.2f} overall virtue alignment with {agent.reliability:.2f} confidence."
     
-    async def _store_decision(self, input_text: str, decision: Dict[str, Any]):
+    def _redact_input(self, input_text: str) -> str:
+        """Redact PII from input before storage"""
+        import re
+        
+        redacted = input_text
+        
+        # Redact email addresses
+        redacted = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', '[EMAIL_REDACTED]', redacted)
+        
+        # Redact phone numbers
+        redacted = re.sub(r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b', '[PHONE_REDACTED]', redacted)
+        
+        # Redact potential tokens (long alphanumeric strings)
+        redacted = re.sub(r'\b[A-Za-z0-9]{32,}\b', '[TOKEN_REDACTED]', redacted)
+        
+        return redacted
+    
+    async def _store_decision(self, redacted_input: str, decision: Dict[str, Any]):
         """Store council decision in database"""
         try:
-            decision_id = hashlib.sha256(f"{input_text}{decision['timestamp']}".encode()).hexdigest()[:16]
+            decision_id = decision["decision_id"]
             
-            cursor = self.conn.cursor()
-            
-            cursor.execute("""
-                INSERT INTO council_decisions 
-                (id, input_text, decision_data, timestamp, consensus_strength, ethical_compliance)
+            await self.conn.execute("""
+                INSERT OR REPLACE INTO council_decisions 
+                (id, input_text_redacted, decision_data, timestamp, consensus_strength, ethical_compliance)
                 VALUES (?, ?, ?, ?, ?, ?)
             """, (
                 decision_id,
-                input_text,
+                redacted_input,
                 json.dumps(decision),
                 decision["timestamp"],
                 decision["consensus_strength"],
@@ -563,7 +615,7 @@ class AegisCouncil:
             
             # Store individual agent votes
             for agent_name, vote in decision["agent_votes"].items():
-                cursor.execute("""
+                await self.conn.execute("""
                     INSERT INTO agent_votes 
                     (decision_id, agent_name, vote_data, timestamp)
                     VALUES (?, ?, ?, ?)
@@ -574,27 +626,26 @@ class AegisCouncil:
                     decision["timestamp"]
                 ))
             
-            self.conn.commit()
+            await self.conn.commit()
+            logger.info(f"📊 [{decision_id}] Decision stored successfully")
             
         except Exception as e:
-            logger.error(f"❌ Failed to store decision: {e}")
+            logger.error(f"❌ [{decision.get('decision_id', 'unknown')}] Failed to store decision: {e}")
     
     async def _load_decision_history(self):
         """Load decision history from database"""
         try:
-            cursor = self.conn.cursor()
-            cursor.execute("""
+            async with self.conn.execute("""
                 SELECT decision_data FROM council_decisions 
                 ORDER BY timestamp DESC 
                 LIMIT 100
-            """)
-            
-            for row in cursor.fetchall():
-                try:
-                    decision = json.loads(row[0])
-                    self.decision_history.append(decision)
-                except Exception as e:
-                    logger.warning(f"Failed to load decision: {e}")
+            """) as cursor:
+                async for row in cursor:
+                    try:
+                        decision = json.loads(row[0])
+                        self.decision_history.append(decision)
+                    except Exception as e:
+                        logger.warning(f"Failed to load decision: {e}")
             
             logger.info(f"📚 Loaded {len(self.decision_history)} council decisions")
             
@@ -627,7 +678,7 @@ class AegisCouncil:
         """Shutdown Aegis Council"""
         try:
             if self.conn:
-                self.conn.close()
+                await self.conn.close()
                 self.conn = None
             logger.info("🔄 Aegis Council shutdown complete")
         except Exception as e:

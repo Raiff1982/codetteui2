@@ -94,19 +94,39 @@ class SecurityManager:
     def validate_code_input(self, code: str, language: str) -> Dict[str, Any]:
         """Validate code input for security issues"""
         issues = []
+        risk_level = "low"
         
         # Check for dangerous patterns
         if 'eval(' in code:
             issues.append("eval() usage detected - potential code injection")
+            risk_level = "high"
         
         if '<script' in code.lower():
             issues.append("Script tags detected - potential XSS")
+            risk_level = "high"
         
         if 'innerHTML' in code and 'sanitize' not in code:
             issues.append("Unsafe innerHTML usage - potential XSS")
+            risk_level = "medium" if risk_level == "low" else risk_level
+        
+        # Enhanced security checks
+        if 'document.write' in code:
+            issues.append("document.write usage - potential XSS")
+            risk_level = "medium" if risk_level == "low" else risk_level
+        
+        if re.search(r'new\s+Function\s*\(', code):
+            issues.append("Function constructor usage - potential code injection")
+            risk_level = "high"
+        
+        # Check for SQL injection patterns
+        if re.search(r'query\s*\+\s*[\'"]', code):
+            issues.append("String concatenation in SQL query - potential injection")
+            risk_level = "high"
         
         return {
             "valid": len(issues) == 0,
             "issues": issues,
-            "risk_level": "high" if len(issues) > 2 else "medium" if len(issues) > 0 else "low"
+            "risk_level": risk_level,
+            "requires_review": risk_level in ["high", "medium"],
+            "auto_block": risk_level == "high" and len(issues) > 2
         }

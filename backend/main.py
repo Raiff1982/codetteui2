@@ -61,19 +61,19 @@ async def lifespan(app: FastAPI):
         await ai_systems['dreamcore'].initialize()
         
         ai_systems['nexus'] = NexusSignalEngine()
-        ai_systems['nexus'].initialize()
+        await ai_systems['nexus'].initialize()
         
         ai_systems['aegis'] = AegisCouncil()
         await ai_systems['aegis'].initialize()
         
         ai_systems['quantum'] = QuantumMultiObjectiveOptimizer()
-        ai_systems['quantum'].initialize()
+        await ai_systems['quantum'].initialize()
         
         ai_systems['ethical'] = EthicalAIGovernance()
-        ai_systems['ethical'].initialize()
+        await ai_systems['ethical'].initialize()
         
         ai_systems['neural'] = NeuralCodePredictor()
-        ai_systems['neural'].initialize()
+        await ai_systems['neural'].initialize()
         
         ai_systems['music'] = AIComposer()
         ai_systems['music'].initialize()
@@ -417,7 +417,7 @@ async def comprehensive_analysis(request: CodeAnalysisRequest):
         
         # Nexus signal processing
         if 'nexus' in ai_systems:
-            nexus_result = ai_systems['nexus'].process(request.code)
+            nexus_result = await ai_systems['nexus'].process(request.code)
             results['nexus'] = nexus_result
         
         # Neural predictions
@@ -529,7 +529,7 @@ async def comprehensive_analysis(request: CodeAnalysisRequest):
         
         # Nexus signal processing
         if 'security' in request.analysis_types and 'nexus' in ai_systems:
-            nexus_result = ai_systems['nexus'].process(request.code)
+            nexus_result = await ai_systems['nexus'].process(request.code)
             results['nexus'] = nexus_result
         
         # Neural predictions

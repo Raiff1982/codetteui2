@@ -8,9 +8,10 @@ This implements the actual DreamCore system described in the research paper.
 
 import asyncio
 import json
-import sqlite3
+import aiosqlite
 import hashlib
 import numpy as np
+import statistics
 import os
 from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional, Tuple
@@ -55,10 +56,12 @@ class DreamCoreMemory:
         self.emotional_vectors: Dict[str, np.ndarray] = {}
         self.wake_state_tracers: List[Dict[str, Any]] = []
         self.is_initialized = False
-        self.conn: Optional[sqlite3.Connection] = None
+        self.conn: Optional[aiosqlite.Connection] = None
         
         # Ensure data directory exists
-        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+        db_dir = os.path.dirname(self.db_path)
+        if db_dir:
+            os.makedirs(db_dir, exist_ok=True)
         
     async def initialize(self):
         """Initialize the DreamCore system"""
@@ -66,7 +69,13 @@ class DreamCoreMemory:
             logger.info("Initializing DreamCore Memory System...")
             
             # Create database connection
-            self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
+            self.conn = await aiosqlite.connect(self.db_path)
+            
+            # Enable WAL mode and performance optimizations
+            await self.conn.execute("PRAGMA journal_mode=WAL")
+            await self.conn.execute("PRAGMA synchronous=NORMAL")
+            await self.conn.execute("PRAGMA foreign_keys=ON")
+            
             await self._create_tables()
             
             # Load existing memories
@@ -84,16 +93,11 @@ class DreamCoreMemory:
     
     async def _create_tables(self):
         """Create database tables for memory storage"""
-        if not self.conn:
-            raise RuntimeError("Database connection not established")
-            
-        cursor = self.conn.cursor()
-        
-        cursor.execute("""
+        await self.conn.execute("""
             CREATE TABLE IF NOT EXISTS memories (
                 id TEXT PRIMARY KEY,
                 emotion_tag TEXT NOT NULL,
-                content TEXT NOT NULL,
+                content_redacted TEXT NOT NULL,
                 emotional_weight REAL NOT NULL,
                 created_at TEXT NOT NULL,
                 last_accessed TEXT NOT NULL,
@@ -103,7 +107,7 @@ class DreamCoreMemory:
             )
         """)
         
-        cursor.execute("""
+        await self.conn.execute("""
             CREATE TABLE IF NOT EXISTS wake_state_traces (
                 id TEXT PRIMARY KEY,
                 trigger_event TEXT NOT NULL,
@@ -115,7 +119,7 @@ class DreamCoreMemory:
             )
         """)
         
-        cursor.execute("""
+        await self.conn.execute("""
             CREATE TABLE IF NOT EXISTS emotional_vectors (
                 emotion TEXT PRIMARY KEY,
                 vector_data TEXT NOT NULL,
@@ -123,30 +127,28 @@ class DreamCoreMemory:
             )
         """)
         
-        self.conn.commit()
+        await self.conn.commit()
         logger.info("📊 DreamCore database tables created")
     
     async def _load_memories(self):
         """Load existing memories from database"""
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT * FROM memories")
-        
-        for row in cursor.fetchall():
-            try:
-                memory = EmotionalMemory(
-                    id=row[0],
-                    emotion_tag=row[1],
-                    content=row[2],
-                    emotional_weight=row[3],
-                    created_at=datetime.fromisoformat(row[4]),
-                    last_accessed=datetime.fromisoformat(row[5]),
-                    access_count=row[6],
-                    decay_factor=row[7],
-                    anchors=json.loads(row[8])
-                )
-                self.memories[memory.id] = memory
-            except Exception as e:
-                logger.warning(f"Failed to load memory {row[0]}: {e}")
+        async with self.conn.execute("SELECT * FROM memories") as cursor:
+            async for row in cursor:
+                try:
+                    memory = EmotionalMemory(
+                        id=row[0],
+                        emotion_tag=row[1],
+                        content=row[2],
+                        emotional_weight=row[3],
+                        created_at=datetime.fromisoformat(row[4]),
+                        last_accessed=datetime.fromisoformat(row[5]),
+                        access_count=row[6],
+                        decay_factor=row[7],
+                        anchors=json.loads(row[8])
+                    )
+                    self.memories[memory.id] = memory
+                except Exception as e:
+                    logger.warning(f"Failed to load memory {row[0]}: {e}")
         
         logger.info(f"📚 Loaded {len(self.memories)} memories from database")
     
@@ -159,9 +161,10 @@ class DreamCoreMemory:
         ]
         
         # Load existing vectors or create new ones
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT emotion, vector_data FROM emotional_vectors")
-        existing_vectors = dict(cursor.fetchall())
+        existing_vectors = {}
+        async with self.conn.execute("SELECT emotion, vector_data FROM emotional_vectors") as cursor:
+            async for row in cursor:
+                existing_vectors[row[0]] = row[1]
         
         for emotion in emotions:
             if emotion in existing_vectors:
@@ -175,12 +178,12 @@ class DreamCoreMemory:
                 self.emotional_vectors[emotion] = vector
                 
                 # Save to database
-                cursor.execute("""
+                await self.conn.execute("""
                     INSERT OR REPLACE INTO emotional_vectors (emotion, vector_data, last_updated)
                     VALUES (?, ?, ?)
-                """, (emotion, json.dumps(vector.tolist()), datetime.utcnow().isoformat()))
+                """, (emotion, json.dumps(vector.tolist()), datetime.utcnow().isoformat() + "Z"))
         
-        self.conn.commit()
+        await self.conn.commit()
         logger.info("🧠 Emotional vector space initialized")
     
     async def store_memory(
@@ -194,8 +197,11 @@ class DreamCoreMemory:
         try:
             memory_id = self._generate_memory_id(content)
             
+            # Redact content before storage
+            redacted_content = self._redact_content(content)
+            
             if anchors is None:
-                anchors = self._generate_anchors(content, emotion_tag)
+                anchors = self._generate_anchors(redacted_content, emotion_tag)
             
             # Convert anchors to serializable format
             anchors_data = [asdict(anchor) for anchor in anchors]
@@ -203,7 +209,7 @@ class DreamCoreMemory:
             memory = EmotionalMemory(
                 id=memory_id,
                 emotion_tag=emotion_tag,
-                content=content,
+                content=redacted_content,
                 anchors=anchors_data,
                 emotional_weight=emotional_weight,
                 created_at=datetime.utcnow(),
@@ -344,25 +350,23 @@ class DreamCoreMemory:
     
     async def _persist_memory(self, memory: EmotionalMemory):
         """Persist memory to database"""
-        cursor = self.conn.cursor()
-        
-        cursor.execute("""
+        await self.conn.execute("""
             INSERT OR REPLACE INTO memories 
-            (id, emotion_tag, content, emotional_weight, created_at, last_accessed, access_count, decay_factor, anchors)
+            (id, emotion_tag, content_redacted, emotional_weight, created_at, last_accessed, access_count, decay_factor, anchors)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             memory.id,
             memory.emotion_tag,
             memory.content,
             memory.emotional_weight,
-            memory.created_at.isoformat(),
-            memory.last_accessed.isoformat(),
+            memory.created_at.isoformat() + "Z",
+            memory.last_accessed.isoformat() + "Z",
             memory.access_count,
             memory.decay_factor,
             json.dumps(memory.anchors)
         ))
         
-        self.conn.commit()
+        await self.conn.commit()
     
     def _update_emotional_vectors(self, emotion_tag: str, weight: float):
         """Update emotional vector space based on new memory"""
@@ -377,17 +381,33 @@ class DreamCoreMemory:
                 self.emotional_vectors[emotion_tag] /= norm
             
             # Save updated vector to database
-            cursor = self.conn.cursor()
-            cursor.execute("""
+            await self.conn.execute("""
                 UPDATE emotional_vectors 
                 SET vector_data = ?, last_updated = ?
                 WHERE emotion = ?
             """, (
                 json.dumps(self.emotional_vectors[emotion_tag].tolist()),
-                datetime.utcnow().isoformat(),
+                datetime.utcnow().isoformat() + "Z",
                 emotion_tag
             ))
-            self.conn.commit()
+            await self.conn.commit()
+    
+    def _redact_content(self, content: str) -> str:
+        """Redact PII from content before storage"""
+        import re
+        
+        redacted = content
+        
+        # Redact email addresses
+        redacted = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', '[EMAIL_REDACTED]', redacted)
+        
+        # Redact phone numbers
+        redacted = re.sub(r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b', '[PHONE_REDACTED]', redacted)
+        
+        # Redact potential API keys/tokens
+        redacted = re.sub(r'\b[A-Za-z0-9]{32,}\b', '[TOKEN_REDACTED]', redacted)
+        
+        return redacted
     
     async def _apply_temporal_decay(self):
         """Apply temporal decay to memories as described in research"""
@@ -412,9 +432,8 @@ class DreamCoreMemory:
         for memory_id in decayed_memories:
             del self.memories[memory_id]
             # Remove from database
-            cursor = self.conn.cursor()
-            cursor.execute("DELETE FROM memories WHERE id = ?", (memory_id,))
-            self.conn.commit()
+            await self.conn.execute("DELETE FROM memories WHERE id = ?", (memory_id,))
+            await self.conn.commit()
         
         if decayed_memories:
             logger.info(f"🗑️ Removed {len(decayed_memories)} decayed memories")
@@ -427,7 +446,7 @@ class DreamCoreMemory:
         """Shutdown DreamCore system"""
         try:
             if self.conn:
-                self.conn.close()
+                await self.conn.close()
                 self.conn = None
             logger.info("🔄 DreamCore Memory System shutdown complete")
         except Exception as e:

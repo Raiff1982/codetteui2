@@ -8,9 +8,10 @@ This implements actual ethical analysis and governance systems.
 import asyncio
 import logging
 import numpy as np
-import sqlite3
+import aiosqlite
 import os
 import json
+import statistics
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 import re
@@ -38,19 +39,27 @@ class EthicalAIGovernance:
             "ban_negative_bias": True
         }
         self.is_initialized = False
-        self.conn: Optional[sqlite3.Connection] = None
+        self.conn: Optional[aiosqlite.Connection] = None
         
         # Ensure data directory exists
-        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+        db_dir = os.path.dirname(self.db_path)
+        if db_dir:
+            os.makedirs(db_dir, exist_ok=True)
         
-    def initialize(self):
+    async def initialize(self):
         """Initialize ethical governance system"""
         try:
             logger.info("Initializing Ethical AI Governance...")
             
             # Create database connection
-            self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
-            self._create_tables()
+            self.conn = await aiosqlite.connect(self.db_path)
+            
+            # Enable WAL mode and performance optimizations
+            await self.conn.execute("PRAGMA journal_mode=WAL")
+            await self.conn.execute("PRAGMA synchronous=NORMAL")
+            await self.conn.execute("PRAGMA foreign_keys=ON")
+            
+            await self._create_tables()
             
             self.is_initialized = True
             logger.info("✅ Ethical governance initialized successfully")
@@ -59,14 +68,12 @@ class EthicalAIGovernance:
             logger.error(f"❌ Ethical governance initialization failed: {e}")
             raise
     
-    def _create_tables(self):
+    async def _create_tables(self):
         """Create database tables"""
-        cursor = self.conn.cursor()
-        
-        cursor.execute("""
+        await self.conn.execute("""
             CREATE TABLE IF NOT EXISTS ethical_analyses (
                 id TEXT PRIMARY KEY,
-                code_content TEXT NOT NULL,
+                code_content_redacted TEXT NOT NULL,
                 language TEXT NOT NULL,
                 ethical_score REAL NOT NULL,
                 virtue_scores TEXT NOT NULL,
@@ -78,7 +85,7 @@ class EthicalAIGovernance:
             )
         """)
         
-        self.conn.commit()
+        await self.conn.commit()
         logger.info("📊 Ethical governance database tables created")
     
     async def analyze_code(self, code: str, language: str) -> Dict[str, Any]:
@@ -304,22 +311,39 @@ class EthicalAIGovernance:
         
         return recommendations
     
+    def _redact_code(self, code: str) -> str:
+        """Redact sensitive information from code before storage"""
+        import re
+        
+        redacted = code
+        
+        # Redact API keys and tokens
+        redacted = re.sub(r'["\']?[A-Za-z0-9]{32,}["\']?', '[API_KEY_REDACTED]', redacted)
+        
+        # Redact email addresses
+        redacted = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', '[EMAIL_REDACTED]', redacted)
+        
+        # Redact URLs with sensitive paths
+        redacted = re.sub(r'https?://[^\s]+/api/[^\s]*', '[API_URL_REDACTED]', redacted)
+        
+        return redacted
+    
     async def _store_analysis(self, code: str, language: str, result: Dict[str, Any]):
         """Store ethical analysis in database"""
         try:
-            cursor = self.conn.cursor()
+            redacted_code = self._redact_code(code)
             
             analysis_id = f"eth_{int(time.time() * 1000)}"
             
-            cursor.execute("""
+            await self.conn.execute("""
                 INSERT INTO ethical_analyses 
-                (id, code_content, language, ethical_score, virtue_scores, 
+                (id, code_content_redacted, language, ethical_score, virtue_scores, 
                  security_issues, accessibility_score, bias_indicators, 
                  recommendations, timestamp)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 analysis_id,
-                code[:1000],  # Limit code storage
+                redacted_code[:1000],  # Limit code storage
                 language,
                 result["ethical_score"],
                 json.dumps(result["virtue_scores"]),
@@ -330,7 +354,7 @@ class EthicalAIGovernance:
                 result["analysis_timestamp"]
             ))
             
-            self.conn.commit()
+            await self.conn.commit()
             logger.info(f"📊 Stored ethical analysis: {analysis_id}")
             
         except Exception as e:
@@ -340,11 +364,11 @@ class EthicalAIGovernance:
         """Check if ethical governance is active"""
         return self.is_initialized and self.conn is not None
     
-    def shutdown(self):
+    async def shutdown(self):
         """Shutdown ethical governance system"""
         try:
             if self.conn:
-                self.conn.close()
+                await self.conn.close()
                 self.conn = None
             logger.info("🔄 Ethical governance shutdown complete")
         except Exception as e:

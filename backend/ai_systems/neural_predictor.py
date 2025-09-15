@@ -8,9 +8,10 @@ This implements actual neural prediction for code completion.
 import asyncio
 import logging
 import numpy as np
-import sqlite3
+import aiosqlite
 import os
 import json
+import statistics
 import re
 from datetime import datetime
 from typing import Dict, Any, List, Optional
@@ -53,22 +54,30 @@ class NeuralCodePredictor:
         self.patterns = {}
         self.user_profiles = {}
         self.is_initialized = False
-        self.conn: Optional[sqlite3.Connection] = None
+        self.conn: Optional[aiosqlite.Connection] = None
         
         # Ensure data directory exists
-        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+        db_dir = os.path.dirname(self.db_path)
+        if db_dir:
+            os.makedirs(db_dir, exist_ok=True)
         
-    def initialize(self):
+    async def initialize(self):
         """Initialize the neural predictor"""
         try:
             logger.info("Initializing Neural Code Predictor...")
             
             # Create database connection
-            self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
-            self._create_tables()
+            self.conn = await aiosqlite.connect(self.db_path)
+            
+            # Enable WAL mode and performance optimizations
+            await self.conn.execute("PRAGMA journal_mode=WAL")
+            await self.conn.execute("PRAGMA synchronous=NORMAL")
+            await self.conn.execute("PRAGMA foreign_keys=ON")
+            
+            await self._create_tables()
             self._build_vocabulary()
             self._initialize_patterns()
-            self._load_user_profiles()
+            await self._load_user_profiles()
             
             self.is_initialized = True
             logger.info("✅ Neural predictor initialized successfully")
@@ -77,11 +86,9 @@ class NeuralCodePredictor:
             logger.error(f"❌ Neural predictor initialization failed: {e}")
             raise
     
-    def _create_tables(self):
+    async def _create_tables(self):
         """Create database tables"""
-        cursor = self.conn.cursor()
-        
-        cursor.execute("""
+        await self.conn.execute("""
             CREATE TABLE IF NOT EXISTS code_patterns (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 pattern_type TEXT NOT NULL,
@@ -95,7 +102,7 @@ class NeuralCodePredictor:
             )
         """)
         
-        cursor.execute("""
+        await self.conn.execute("""
             CREATE TABLE IF NOT EXISTS user_profiles (
                 user_id TEXT PRIMARY KEY,
                 coding_style TEXT NOT NULL,
@@ -108,11 +115,11 @@ class NeuralCodePredictor:
             )
         """)
         
-        cursor.execute("""
+        await self.conn.execute("""
             CREATE TABLE IF NOT EXISTS prediction_history (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id TEXT,
-                code_context TEXT NOT NULL,
+                code_context_redacted TEXT NOT NULL,
                 prediction TEXT NOT NULL,
                 accepted BOOLEAN NOT NULL,
                 confidence REAL NOT NULL,
@@ -121,7 +128,7 @@ class NeuralCodePredictor:
             )
         """)
         
-        self.conn.commit()
+        await self.conn.commit()
         logger.info("📊 Neural predictor database tables created")
     
     def _build_vocabulary(self):
@@ -165,24 +172,22 @@ class NeuralCodePredictor:
             "jsx_component": r"<[A-Z]\w*"
         }
     
-    def _load_user_profiles(self):
+    async def _load_user_profiles(self):
         """Load user profiles from database"""
         try:
-            cursor = self.conn.cursor()
-            cursor.execute("SELECT * FROM user_profiles")
-            
-            for row in cursor.fetchall():
-                profile = UserProfile(
-                    user_id=row[0],
-                    coding_style=row[1],
-                    skill_level=row[2],
-                    productivity_score=row[3],
-                    creativity_index=row[4],
-                    focus_areas=json.loads(row[5]),
-                    preferred_patterns=json.loads(row[6]),
-                    last_updated=datetime.fromisoformat(row[7])
-                )
-                self.user_profiles[profile.user_id] = profile
+            async with self.conn.execute("SELECT * FROM user_profiles") as cursor:
+                async for row in cursor:
+                    profile = UserProfile(
+                        user_id=row[0],
+                        coding_style=row[1],
+                        skill_level=row[2],
+                        productivity_score=row[3],
+                        creativity_index=row[4],
+                        focus_areas=json.loads(row[5]),
+                        preferred_patterns=json.loads(row[6]),
+                        last_updated=datetime.fromisoformat(row[7])
+                    )
+                    self.user_profiles[profile.user_id] = profile
             
             logger.info(f"📚 Loaded {len(self.user_profiles)} user profiles")
             
@@ -463,8 +468,7 @@ class NeuralCodePredictor:
                 profile.last_updated = datetime.utcnow()
             
             # Persist to database
-            cursor = self.conn.cursor()
-            cursor.execute("""
+            await self.conn.execute("""
                 INSERT OR REPLACE INTO user_profiles 
                 (user_id, coding_style, skill_level, productivity_score, 
                  creativity_index, focus_areas, preferred_patterns, last_updated)
@@ -477,7 +481,7 @@ class NeuralCodePredictor:
                 profile.creativity_index,
                 json.dumps(profile.focus_areas),
                 json.dumps(profile.preferred_patterns),
-                profile.last_updated.isoformat()
+                profile.last_updated.isoformat() + "Z"
             ))
             
         except Exception as e:
@@ -488,26 +492,23 @@ class NeuralCodePredictor:
         try:
             pattern_type = self._classify_pattern(prediction)
             
-            cursor = self.conn.cursor()
-            
             # Check if pattern exists
-            cursor.execute("""
+            async with self.conn.execute("""
                 SELECT id, frequency FROM code_patterns 
                 WHERE pattern_text = ? AND language = ? AND pattern_type = ?
-            """, (prediction, language, pattern_type))
-            
-            existing = cursor.fetchone()
+            """, (prediction, language, pattern_type)) as cursor:
+                existing = await cursor.fetchone()
             
             if existing:
                 # Update frequency
-                cursor.execute("""
+                await self.conn.execute("""
                     UPDATE code_patterns 
                     SET frequency = frequency + 1, updated_at = ?
                     WHERE id = ?
-                """, (datetime.utcnow().isoformat(), existing[0]))
+                """, (datetime.utcnow().isoformat() + "Z", existing[0]))
             else:
                 # Create new pattern
-                cursor.execute("""
+                await self.conn.execute("""
                     INSERT INTO code_patterns 
                     (pattern_type, pattern_text, language, frequency, confidence, context, created_at, updated_at)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -518,8 +519,8 @@ class NeuralCodePredictor:
                     1,
                     0.8,
                     context[:200],
-                    datetime.utcnow().isoformat(),
-                    datetime.utcnow().isoformat()
+                    datetime.utcnow().isoformat() + "Z",
+                    datetime.utcnow().isoformat() + "Z"
                 ))
             
         except Exception as e:
@@ -564,23 +565,38 @@ class NeuralCodePredictor:
     async def _store_prediction(self, user_id: str, code: str, prediction: Dict[str, Any], language: str):
         """Store prediction for future learning"""
         try:
-            cursor = self.conn.cursor()
-            cursor.execute("""
+            redacted_code = self._redact_code_context(code)
+            
+            await self.conn.execute("""
                 INSERT INTO prediction_history 
-                (user_id, code_context, prediction, accepted, confidence, language, timestamp)
+                (user_id, code_context_redacted, prediction, accepted, confidence, language, timestamp)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
                 user_id,
-                code[-200:],  # Last 200 chars of context
+                redacted_code[-200:],  # Last 200 chars of context
                 prediction["text"],
                 False,  # Will be updated when user accepts/rejects
                 prediction["confidence"],
                 language,
-                datetime.utcnow().isoformat()
+                datetime.utcnow().isoformat() + "Z"
             ))
             
         except Exception as e:
             logger.error(f"❌ Prediction storage failed: {e}")
+    
+    def _redact_code_context(self, code: str) -> str:
+        """Redact sensitive information from code context"""
+        import re
+        
+        redacted = code
+        
+        # Redact API keys and tokens
+        redacted = re.sub(r'["\']?[A-Za-z0-9]{32,}["\']?', '[API_KEY_REDACTED]', redacted)
+        
+        # Redact email addresses
+        redacted = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', '[EMAIL_REDACTED]', redacted)
+        
+        return redacted
     
     async def get_user_insights(self, user_id: str) -> Dict[str, Any]:
         """Get insights about user's coding patterns"""
@@ -589,17 +605,14 @@ class NeuralCodePredictor:
             if not profile:
                 return {"error": "User profile not found"}
             
-            # Get recent prediction history
-            cursor = self.conn.cursor()
-            cursor.execute("""
+            async with self.conn.execute("""
                 SELECT prediction, accepted, language, timestamp 
                 FROM prediction_history 
                 WHERE user_id = ? 
                 ORDER BY timestamp DESC 
                 LIMIT 50
-            """, (user_id,))
-            
-            history = cursor.fetchall()
+            """, (user_id,)) as cursor:
+                history = await cursor.fetchall()
             
             # Calculate acceptance rate
             total_predictions = len(history)
@@ -649,11 +662,11 @@ class NeuralCodePredictor:
         """Check if neural predictor is active"""
         return self.is_initialized and self.conn is not None
     
-    def shutdown(self):
+    async def shutdown(self):
         """Shutdown neural predictor"""
         try:
             if self.conn:
-                self.conn.close()
+                await self.conn.close()
                 self.conn = None
             logger.info("🔄 Neural predictor shutdown complete")
         except Exception as e:

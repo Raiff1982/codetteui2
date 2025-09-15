@@ -10,8 +10,9 @@ import hashlib
 import json
 import numpy as np
 import logging
-import sqlite3
+import aiosqlite
 import os
+import statistics
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 try:
@@ -37,7 +38,7 @@ class NexusSignalEngine:
         self.processing_history: List[Dict[str, Any]] = []
         self.agent_perspectives = ["Colleen", "Luke", "Kellyanne"]
         self.is_initialized = False
-        self.conn: Optional[sqlite3.Connection] = None
+        self.conn: Optional[aiosqlite.Connection] = None
         
         # Risk and virtue terms from research
         self.risk_terms = [
@@ -56,17 +57,25 @@ class NexusSignalEngine:
         ]
         
         # Ensure data directory exists
-        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+        db_dir = os.path.dirname(self.db_path)
+        if db_dir:
+            os.makedirs(db_dir, exist_ok=True)
     
-    def initialize(self):
+    async def initialize(self):
         """Initialize the signal engine"""
         try:
             logger.info("Initializing Nexus Signal Engine...")
             
             # Create database connection
-            self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
-            self._create_tables()
-            self._load_processing_history()
+            self.conn = await aiosqlite.connect(self.db_path)
+            
+            # Enable WAL mode and performance optimizations
+            await self.conn.execute("PRAGMA journal_mode=WAL")
+            await self.conn.execute("PRAGMA synchronous=NORMAL")
+            await self.conn.execute("PRAGMA foreign_keys=ON")
+            
+            await self._create_tables()
+            await self._load_processing_history()
             
             self.is_initialized = True
             logger.info("✅ Nexus Signal Engine initialized successfully")
@@ -75,14 +84,12 @@ class NexusSignalEngine:
             logger.error(f"❌ Nexus initialization failed: {e}")
             raise
     
-    def _create_tables(self):
+    async def _create_tables(self):
         """Create database tables"""
-        cursor = self.conn.cursor()
-        
-        cursor.execute("""
+        await self.conn.execute("""
             CREATE TABLE IF NOT EXISTS signal_analysis (
                 signal_hash TEXT PRIMARY KEY,
-                input_signal TEXT NOT NULL,
+                input_signal_redacted TEXT NOT NULL,
                 analysis_result TEXT NOT NULL,
                 timestamp TEXT NOT NULL,
                 ethics_score REAL NOT NULL,
@@ -90,7 +97,7 @@ class NexusSignalEngine:
             )
         """)
         
-        cursor.execute("""
+        await self.conn.execute("""
             CREATE TABLE IF NOT EXISTS agent_perspectives (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 signal_hash TEXT NOT NULL,
@@ -101,30 +108,34 @@ class NexusSignalEngine:
             )
         """)
         
-        self.conn.commit()
+        # Add performance indices
+        await self.conn.execute("""
+            CREATE INDEX IF NOT EXISTS idx_signal_analysis_timestamp 
+            ON signal_analysis (timestamp DESC)
+        """)
+        
+        await self.conn.commit()
         logger.info("📊 Nexus database tables created")
     
-    def _load_processing_history(self):
+    async def _load_processing_history(self):
         """Load processing history from database"""
-        cursor = self.conn.cursor()
-        cursor.execute("""
+        async with self.conn.execute("""
             SELECT signal_hash, analysis_result, timestamp 
             FROM signal_analysis 
             ORDER BY timestamp DESC 
             LIMIT 100
-        """)
-        
-        for row in cursor.fetchall():
-            try:
-                analysis = json.loads(row[1])
-                self.processing_history.append(analysis)
-                self.signal_cache[row[0]] = analysis
-            except Exception as e:
-                logger.warning(f"Failed to load analysis {row[0]}: {e}")
+        """) as cursor:
+            async for row in cursor:
+                try:
+                    analysis = json.loads(row[1])
+                    self.processing_history.append(analysis)
+                    self.signal_cache[row[0]] = analysis
+                except Exception as e:
+                    logger.warning(f"Failed to load analysis {row[0]}: {e}")
         
         logger.info(f"📚 Loaded {len(self.processing_history)} signal analyses")
     
-    def process(self, input_signal: str) -> Dict[str, Any]:
+    async def process(self, input_signal: str) -> Dict[str, Any]:
         """
         Process input signal through deterministic analysis
         
@@ -161,7 +172,7 @@ class NexusSignalEngine:
             self.processing_history.append(analysis)
             
             # Persist to database
-            self._persist_analysis(analysis)
+            await self._persist_analysis(input_signal, analysis)
             
             # Limit history size
             if len(self.processing_history) > 1000:
@@ -539,18 +550,35 @@ class NexusSignalEngine:
         else:
             return "neutral"
     
-    def _persist_analysis(self, analysis: Dict[str, Any]):
+    def _redact_signal(self, signal: str) -> str:
+        """Redact PII from signal before storage"""
+        import re
+        
+        redacted = signal
+        
+        # Redact email addresses
+        redacted = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', '[EMAIL_REDACTED]', redacted)
+        
+        # Redact phone numbers
+        redacted = re.sub(r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b', '[PHONE_REDACTED]', redacted)
+        
+        # Redact potential tokens
+        redacted = re.sub(r'\b[A-Za-z0-9]{32,}\b', '[TOKEN_REDACTED]', redacted)
+        
+        return redacted
+    
+    async def _persist_analysis(self, input_signal: str, analysis: Dict[str, Any]):
         """Persist analysis to database"""
         try:
-            cursor = self.conn.cursor()
+            redacted_signal = self._redact_signal(input_signal)
             
-            cursor.execute("""
+            await self.conn.execute("""
                 INSERT OR REPLACE INTO signal_analysis 
-                (signal_hash, input_signal, analysis_result, timestamp, ethics_score, risk_level)
+                (signal_hash, input_signal_redacted, analysis_result, timestamp, ethics_score, risk_level)
                 VALUES (?, ?, ?, ?, ?, ?)
             """, (
                 analysis["signal_hash"],
-                analysis.get("input_signal", ""),
+                redacted_signal,
                 json.dumps(analysis),
                 analysis["timestamp"],
                 analysis["ethics_score"],
@@ -559,7 +587,7 @@ class NexusSignalEngine:
             
             # Store agent perspectives
             for agent_name, perspective in analysis["perspectives"].items():
-                cursor.execute("""
+                await self.conn.execute("""
                     INSERT INTO agent_perspectives 
                     (signal_hash, agent_name, perspective_data, timestamp)
                     VALUES (?, ?, ?, ?)
@@ -570,7 +598,7 @@ class NexusSignalEngine:
                     analysis["timestamp"]
                 ))
             
-            self.conn.commit()
+            await self.conn.commit()
             
         except Exception as e:
             logger.error(f"❌ Failed to persist analysis: {e}")
@@ -584,15 +612,15 @@ class NexusSignalEngine:
         return {
             "total_signals_processed": len(self.processing_history),
             "cache_size": len(self.signal_cache),
-            "average_ethics_score": np.mean([h.get("ethics_score", 0) for h in self.processing_history]) if self.processing_history else 0,
+            "average_ethics_score": statistics.fmean([h.get("ethics_score", 0) for h in self.processing_history]) if self.processing_history else 0,
             "risk_detections": sum(1 for h in self.processing_history if h.get("risk_assessment", {}).get("risk_level") == "high")
         }
     
-    def shutdown(self):
+    async def shutdown(self):
         """Shutdown Nexus Signal Engine"""
         try:
             if self.conn:
-                self.conn.close()
+                await self.conn.close()
                 self.conn = None
             logger.info("🔄 Nexus Signal Engine shutdown complete")
         except Exception as e:

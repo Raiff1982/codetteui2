@@ -11,9 +11,10 @@ import logging
 import time
 import random
 import math
-import sqlite3
+import aiosqlite
 import os
 import json
+import statistics
 from datetime import datetime
 from typing import List, Tuple, Dict, Any, Callable, Optional
 
@@ -116,19 +117,27 @@ class QuantumMultiObjectiveOptimizer:
     def __init__(self, db_path: str = "backend/data/quantum.db"):
         self.db_path = db_path
         self.is_initialized = False
-        self.conn: Optional[sqlite3.Connection] = None
+        self.conn: Optional[aiosqlite.Connection] = None
         
         # Ensure data directory exists
-        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+        db_dir = os.path.dirname(self.db_path)
+        if db_dir:
+            os.makedirs(db_dir, exist_ok=True)
         
-    def initialize(self):
+    async def initialize(self):
         """Initialize the quantum optimizer"""
         try:
             logger.info("Initializing Quantum Multi-Objective Optimizer...")
             
             # Create database connection
-            self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
-            self._create_tables()
+            self.conn = await aiosqlite.connect(self.db_path)
+            
+            # Enable WAL mode and performance optimizations
+            await self.conn.execute("PRAGMA journal_mode=WAL")
+            await self.conn.execute("PRAGMA synchronous=NORMAL")
+            await self.conn.execute("PRAGMA foreign_keys=ON")
+            
+            await self._create_tables()
             
             self.is_initialized = True
             logger.info("✅ Quantum optimizer initialized successfully")
@@ -137,11 +146,9 @@ class QuantumMultiObjectiveOptimizer:
             logger.error(f"❌ Quantum optimizer initialization failed: {e}")
             raise
     
-    def _create_tables(self):
+    async def _create_tables(self):
         """Create database tables"""
-        cursor = self.conn.cursor()
-        
-        cursor.execute("""
+        await self.conn.execute("""
             CREATE TABLE IF NOT EXISTS optimization_results (
                 id TEXT PRIMARY KEY,
                 objectives TEXT NOT NULL,
@@ -154,7 +161,13 @@ class QuantumMultiObjectiveOptimizer:
             )
         """)
         
-        self.conn.commit()
+        # Add performance index
+        await self.conn.execute("""
+            CREATE INDEX IF NOT EXISTS idx_optimization_results_timestamp 
+            ON optimization_results (timestamp DESC)
+        """)
+        
+        await self.conn.commit()
         logger.info("📊 Quantum optimizer database tables created")
     
     async def optimize(
@@ -277,18 +290,16 @@ class QuantumMultiObjectiveOptimizer:
         
         # Calculate diversity and convergence
         diversity = np.mean(np.std(normalized, axis=0))
-        convergence = 1.0 / (1.0 + np.mean(np.linalg.norm(normalized, axis=1)))
+        convergence = 1.0 / (1.0 + float(np.mean(np.linalg.norm(normalized, axis=1))))
         
         return float(0.5 * diversity + 0.5 * convergence)
     
     async def _store_result(self, objectives: List[str], dimension: int, result: Dict[str, Any]):
         """Store optimization result in database"""
         try:
-            cursor = self.conn.cursor()
-            
             result_id = f"opt_{int(time.time() * 1000)}"
             
-            cursor.execute("""
+            await self.conn.execute("""
                 INSERT INTO optimization_results 
                 (id, objectives, dimension, pareto_front_size, convergence_time, 
                  optimization_score, quantum_metrics, timestamp)
@@ -301,10 +312,10 @@ class QuantumMultiObjectiveOptimizer:
                 result["convergence_time"],
                 result["optimization_score"],
                 json.dumps(result["quantum_metrics"]),
-                datetime.now().isoformat()
+                datetime.utcnow().isoformat() + "Z"
             ))
             
-            self.conn.commit()
+            await self.conn.commit()
             logger.info(f"📊 Stored optimization result: {result_id}")
             
         except Exception as e:
@@ -313,26 +324,23 @@ class QuantumMultiObjectiveOptimizer:
     async def get_optimization_history(self, limit: int = 10) -> List[Dict[str, Any]]:
         """Get recent optimization history"""
         try:
-            cursor = self.conn.cursor()
-            
-            cursor.execute("""
+            results = []
+            async with self.conn.execute("""
                 SELECT * FROM optimization_results 
                 ORDER BY timestamp DESC 
                 LIMIT ?
-            """, (limit,))
-            
-            results = []
-            for row in cursor.fetchall():
-                results.append({
-                    "id": row[0],
-                    "objectives": json.loads(row[1]),
-                    "dimension": row[2],
-                    "pareto_front_size": row[3],
-                    "convergence_time": row[4],
-                    "optimization_score": row[5],
-                    "quantum_metrics": json.loads(row[6]),
-                    "timestamp": row[7]
-                })
+            """, (limit,)) as cursor:
+                async for row in cursor:
+                    results.append({
+                        "id": row[0],
+                        "objectives": json.loads(row[1]),
+                        "dimension": row[2],
+                        "pareto_front_size": row[3],
+                        "convergence_time": row[4],
+                        "optimization_score": row[5],
+                        "quantum_metrics": json.loads(row[6]),
+                        "timestamp": row[7]
+                    })
             
             return results
             
@@ -340,8 +348,9 @@ class QuantumMultiObjectiveOptimizer:
             logger.error(f"❌ Failed to get optimization history: {e}")
             return []
     
-    def cleanup(self):
+    async def shutdown(self):
         """Cleanup resources"""
         if self.conn:
-            self.conn.close()
-            logger.info("🧹 Quantum optimizer cleanup completed")
+            await self.conn.close()
+            self.conn = None
+            logger.info("🔄 Quantum optimizer shutdown complete")

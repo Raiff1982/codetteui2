@@ -106,6 +106,10 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="flex-1 bg-transparent border-none outline-none text-gray-900 dark:text-white placeholder-gray-500 text-lg"
+            aria-label="Command search input"
+            role="combobox"
+            aria-expanded={filteredCommands.length > 0}
+            aria-autocomplete="list"
           />
           <kbd className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded">
             ESC
@@ -113,7 +117,7 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
         </div>
 
         {/* Commands List */}
-        <div ref={listRef} className="flex-1 overflow-y-auto">
+        <div ref={listRef} className="flex-1 overflow-y-auto" role="listbox" aria-label="Available commands">
           {filteredCommands.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
               <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -133,6 +137,8 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
                         ? 'bg-purple-100 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-700' 
                         : 'hover:bg-gray-100 dark:hover:bg-gray-800'
                     }`}
+                    role="option"
+                    aria-selected={isSelected}
                     onClick={() => {
                       command.action();
                       onClose();

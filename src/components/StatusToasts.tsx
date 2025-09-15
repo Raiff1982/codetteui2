@@ -50,6 +50,7 @@ export function StatusToasts({ toasts, onDismiss }: StatusToastsProps) {
       className="fixed top-4 right-4 z-50 space-y-2 max-w-sm"
       aria-live="polite"
       aria-label="Status notifications"
+      role="region"
     >
       {toasts.map((toast) => {
         const TypeIcon = typeIcons[toast.type];
@@ -60,6 +61,7 @@ export function StatusToasts({ toasts, onDismiss }: StatusToastsProps) {
             key={toast.id}
             className={`p-4 rounded-lg border shadow-lg backdrop-blur-sm transition-all duration-300 ${typeColors[toast.type]}`}
             role="alert"
+            aria-live="polite"
           >
             <div className="flex items-start gap-3">
               <div className="flex items-center gap-2 flex-shrink-0">
