@@ -349,14 +349,14 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
             <h1 className={`${isMobile ? 'text-4xl' : 'text-6xl'} font-bold text-gray-900 dark:text-white mb-6 tracking-tight`}>
               Welcome to Codette
             </h1>
-            <p className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-600 dark:text-gray-400 ${isMobile ? 'max-w-full' : 'max-w-3xl'} mx-auto leading-relaxed font-medium`}>
-              The world's first production-ready AI development environment built on genuine research with published DOIs. 
-              Codette combines 6 revolutionary AI systems, mathematical rigor, and emotional intelligence to create 
-              a development experience that's not just intelligent, but genuinely caring and ethically sound.
+            <p className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-600 dark:text-gray-400 ${isMobile ? 'max-w-full' : 'max-w-4xl'} mx-auto leading-relaxed font-medium`}>
+              The world's first <strong>enterprise-ready</strong> AI development environment built on genuine research with published DOIs. 
+              Codette combines 6 production AI systems with mathematical rigor, event-loop safety, PII protection, and emotional intelligence 
+              to create a development experience that's not just intelligent, but genuinely caring and ethically sound.
             </p>
             <div className={`${isMobile ? 'mt-3' : 'mt-4'} text-center`}>
               <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-500 dark:text-gray-500 font-medium`}>
-                Production-ready with mathematical rigor by <a href="https://www.raiffsbits.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 font-medium transition-colors underline">Raiff's Bits</a> • 
+                Enterprise-ready with mathematical rigor by <a href="https://www.raiffsbits.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 font-medium transition-colors underline">Raiff's Bits</a> • 
                 <a href="https://codette.online" target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:text-purple-700 font-medium transition-colors underline ml-1">
                   Live Demo
                 </a>
@@ -384,8 +384,8 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
               </div>
               <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-700 dark:text-gray-300 text-center font-medium`}>
                 {backendStatus === 'connected' 
-                  ? 'All 6 AI systems are running! Experience quantum optimization, ethical governance, neural prediction, and real-time collaboration.'
-                  : 'Explore the revolutionary interface and see how AI development should work. Deploy the backend for complete functionality!'
+                  ? 'All 6 AI systems operational with mathematical rigor! Experience quantum optimization, ethical governance, neural prediction, and real-time collaboration with PII protection.'
+                  : 'Explore the revolutionary interface and see how ethical AI development works. Deploy the production backend for complete enterprise functionality!'
                 }
               </p>
               {backendStatus === 'connected' && (
@@ -429,12 +429,12 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
                 </h3>
               </div>
               <p className="text-blue-700 dark:text-blue-300 mb-4 text-sm leading-relaxed">
-                Deploy the production-ready Python backend to access all 6 AI systems with mathematical rigor, 
-                real-time collaboration, and enterprise-grade features. The backend includes event-loop safe 
-                operations, PII protection, and mathematically correct virtue-based decision making.
+                Deploy the enterprise-ready Python backend to access all 6 AI systems with mathematical rigor, 
+                event-loop safety, comprehensive PII protection, and real-time collaboration. The backend includes 
+                aiosqlite with WAL mode, deterministic virtue weighting, and correlation tracking for production use.
               </p>
               <div className="bg-blue-100 dark:bg-blue-900/30 rounded-lg p-4 mb-4">
-                <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">Production Setup:</h4>
+                <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">Enterprise Setup:</h4>
                 <div className="space-y-2 text-sm text-blue-800 dark:text-blue-200 font-mono">
                   <div>1. <code className="bg-blue-200 dark:bg-blue-800 px-2 py-1 rounded">cd backend</code></div>
                   <div>2. <code className="bg-blue-200 dark:bg-blue-800 px-2 py-1 rounded">pip install -r requirements.txt</code></div>
@@ -554,13 +554,14 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
                       <CheckCircle2 className="w-5 h-5 text-green-600" />
                       <h4 className="font-medium text-gray-800 dark:text-white">What You'll Get</h4>
                     </div>
-                    <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
-                      <li>• 6 production-ready AI systems with mathematical rigor and research backing</li>
+                    <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1 text-left">
+                      <li>• 6 enterprise-ready AI systems with mathematical rigor and published research</li>
                       <li>• Event-loop safe real-time collaboration with WebSocket support</li>
-                      <li>• Quantum-inspired optimization with Pareto front analysis</li>
-                      <li>• Ethical AI governance with mathematically correct virtue weighting</li>
-                      <li>• Neural code prediction with user personalization and privacy protection</li>
-                      <li>• Comprehensive API with auto-generated docs and correlation tracking</li>
+                      <li>• Quantum-inspired optimization with genuine Pareto front analysis</li>
+                      <li>• Ethical AI governance with deterministic virtue weighting and consensus</li>
+                      <li>• Neural code prediction with privacy-first learning and PII redaction</li>
+                      <li>• Production API with correlation tracking and structured logging</li>
+                      <li>• Comprehensive security with auto-blocking and multi-layer validation</li>
                     </ul>
                   </div>
                 </div>
