@@ -7,21 +7,173 @@
 
 Codette is an experimental development environment that combines traditional IDE features with AI-enhanced capabilities. We believe in transparency about our capabilities, so here's an honest overview of what Codette currently can and cannot do:
 
-### 🎯 Current Capabilities
+## 🛠️ Quick Start
 
-- ✅ **Code Analysis**: Advanced code quality analysis using Pylint/Bandit for Python and ESLint for JavaScript
-- ✅ **Security**: Comprehensive security with input validation, rate limiting, JWT authentication, and encryption
-- ✅ **Development Tools**: Full ESLint, TypeScript, and testing infrastructure
-- ✅ **Backend Integration**: FastAPI backend with structured API and WebSocket support
-- ✅ **Input Validation**: Robust validation for code, paths, and user inputs
-- ✅ **Data Protection**: File encryption, secure token management, and checksum verification
-- ✅ **Security Headers**: Protection against XSS, clickjacking, and other web vulnerabilities
+### Backend Setup
 
-### 🚧 Work in Progress
+1. Create and activate a Python virtual environment:
+```bash
+# Windows
+python -m venv .venv
+.venv\Scripts\activate
 
-- 🔄 **Collaborative Editing**: WebSocket-based file synchronization in development
-- 🔄 **Music Generation**: Basic Web Audio implementation planned
-- 🔄 **Performance Monitoring**: System metrics collection in progress
+# Unix/macOS
+python -m venv .venv
+source .venv/bin/activate
+```
+
+2. Install backend dependencies:
+```bash
+pip install -r backend/requirements.txt
+```
+
+3. Configure environment:
+```bash
+# Copy example env file
+cp backend/.env.example backend/.env
+
+# Required environment variables:
+# - DATABASE_URL: PostgreSQL connection string (or SQLite for development)
+# - ENVIRONMENT: 'development' or 'production'
+# - API_HOST: Default 0.0.0.0
+# - API_PORT: Default 8000
+# - CORS_ORIGINS: Frontend URLs (comma-separated), e.g., http://localhost:5173
+# - RATE_LIMIT_REQUESTS_PER_MINUTE: Default 60
+# - RATE_LIMIT_BURST: Default 10
+```
+
+4. Start the backend server:
+```bash
+# Development mode with auto-reload
+python backend/start.py
+
+# Or directly with uvicorn
+uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+The backend will be available at http://localhost:8000 with API documentation at http://localhost:8000/docs
+
+### Frontend Environment Variables
+
+Required environment variables for the frontend (create `.env` in project root):
+
+```bash
+# API Configuration
+VITE_API_BASE_URL=http://localhost:8000  # Backend API URL
+VITE_API_URL=${VITE_API_BASE_URL}        # Legacy support, same as API_BASE_URL
+VITE_ENV=development                      # Environment: development/production
+VITE_DEBUG=true                          # Enable debug logging
+VITE_DEPLOYMENT_TARGET=local             # Deployment target: local/staging/production
+
+# Supabase Integration (required for collaboration features)
+VITE_SUPABASE_URL=your_project_url       # Supabase project URL
+VITE_SUPABASE_ANON_KEY=your_anon_key     # Supabase anonymous key
+```
+
+All environment variables are required unless marked as optional. Copy `.env.example` to `.env` and fill in your values.
+
+### Error Tracking
+
+Codette supports error tracking via Sentry. To enable:
+
+1. Create a Sentry project and get your DSN
+2. Add to your `.env`:
+```bash
+VITE_SENTRY_DSN=your_sentry_dsn_here
+```
+
+Error tracking is optional and will only be enabled in production if DSN is provided.
+
+### Supabase Integration
+
+Codette uses Supabase for real-time collaboration features and user data storage. Features requiring Supabase:
+- Real-time file synchronization
+- User preferences storage
+- Shared code snippets
+- Collaboration history
+
+To enable Supabase features:
+
+1. Create a Supabase project at https://supabase.com
+2. Add to your `.env`:
+```bash
+VITE_SUPABASE_URL=your_project_url
+VITE_SUPABASE_ANON_KEY=your_anon_key
+```
+
+Codette will run in local mode with mock data if Supabase is not configured.
+
+## 🧪 Testing
+
+### Backend Tests
+The backend includes comprehensive pytest-based tests. Run them with:
+```bash
+# Run all backend tests
+cd backend
+python -m pytest
+
+# Run specific test file
+python -m pytest tests/test_ai_systems.py
+
+# Run with verbosity
+python -m pytest -v
+```
+
+### Frontend Tests
+Frontend testing infrastructure is under development. We plan to add:
+- Unit tests with Vitest
+- Integration tests with Playwright
+- Component tests with Testing Library
+
+## 🐳 Docker Deployment
+
+Codette can be deployed using Docker:
+
+```bash
+# Build frontend image
+docker build -f backend/deploy/Dockerfile.frontend -t codette-frontend .
+
+# Run frontend container
+docker run -p 80:80 codette-frontend
+```
+
+Default ports:
+- Frontend: 80 (HTTP)
+- Backend: 8000 (API)
+
+For custom port mapping:
+```bash
+# Map to different host port
+docker run -p 3000:80 codette-frontend  # Access frontend on port 3000
+```
+
+The frontend container uses Nginx to serve static files and handle client-side routing. See `backend/deploy/nginx-frontend.conf` for the complete configuration.
+
+### Feature Status Overview
+
+#### ✅ Stable Features (Production Ready)
+- **Code Analysis**: Python (Pylint/Bandit) and JavaScript (ESLint) analysis
+- **Security Core**: Rate limiting, JWT auth, input validation
+- **Development Tools**: ESLint and TypeScript configuration
+- **Basic Editor**: Syntax highlighting, file management
+- **API Foundation**: FastAPI backend with health checks and basic endpoints
+
+#### 🚧 In Development (Partially Working)
+- **Collaborative Editing**: Basic WebSocket sync implemented, needs polish
+- **Testing Infrastructure**: Backend tests working, frontend tests in setup
+- **Data Protection**: Basic encryption and checksums implemented
+- **Performance Monitoring**: Basic metrics collection working
+
+#### 🔄 Early Stage (Basic Implementation)
+- **Music Generation**: Prototype using Web Audio API
+- **AI Features**: Initial implementation of code suggestions
+- **Real-time Collaboration**: Basic WebSocket framework in place
+
+#### 🎯 Planned Features (Not Yet Implemented)
+- **Advanced PII Protection**: Comprehensive data privacy system
+- **AI Model Training**: Custom model development
+- **Extended Plugin System**: Third-party extension support
+- **Quantum Analysis Tools**: Quantum computing integrations
 
 ## ✨ Feature Status
 
