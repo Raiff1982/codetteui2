@@ -5,6 +5,23 @@ All notable changes to Codette will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.1.1] - 2025-09-16
+### Added
+- Environment variable validation with Zod schema
+- Sentry monitoring integration with environment-specific configuration
+- Comprehensive testing infrastructure with accessibility tests
+- Playwright for end-to-end testing
+
+### Changed
+- Updated ESLint configuration for better developer experience
+- Migrated to traditional ESLint config from flat config
+- Enhanced git hooks with Husky and lint-staged
+- Improved error handling in environment configuration
+
+### Security
+- Added runtime environment variable validation
+- Enhanced type safety for configuration variables
+
 ## [5.1.0] - 2025-01-23 - Complete Backend Release
 
 ### 🚀 Major Backend Implementation
