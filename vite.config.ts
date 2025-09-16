@@ -7,7 +7,7 @@ export default defineConfig({
   root: '.',
   plugins: [react()],
   server: {
-    https: false
+    // https: false
   },
   build: {
     rollupOptions: {
