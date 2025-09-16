@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     # Security Configuration
     secret_key: str = Field(default="dev-secret-key", env="SECRET_KEY")
     cors_origins: List[str] = Field(
-        default=["http://localhost:5173", "https://codette.online"],
+        default=["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "https://codette.online"],
         env="CORS_ORIGINS"
     )
     

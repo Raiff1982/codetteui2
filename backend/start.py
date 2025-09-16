@@ -5,6 +5,7 @@ Production-ready backend starter
 
 import os
 import sys
+import signal
 import uvicorn
 from dotenv import load_dotenv
 from pathlib import Path
@@ -15,6 +16,14 @@ sys.path.append(str(root_dir))
 
 # Load environment variables
 load_dotenv()
+
+# Signal handlers
+def handle_exit(signum, frame):
+    print("\nReceived signal to terminate. Shutting down gracefully...")
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, handle_exit)
+signal.signal(signal.SIGTERM, handle_exit)
 
 if __name__ == "__main__":
     # Production settings from environment
