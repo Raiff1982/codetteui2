@@ -2,6 +2,20 @@
 
 Thank you for your interest in contributing to Codette! We welcome contributions from developers of all skill levels.
 
+## 🚀 Development Setup
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Set up environment variables (see `.env.example`)
+4. Install Husky git hooks: `npm run prepare`
+
+## ✅ Quality Standards
+
+- All code changes must pass ESLint checks (automatically run pre-commit)
+- New features should include Playwright E2E tests
+- Maintain accessibility compliance (WCAG 2.1 AA)
+- Include Sentry error tracking for new features
+
 ## 🌟 Ways to Contribute
 
 ### Code Contributions
