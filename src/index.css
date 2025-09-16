@@ -3,12 +3,15 @@
 
 @tailwind base;
 @tailwind components;
-@tailwind[data-theme="dark"] .glass {
+@tailwind utilities;
+
+[data-theme="dark"] .glass {
   background: linear-gradient(135deg, rgba(17, 24, 39, 0.9), rgba(88, 28, 135, 0.2));
   border: 1px solid rgba(139, 92, 246, 0.2);
   box-shadow: 
     0 8px 32px rgba(139, 92, 246, 0.1),
-    0 2px 4px rgba(139, 92, 246, 0.05);lities;
+    0 2px 4px rgba(139, 92, 246, 0.05);
+}
 
 :root {
   --font-family-sans: 'Inter', system-ui, -apple-system, sans-serif;
