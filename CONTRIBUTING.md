@@ -5,7 +5,7 @@ Thank you for your interest in contributing to Codette! We welcome contributions
 ## 🚀 Development Setup
 
 1. Clone the repository
-2. Install dependencies: `npm install`
+2. Install dependencies: `npm i`
 3. Set up environment variables (see `.env.example`)
 4. Install Husky git hooks: `npm run prepare`
 

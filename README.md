@@ -22,9 +22,13 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-2. Install backend dependencies:
+2. Install dependencies:
 ```bash
+# Backend dependencies
 pip install -r backend/requirements.txt
+
+# Frontend dependencies (if working on UI)
+npm i
 ```
 
 3. Configure environment:
@@ -32,15 +36,17 @@ pip install -r backend/requirements.txt
 # Copy example env file
 cp backend/.env.example backend/.env
 
-# Required environment variables:
-# - DATABASE_URL: PostgreSQL connection string (or SQLite for development)
-# - ENVIRONMENT: 'development' or 'production'
-# - API_HOST: Default 0.0.0.0
-# - API_PORT: Default 8000
-# - CORS_ORIGINS: Frontend URLs (comma-separated), e.g., http://localhost:5173
-# - RATE_LIMIT_REQUESTS_PER_MINUTE: Default 60
-# - RATE_LIMIT_BURST: Default 10
+# Required environment variables (with defaults):
+# - DATABASE_URL: SQLite by default (sqlite:///backend/data/codette.db)
+# - ENVIRONMENT: development
+# - API_HOST: 0.0.0.0 (listen all interfaces)
+# - API_PORT: 8000
+# - CORS_ORIGINS: http://localhost:5173 (Vite dev server)
+# - RATE_LIMIT_REQUESTS_PER_MINUTE: 60
+# - RATE_LIMIT_BURST: 10
 ```
+
+Note: When running locally, ensure CORS_ORIGINS includes 'http://localhost:5173' for the Vite dev server.
 
 4. Start the backend server:
 ```bash
@@ -120,10 +126,12 @@ python -m pytest -v
 ```
 
 ### Frontend Tests
-Frontend testing infrastructure is under development. We plan to add:
-- Unit tests with Vitest
-- Integration tests with Playwright
-- Component tests with Testing Library
+Frontend testing is currently planned but not yet implemented. We intend to add:
+- Unit tests with Vitest (planned)
+- Integration tests with Playwright (planned)
+- Component tests with Testing Library (planned)
+
+Note: The frontend currently lacks test configuration. If you'd like to contribute test infrastructure, please see CONTRIBUTING.md.
 
 ## 🐳 Docker Deployment
 
