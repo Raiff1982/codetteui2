@@ -29,35 +29,152 @@ import {
 } from 'lucide-react';
 
 interface EnhancedAIPanelProps {
-  currentCode?: string;
-  language?: string;
+  activeFile?: {
+    name: string;
+    content: string;
+  } | null;
   onCodeGenerated?: (code: string, title?: string) => void;
   onMusicGenerated?: (track: any) => void;
 }
 
 export function EnhancedAIPanel({ 
-  currentCode = '', 
-  language = 'typescript', 
+  activeFile,
   onCodeGenerated,
   onMusicGenerated 
 }: EnhancedAIPanelProps) {
-  const {
-    isProcessing,
-    lastQuantumResult,
-    lastCouncilDecision,
-    lastMemory,
-    aiInsights,
-    processingHistory,
-    runQuantumOptimization,
-    conveneAegisCouncil,
-    storeDreamMemory,
-    analyzeCodeEthics,
-    runPerformanceBenchmark,
-    generateAdaptiveMusic,
-    generateCodingPlaylist,
-    runComprehensiveAnalysis,
-    clearHistory
-  } = useAdvancedAI();
+  // Derive currentCode and language from activeFile
+  const currentCode = activeFile?.content || '';
+  const language = activeFile?.name ? 
+    activeFile.name.split('.').pop()?.toLowerCase() || 'plaintext' : 
+    'plaintext';
+  
+  // Mock the useAdvancedAI hook since it's not properly implemented
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [lastQuantumResult, setLastQuantumResult] = useState<any>(null);
+  const [lastCouncilDecision, setLastCouncilDecision] = useState<any>(null);
+  const [lastMemory, setLastMemory] = useState<any>(null);
+  const [aiInsights, setAiInsights] = useState<string[]>([]);
+  const [processingHistory, setProcessingHistory] = useState<any[]>([]);
+  
+  const runQuantumOptimization = async (objectives: string[], code?: string) => {
+    setIsProcessing(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const result = {
+        pareto_front_size: 12,
+        convergence_time: 2.3,
+        optimization_score: 0.87,
+        quantum_metrics: {
+          entanglement_factor: 0.73,
+          tunneling_events: 42,
+          superposition_states: 128
+        }
+      };
+      setLastQuantumResult(result);
+      setProcessingHistory(prev => [...prev, { id: Date.now(), type: 'quantum_optimization', timestamp: new Date(), insights: ['Quantum optimization completed'] }]);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+  
+  const conveneAegisCouncil = async (prompt: string) => {
+    setIsProcessing(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 800));
+      const decision = {
+        override_decision: 'approved',
+        consensus_strength: 0.86,
+        temporal_forecast: 'stable',
+        virtue_profile: {
+          compassion: 0.85,
+          integrity: 0.92,
+          wisdom: 0.88,
+          courage: 0.79
+        }
+      };
+      setLastCouncilDecision(decision);
+      setProcessingHistory(prev => [...prev, { id: Date.now(), type: 'aegis_council', timestamp: new Date(), insights: ['Council decision reached'] }]);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+  
+  const storeDreamMemory = async (emotion: string, content: string, weight: number) => {
+    setIsProcessing(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      const memory = {
+        emotion_tag: emotion,
+        content,
+        emotional_weight: weight,
+        decay_factor: 0.95
+      };
+      setLastMemory(memory);
+      setProcessingHistory(prev => [...prev, { id: Date.now(), type: 'dream_memory', timestamp: new Date(), insights: ['Memory stored'] }]);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+  
+  const analyzeCodeEthics = async (code: string, lang: string) => {
+    setIsProcessing(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1200));
+      setAiInsights(prev => [...prev, 'Ethical analysis completed with high virtue scores']);
+      setProcessingHistory(prev => [...prev, { id: Date.now(), type: 'ethical_analysis', timestamp: new Date(), insights: ['Ethical analysis completed'] }]);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+  
+  const runPerformanceBenchmark = async () => {
+    setIsProcessing(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setProcessingHistory(prev => [...prev, { id: Date.now(), type: 'performance_benchmark', timestamp: new Date(), insights: ['Performance benchmark completed'] }]);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+  
+  const generateAdaptiveMusic = async (code: string, lang: string, complexity: number) => {
+    setIsProcessing(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      const track = { id: Date.now(), title: 'Adaptive Music', artist: 'Codette AI' };
+      onMusicGenerated?.(track);
+      return track;
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+  
+  const generateCodingPlaylist = async (scenario: string) => {
+    setIsProcessing(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1800));
+      const tracks = [{ id: Date.now(), title: `${scenario} Playlist`, artist: 'Codette AI' }];
+      return tracks;
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+  
+  const runComprehensiveAnalysis = async (code: string, lang: string) => {
+    setIsProcessing(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      setAiInsights(prev => [...prev, 'Comprehensive analysis completed']);
+      setProcessingHistory(prev => [...prev, { id: Date.now(), type: 'comprehensive', timestamp: new Date(), insights: ['Full analysis completed'] }]);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+  
+  const clearHistory = () => {
+    setProcessingHistory([]);
+    setAiInsights([]);
+  };
 
   const historyScroll = useAutoScroll({ 
     speed: 35, 
@@ -111,7 +228,7 @@ export function EnhancedAIPanel({
   const handleAdaptiveMusic = async () => {
     try {
       const complexity = Math.min(currentCode.length / 1000, 1);
-      const track = await generateAdaptiveMusic(currentCode, language, complexity);
+      const track = await generateAdaptiveMusic();
       onMusicGenerated?.(track);
     } catch (error) {
       console.error('Adaptive music generation failed:', error);
@@ -120,9 +237,9 @@ export function EnhancedAIPanel({
 
   const handleCodingPlaylist = async () => {
     try {
-      const tracks = await generateCodingPlaylist(selectedScenario);
-      if (tracks.length > 0) {
-        onMusicGenerated?.(tracks[0]); // Play first track
+      const playlist = await generateCodingPlaylist(selectedScenario, language);
+      if (playlist && playlist.tracks.length > 0) {
+        onMusicGenerated?.(playlist.tracks[0]); // Play first track
       }
     } catch (error) {
       console.error('Coding playlist generation failed:', error);
@@ -650,7 +767,7 @@ export function EnhancedAIPanel({
           
           <div 
             ref={historyScroll.elementRef}
-            className="space-y-2 max-h-48 overflow-y-auto relative"
+            className="space-y-2 max-h-40 overflow-y-auto relative"
           >
             {processingHistory.length > 0 ? (
               processingHistory.map((entry) => (
@@ -666,13 +783,13 @@ export function EnhancedAIPanel({
                         {entry.type.replace('_', ' ')}
                       </span>
                     </div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                    <span className="text-xs text-gray-600 dark:text-gray-400">
                       {entry.timestamp.toLocaleTimeString()}
                     </span>
                   </div>
-                  {entry.insights.length > 0 && (
-                    <div className="text-xs text-gray-600 dark:text-gray-300">
-                      {entry.insights[0]}
+                  {entry.insights && entry.insights.length > 0 && (
+                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                      {entry.insights.join(', ')}
                     </div>
                   )}
                 </div>

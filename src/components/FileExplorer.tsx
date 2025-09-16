@@ -1,18 +1,24 @@
-            // File Explorer Component - Clean implementation
-import React, { useState } from 'react';
-import { FileType } from '../types/file';
+import React, { useState, useEffect } from 'react';
 import { 
+  FileText, 
   Folder, 
-  File, 
   Plus, 
   MoreHorizontal, 
-  Edit, 
-  Download,
-  Upload,
+  Trash2, 
+  Edit3,
   Search,
   Filter,
-  Trash2
+  ChevronRight,
+  ChevronDown,
+  Code,
+  Image,
+  Music,
+  Video,
+  Archive,
+  Settings,
+  Palette
 } from 'lucide-react';
+import { FileType } from '../types/file';
 
 interface FileExplorerProps {
   files: FileType[];
@@ -31,165 +37,245 @@ export function FileExplorer({
 }: FileExplorerProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateMenu, setShowCreateMenu] = useState(false);
-  const [newFileName, setNewFileName] = useState('');
-  const [createType, setCreateType] = useState<'file' | 'folder'>('file');
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+  const [contextMenu, setContextMenu] = useState<{ fileId: string; x: number; y: number } | null>(null);
+
+  const getFileIcon = (fileName: string, type: 'file' | 'folder') => {
+    if (type === 'folder') return <Folder className="w-4 h-4 text-blue-500" />;
+    
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    
+    switch (extension) {
+      case 'js':
+      case 'jsx':
+      case 'ts':
+      case 'tsx':
+        return <Code className="w-4 h-4 text-yellow-500" />;
+      case 'css':
+      case 'scss':
+      case 'sass':
+        return <Palette className="w-4 h-4 text-blue-600" />;
+      case 'html':
+        return <Code className="w-4 h-4 text-orange-500" />;
+      case 'json':
+        return <Settings className="w-4 h-4 text-green-600" />;
+      case 'md':
+        return <FileText className="w-4 h-4 text-gray-600" />;
+      case 'png':
+      case 'jpg':
+      case 'jpeg':
+      case 'gif':
+      case 'svg':
+        return <Image className="w-4 h-4 text-purple-500" />;
+      case 'mp3':
+      case 'wav':
+      case 'ogg':
+        return <Music className="w-4 h-4 text-pink-500" />;
+      case 'mp4':
+      case 'avi':
+      case 'mov':
+        return <Video className="w-4 h-4 text-red-500" />;
+      case 'zip':
+      case 'tar':
+      case 'gz':
+        return <Archive className="w-4 h-4 text-gray-500" />;
+      default:
+        return <FileText className="w-4 h-4 text-gray-500" />;
+    }
+  };
 
   const filteredFiles = files.filter(file =>
     file.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleCreate = () => {
-    if (newFileName.trim()) {
-      onFileCreate(newFileName.trim(), createType);
-      setNewFileName('');
-      setShowCreateMenu(false);
+  const handleCreateFile = (type: 'file' | 'folder') => {
+    const name = prompt(`Enter ${type} name:`);
+    if (name) {
+      onFileCreate(name, type);
     }
+    setShowCreateMenu(false);
   };
 
-  const getFileIcon = (file: FileType) => {
-    const iconClass = "w-4 h-4";
-    
-    if (file.type === 'folder') {
-      return <Folder className="w-4 h-4 text-blue-500" />;
-    }
-    
-    const extension = file.name.split('.').pop()?.toLowerCase();
-    switch (extension) {
-      case 'js':
-      case 'jsx':
-        return <File className={`${iconClass} text-yellow-500`} />;
-      case 'ts':
-      case 'tsx':
-        return <File className={`${iconClass} text-blue-500`} />;
-      case 'py':
-        return <File className={`${iconClass} text-green-500`} />;
-      case 'css':
-      case 'scss':
-        return <File className={`${iconClass} text-blue-600`} />;
-      case 'html':
-        return <File className={`${iconClass} text-orange-500`} />;
-      case 'json':
-        return <File className={`${iconClass} text-green-600`} />;
-      default:
-        return <File className={`${iconClass} text-gray-500`} />;
-    }
+  const handleContextMenu = (e: React.MouseEvent, fileId: string) => {
+    e.preventDefault();
+    setContextMenu({ fileId, x: e.clientX, y: e.clientY });
   };
+
+  const handleDeleteFile = (fileId: string) => {
+    if (confirm('Are you sure you want to delete this file?')) {
+      onFileDelete(fileId);
+    }
+    setContextMenu(null);
+  };
+
+  const toggleFolder = (folderId: string) => {
+    setExpandedFolders(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(folderId)) {
+        newSet.delete(folderId);
+      } else {
+        newSet.add(folderId);
+      }
+      return newSet;
+    });
+  };
+
+  // Close context menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => setContextMenu(null);
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   return (
     <div className="h-full flex flex-col bg-white dark:bg-gray-800">
       {/* Header */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-gray-800 dark:text-white">Files</h3>
-          <button
-            onClick={() => setShowCreateMenu(!showCreateMenu)}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-          >
-            <Plus className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setShowCreateMenu(!showCreateMenu)}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              title="Create new file or folder"
+            >
+              <Plus className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+            </button>
+            
+            {showCreateMenu && (
+              <div className="absolute right-0 top-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl py-2 z-20 min-w-32">
+                <button
+                  onClick={() => handleCreateFile('file')}
+                  className="w-full flex items-center space-x-2 px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <FileText className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">New File</span>
+                </button>
+                <button
+                  onClick={() => handleCreateFile('folder')}
+                  className="w-full flex items-center space-x-2 px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <Folder className="w-4 h-4 text-blue-500" />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">New Folder</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
-        
+
         {/* Search */}
         <div className="relative">
           <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <input
             type="text"
+            placeholder="Search files..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search files..."
-            className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-800 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-800 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
       </div>
-      {/* Create Menu */}
-      {showCreateMenu && (
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
-          <div className="space-y-3">
-            <div className="flex space-x-2">
-              <button
-                onClick={() => setCreateType('file')}
-                className={`px-3 py-1 rounded text-sm ${
-                  createType === 'file' 
-                    ? 'bg-blue-500 text-white' 
-                    : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
-                }`}
-              >
-                File
-              </button>
-              <button
-                onClick={() => setCreateType('folder')}
-                className={`px-3 py-1 rounded text-sm ${
-                  createType === 'folder' 
-                    ? 'bg-blue-500 text-white' 
-                    : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
-                }`}
-              >
-                Folder
-              </button>
-            </div>
-            
-            <div className="flex space-x-2">
-              <input
-                type="text"
-                value={newFileName}
-                onChange={(e) => setNewFileName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-                placeholder={`${createType} name...`}
-                className="flex-1 px-3 py-2 bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 rounded text-sm text-gray-800 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                autoFocus
-              />
-              <button
-                onClick={handleCreate}
-                disabled={!newFileName.trim()}
-                className="px-3 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 disabled:opacity-50 transition-colors"
-              >
-                Create
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
       {/* File List */}
-      <div className="flex-1 overflow-y-auto p-2">
-        <div className="space-y-1">
-          {filteredFiles.map(file => (
-            <div
-              key={file.id}
-              onClick={() => onFileSelect(file)}
-              className={`flex items-center space-x-3 p-2 rounded-lg cursor-pointer transition-colors group ${
-                activeFile?.id === file.id
-                  ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200'
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-              }`}
-            >
-              {getFileIcon(file)}
-              <span className="flex-1 text-sm font-medium truncate">{file.name}</span>
-              {file.modified && (
-                <div className="w-2 h-2 bg-orange-500 rounded-full" />
-              )}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onFileDelete(file.id);
+      <div className="flex-1 overflow-y-auto p-4">
+        {filteredFiles.length > 0 ? (
+          <div className="space-y-1">
+            {filteredFiles.map(file => (
+              <div
+                key={file.id}
+                className={`group flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-all ${
+                  activeFile?.id === file.id
+                    ? 'bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-600'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+                onClick={() => {
+                  if (file.type === 'file') {
+                    onFileSelect(file);
+                  } else {
+                    toggleFolder(file.id);
+                  }
                 }}
-                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-all"
+                onContextMenu={(e) => handleContextMenu(e, file.id)}
               >
-                <Trash2 className="w-3 h-3 text-red-500" />
-              </button>
-            </div>
-          ))}
-        </div>
-        
-        {filteredFiles.length === 0 && (
+                {file.type === 'folder' && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFolder(file.id);
+                    }}
+                    className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+                  >
+                    {expandedFolders.has(file.id) ? (
+                      <ChevronDown className="w-3 h-3 text-gray-500" />
+                    ) : (
+                      <ChevronRight className="w-3 h-3 text-gray-500" />
+                    )}
+                  </button>
+                )}
+                
+                {getFileIcon(file.name, file.type)}
+                
+                <span className="flex-1 text-sm text-gray-700 dark:text-gray-300 truncate">
+                  {file.name}
+                </span>
+                
+                {file.modified && (
+                  <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                )}
+                
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleContextMenu(e, file.id);
+                  }}
+                  className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-all"
+                >
+                  <MoreHorizontal className="w-3 h-3 text-gray-500" />
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
           <div className="text-center py-8">
-            <File className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-            <p className="text-gray-600 dark:text-gray-400">No files found</p>
+            <Folder className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+            <p className="text-gray-600 dark:text-gray-400">
+              {searchTerm ? 'No files match your search' : 'No files yet'}
+            </p>
             <p className="text-sm text-gray-500 dark:text-gray-500">
-              {searchTerm ? 'Try a different search' : 'Create your first file'}
+              {searchTerm ? 'Try a different search term' : 'Create your first file to get started'}
             </p>
           </div>
         )}
       </div>
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <div
+          className="fixed bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl py-2 z-50"
+          style={{ left: contextMenu.x, top: contextMenu.y }}
+        >
+          <button
+            onClick={() => {
+              const newName = prompt('Enter new name:');
+              if (newName) {
+                // Handle rename
+              }
+              setContextMenu(null);
+            }}
+            className="w-full flex items-center space-x-2 px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          >
+            <Edit3 className="w-4 h-4 text-gray-500" />
+            <span className="text-sm text-gray-700 dark:text-gray-300">Rename</span>
+          </button>
+          <button
+            onClick={() => handleDeleteFile(contextMenu.fileId)}
+            className="w-full flex items-center space-x-2 px-4 py-2 text-left hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+          >
+            <Trash2 className="w-4 h-4 text-red-500" />
+            <span className="text-sm text-red-600 dark:text-red-400">Delete</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

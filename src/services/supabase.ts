@@ -1,13 +1,37 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://ngvcyxvtorwqocnqcbyz.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ndmN5eHZ0b3J3cW9jbnFjYnl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc5OTM4OTQsImV4cCI6MjA2MzU2OTg5NH0.jGgKmB80e0a0oEUiyO0voSDeKGwTiRwZPdcGGf2CU_M';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+  console.warn('Supabase environment variables not configured - running in local mode');
+  // Create a mock client for development
+  const mockClient = {
+    from: () => ({
+      insert: () => ({ data: null, error: 'Supabase not configured' }),
+      select: () => ({ data: [], error: 'Supabase not configured' }),
+      update: () => ({ data: null, error: 'Supabase not configured' }),
+      delete: () => ({ data: null, error: 'Supabase not configured' })
+    })
+  };
+  export const supabase = mockClient as any;
+} else {
+  export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+    },
+    db: {
+      schema: 'public'
+    },
+    global: {
+      headers: {
+        'X-Client-Info': 'codette-ai-platform'
+      }
+    }
+  });
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Database types for ethical AI
 export interface Database {
