@@ -1,8 +1,8 @@
 # Core FastAPI and server
 fastapi==0.112.0
 uvicorn[standard]==0.30.0
-pydantic==2.5.0
-starlette==0.47.2
+pydantic>=2.6.0
+starlette>=0.37.2,<0.38.0
 
 # Core AI and ML libraries
 numpy>=1.24.0

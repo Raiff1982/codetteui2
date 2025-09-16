@@ -10,6 +10,10 @@ class AIComposer:
     def compose(self, *args, **kwargs):
         """Stub method for composing music."""
         return None
+    
+    def initialize(self):
+        """Initialize the AI composer"""
+        self.is_initialized = True
 
 def generate_music(*args, **kwargs):
     """Stub function for music generation."""

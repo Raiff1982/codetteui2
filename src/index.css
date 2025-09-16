@@ -52,6 +52,15 @@ html, body {
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
+/* Theme transition handling */
+.theme-transition,
+.theme-transition *,
+.theme-transition *:before,
+.theme-transition *:after {
+  transition: all 0.3s ease-out !important;
+  transition-delay: 0 !important;
+}
+
 #root {
   height: 100vh;
   overflow: hidden;

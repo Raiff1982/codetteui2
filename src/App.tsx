@@ -142,7 +142,18 @@ function App() {
   const [showDocumentationMaker, setShowDocumentationMaker] = useState(false);
 
   useEffect(() => {
+    // Update theme and ensure smooth transitions
     document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.classList.add('theme-transition');
+    document.documentElement.style.colorScheme = theme;
+    
+    const removeTransition = () => document.documentElement.classList.remove('theme-transition');
+    const transitionTimeout = setTimeout(removeTransition, 1000);
+    
+    return () => {
+      clearTimeout(transitionTimeout);
+      removeTransition();
+    };
   }, [theme]);
 
   useEffect(() => {
@@ -352,7 +363,7 @@ function App() {
       <SkipLink />
       <TouchGestures>
         <TooltipProvider showBeginnerTips={showBeginnerTips}>
-          <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-purple-950 transition-all duration-500 motion-reduce:transition-none">
+          <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50/50 to-purple-50/50 dark:from-gray-950 dark:via-blue-950/30 dark:to-purple-950/40 transition-colors duration-500 motion-reduce:transition-none">
             
             {/* Focus Mode Indicator */}
             {isFocusMode && (

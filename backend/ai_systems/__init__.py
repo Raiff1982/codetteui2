@@ -72,7 +72,9 @@ AI_SYSTEMS_INFO = {
     }
 }
 
-def get_system_info(system_name: str) -> Dict[str, Any]:
+from typing import Dict, Any
+
+def get_system_info(system_name: str) -> Dict[str, Any]:     
     """Get information about a specific AI system"""
     return AI_SYSTEMS_INFO.get(system_name, {})
 
