@@ -228,7 +228,7 @@ export function EnhancedAIPanel({
   const handleAdaptiveMusic = async () => {
     try {
       const complexity = Math.min(currentCode.length / 1000, 1);
-      const track = await generateAdaptiveMusic(currentCode, language, complexity);
+      const track = await generateAdaptiveMusic();
       onMusicGenerated?.(track);
     } catch (error) {
       console.error('Adaptive music generation failed:', error);
@@ -237,9 +237,9 @@ export function EnhancedAIPanel({
 
   const handleCodingPlaylist = async () => {
     try {
-      const tracks = await generateCodingPlaylist(selectedScenario);
-      if (tracks.length > 0) {
-        onMusicGenerated?.(tracks[0]); // Play first track
+      const playlist = await generateCodingPlaylist(selectedScenario, language);
+      if (playlist && playlist.tracks.length > 0) {
+        onMusicGenerated?.(playlist.tracks[0]); // Play first track
       }
     } catch (error) {
       console.error('Coding playlist generation failed:', error);
