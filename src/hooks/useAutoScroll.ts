@@ -17,7 +17,7 @@ export function useAutoScroll({
   enabled = true,
   enableBidirectional = false
 }: AutoScrollOptions = {}) {
-  const elementRef = useRef<HTMLElement>(null);
+  const elementRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [isUserInteracting, setIsUserInteracting] = useState(false);
   const [scrollDirection, setScrollDirection] = useState<'forward' | 'backward'>('forward');

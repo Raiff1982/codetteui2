@@ -21,7 +21,7 @@ import uvicorn
 # Import configuration
 from config.settings import settings, get_ai_system_config
 
-# Import AI systems
+# Import AI systems and routers
 from ai_systems.dreamcore_memory import DreamCoreMemory
 from ai_systems.nexus_signal_engine import NexusSignalEngine
 from ai_systems.aegis_council import AegisCouncil
@@ -29,6 +29,9 @@ from ai_systems.quantum_optimizer import QuantumMultiObjectiveOptimizer
 from ai_systems.ethical_governance import EthicalAIGovernance
 from ai_systems.neural_predictor import NeuralCodePredictor
 from ai_systems.music_generator import AIComposer
+
+# Import routers
+from routers import analysis_router as analysis
 
 # Database and utilities
 from database.connection import DatabaseManager
@@ -122,6 +125,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include routers
+app.include_router(analysis.analysis_router)
 
 # Security and rate limiting
 security_manager = SecurityManager()

@@ -3,43 +3,32 @@ import { useState, useEffect, useRef } from 'react';
 import { useAutoScroll } from '../hooks/useAutoScroll';
 import { 
   FileText, 
-  Folder, 
   Code, 
   Zap, 
-  Palette,
   Terminal as TerminalIcon,
-  Keyboard,
   Heart,
   Brain,
-  Atom      icon: Brain,
-      title: 'AI Features',
-      description: 'AI capabilities in active development',  Network,
+  Atom,
+  Network,
   Shield,
-  Sparkles,
-  AlertTriangle,
   Activity,
-  Music,
-  Eye,
-  Ch              <p className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-600 dark:text-gray-400 ${isMobile ? 'max-w-full' : 'max-w-4xl'} mx-auto leading-relaxed font-medium`}>
-              An innovative IDE focused on ethical AI development. Currently in development, Codette aims to combine AI 
-              systems with ethical governance and security features. Some features are implemented as proof-of-concept,
-              while others are in active development or planned for future releases.
-            </p>Down,
   Server,
-  Database,
-  Wifi,
   CheckCircle2,
   Play,
-  Settings
+  Settings,
+  ChevronDown,
+  Folder,
+  Database,
+  Sparkles,
+  Music
 } from 'lucide-react';
 
 interface WelcomeScreenProps {
   onCreateFile: (name: string, type: 'file' | 'folder') => void;
   onOpenMusic?: () => void;
-  onOpenCommandPalette?: () => void;
 }
 
-export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette }: WelcomeScreenProps) {
+export function WelcomeScreen({ onCreateFile, onOpenMusic }: WelcomeScreenProps) {
   const quickActionsScroll = useAutoScroll({ 
     speed: 30, 
     direction: 'vertical',
@@ -193,70 +182,63 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
 
   const quickActions = [
     {
-      icon: FileText,
-      title: 'New File',
-      description: 'Create a new file',
-      action: () => onCreateFile('untitled.txt', 'file')
-    },
-    {
-      icon: Code,
-      title: 'New JavaScript File',
-      description: 'Create a JavaScript file',
-      action: () => onCreateFile('script.js', 'file')
-    },
-    {
-      icon: Palette,
-      title: 'New CSS File',
-      description: 'Create a stylesheet',
-      action: () => onCreateFile('styles.css', 'file')
-    },
-    {
-      icon: Folder,
-      title: 'New Folder',
-      description: 'Create a new folder',
-      action: () => onCreateFile('new-folder', 'folder')
-    },
-    {
-      icon: Sparkles,
-      title: 'AI Music Experience',
-      description: 'Revolutionary adaptive music that responds to your code',
-      action: () => {
-        console.log('Opening music player...');
-        if (onOpenMusic) {
-          onOpenMusic();
-        } else {
-          console.warn('Music player not available');
-        }
-      }
-    },
-    {
       icon: Brain,
-      title: 'AI Analysis Demo',
-      description: 'Try out our AI analysis features (in development)',
-      action: () => onCreateFile('ai-demo.ts', 'file')
-    },
-    {
-      icon: Heart,
-      title: 'Ethics Guidelines',
-      description: 'View our AI ethics guidelines and principles',
-      action: () => onCreateFile('ethics-guidelines.md', 'file')
+      title: 'Code Analysis',
+      description: 'Start analyzing your code quality',
+      action: () => onCreateFile('analyze-code.py', 'file')
     },
     {
       icon: Shield,
-      title: 'Security Analysis',
-      description: 'Multi-layer security with ethical AI governance',
-      action: () => onCreateFile('secure-code.ts', 'file')
+      title: 'Security Check',
+      description: 'Review security features and settings',
+      action: () => onCreateFile('security-config.json', 'file')
+    },
+    {
+      icon: Code,
+      title: 'Python Example',
+      description: 'Create a Python file with examples',
+      action: () => onCreateFile('example.py', 'file')
+    },
+    {
+      icon: FileText,
+      title: 'JavaScript Example',
+      description: 'Create a JavaScript file with examples',
+      action: () => onCreateFile('example.js', 'file')
+    },
+    {
+      icon: Network,
+      title: 'API Explorer',
+      description: 'Browse FastAPI documentation',
+      action: () => window.open('http://localhost:8000/docs', '_blank')
+    },
+    {
+      icon: Activity,
+      title: 'Performance Check',
+      description: 'Monitor system performance',
+      action: () => onCreateFile('metrics.py', 'file')
+    },
+    {
+      icon: Heart,
+      title: 'Project Docs',
+      description: 'View project documentation and guidelines',
+      action: () => onCreateFile('getting-started.md', 'file')
+    },
+    {
+      icon: Shield,
+      title: 'Setup Guide',
+      description: 'Configure security and environment settings',
+      action: () => onCreateFile('setup-guide.md', 'file')
     },
     {
       icon: Server,
-      title: 'Backend API',
-      description: 'View the API documentation (development in progress)',
+      title: 'API Docs',
+      description: 'Browse the FastAPI documentation',
       action: () => window.open('http://localhost:8000/docs', '_blank')
     },
     {
       icon: Database,
-      title: 'Real-time Collaboration',
-      description: 'WebSocket-powered live coding with other developers',
+      title: 'Collaboration',
+      description: 'Try beta collaboration features',
       action: () => onCreateFile('collaboration-demo.ts', 'file')
     },
     {
@@ -269,34 +251,34 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
 
   const features = [
     {
-      icon: Zap,
-      title: 'Lightning Fast',
-      description: 'Optimized for speed and performance'
-    },
-    {
       icon: Brain,
-      title: 'AI Features',
-      description: 'AI capabilities in active development'
-    },
-    {
-      icon: Atom,
-      title: 'Future Tech',
-      description: 'Exploring advanced computing concepts'
+      title: 'Code Analysis',
+      description: 'Advanced code quality analysis with Pylint/Bandit for Python and ESLint for JavaScript'
     },
     {
       icon: Shield,
-      title: 'Ethics First',
-      description: 'Guidelines for responsible AI development'
+      title: 'Enterprise Security',
+      description: 'Comprehensive security with rate limiting, JWT auth, and encryption'
     },
     {
-      icon: Keyboard,
-      title: 'Keyboard Shortcuts',
-      description: 'Powerful shortcuts for productivity'
+      icon: Zap,
+      title: 'Input Validation',
+      description: 'Robust validation for code, paths, and user inputs'
     },
     {
       icon: Network,
-      title: 'Collaboration',
-      description: 'Basic collaborative features planned'
+      title: 'API Integration',
+      description: 'FastAPI backend with structured endpoints and WebSocket support'
+    },
+    {
+      icon: Atom,
+      title: 'Data Protection',
+      description: 'File encryption, secure tokens, and checksum verification'
+    },
+    {
+      icon: Heart,
+      title: 'Developer Focus',
+      description: 'Built with security and best practices in mind'
     },
     {
       icon: TerminalIcon,
@@ -412,28 +394,28 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
               {backendStatus === 'connected' && (
                 <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
                   <div className="flex items-center space-x-1">
-                    <CheckCircle2 className="w-3 h-3 text-green-600" />
-                    <span className="text-green-700 dark:text-green-300">DreamCore Memory</span>
+                    <Shield className="w-3 h-3 text-green-600" />
+                    <span className="text-green-700 dark:text-green-300">Security Enabled</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <CheckCircle2 className="w-3 h-3 text-green-600" />
-                    <span className="text-green-700 dark:text-green-300">Nexus Engine</span>
+                    <Brain className="w-3 h-3 text-green-600" />
+                    <span className="text-green-700 dark:text-green-300">Code Analysis</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <CheckCircle2 className="w-3 h-3 text-green-600" />
-                    <span className="text-green-700 dark:text-green-300">Aegis Council</span>
+                    <Server className="w-3 h-3 text-green-600" />
+                    <span className="text-green-700 dark:text-green-300">FastAPI Ready</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <CheckCircle2 className="w-3 h-3 text-green-600" />
-                    <span className="text-green-700 dark:text-green-300">Quantum Optimizer</span>
+                    <Activity className="w-3 h-3 text-green-600" />
+                    <span className="text-green-700 dark:text-green-300">Rate Limiting</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <CheckCircle2 className="w-3 h-3 text-green-600" />
-                    <span className="text-green-700 dark:text-green-300">Ethical Governance</span>
+                    <Network className="w-3 h-3 text-green-600" />
+                    <span className="text-green-700 dark:text-green-300">JWT Auth</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <CheckCircle2 className="w-3 h-3 text-green-600" />
-                    <span className="text-green-700 dark:text-green-300">Neural Predictor</span>
+                    <Atom className="w-3 h-3 text-green-600" />
+                    <span className="text-green-700 dark:text-green-300">Input Validation</span>
                   </div>
                 </div>
               )}
