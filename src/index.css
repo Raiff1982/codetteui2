@@ -3,7 +3,12 @@
 
 @tailwind base;
 @tailwind components;
-@tailwind utilities;
+@tailwind[data-theme="dark"] .glass {
+  background: linear-gradient(135deg, rgba(17, 24, 39, 0.9), rgba(88, 28, 135, 0.2));
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(139, 92, 246, 0.1),
+    0 2px 4px rgba(139, 92, 246, 0.05);lities;
 
 :root {
   --font-family-sans: 'Inter', system-ui, -apple-system, sans-serif;
@@ -281,11 +286,13 @@ textarea:focus-visible {
 
 /* Modern glass morphism effect */
 .glass {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(147, 197, 253, 0.3));
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(147, 197, 253, 0.3);
-  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.15);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(147, 197, 253, 0.2));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(147, 197, 253, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(59, 130, 246, 0.1),
+    0 2px 4px rgba(59, 130, 246, 0.05);
 }
 
 [data-theme="dark"] .glass {
