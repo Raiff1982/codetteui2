@@ -12,12 +12,16 @@ Codette represents a fundamentally different approach to development tools. Buil
 ### ✨ Key Features
 
 #### Frontend Features
-- **🧠 Quantum-Inspired AI**: Real quantum computing principles with Pareto front optimization
-- **🛡️ Ethical AI Governance**: Virtue-driven decision making with mathematical rigor
-- **🎵 Adaptive Music Generation**: AI-composed music with Creative Commons licensing
-- **💡 Neural Code Prediction**: AI that learns your style with privacy protection
-- **❤️ Emotional Code Analysis**: World-first analysis of code's emotional impact
-- **🔒 Enterprise Security**: Multi-layer security with PII redaction and ethical governance
+### 🔒 Hardened Project Sections
+Codette implements enterprise-grade security measures:
+
+- **Comprehensive PII Redaction**: Automatic removal of emails, phones, and tokens before database storage
+- **Multi-Layer Input Sanitization**: Ethical AI governance with auto-blocking for high-risk patterns
+- **Advanced Rate Limiting**: Endpoint-specific limits with burst protection and temporary blocking
+- **Secure Session Management**: Token-based authentication with proper expiration and rotation
+- **Database Security**: aiosqlite with WAL mode, parameterized queries, and performance indices
+- **Privacy First**: No data mining, transparent algorithms, correlation tracking, user consent for all operations
+- **Field-Level Protection**: Encryption-ready architecture with rotation planning
 - **🌍 40+ Programming Languages**: Full support with LSP and AI assistance
 - **📱 Universal Access**: Mobile-responsive with comprehensive accessibility
 - **♿ WCAG 2.1 AA Compliant**: Screen reader optimized with keyboard navigation
@@ -126,6 +130,19 @@ Codette is built on real academic research with published DOIs:
    # Digital Ocean
    ./deploy/deploy.sh digitalocean
    ```
+
+#### Containerized Frontend Deployment
+```bash
+# Build and run static frontend with Docker
+cd codetteui2
+# Build image
+ docker build -t codette-frontend .
+# Run container
+ docker run -p 8080:80 codette-frontend
+# Access at http://localhost:8080
+```
+- Uses the provided `Dockerfile` for static serving via nginx
+- Access at [http://localhost:8080](http://localhost:8080)
 
 ### 🔒 Security & Privacy
 
@@ -314,6 +331,19 @@ npm run dev & cd backend && python start.py
 cd backend
 ./deploy/deploy.sh local  # Local with Docker Compose
 ```
+
+#### Containerized Frontend Deployment
+```bash
+# Build and run static frontend with Docker
+cd codetteui2
+# Build image
+ docker build -t codette-frontend .
+# Run container
+ docker run -p 8080:80 codette-frontend
+# Access at http://localhost:8080
+```
+- Uses the provided `Dockerfile` for static serving via nginx
+- Access at [http://localhost:8080](http://localhost:8080)
 
 #### Cloud Deployment
 ```bash

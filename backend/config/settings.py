@@ -5,7 +5,8 @@ Centralized configuration management for Codette backend
 
 import os
 from typing import Dict, Any, List
-from pydantic import BaseSettings, Field
+from pydantic_settings import BaseSettings
+from pydantic import Field
 
 class Settings(BaseSettings):
     """Application settings with environment variable support"""

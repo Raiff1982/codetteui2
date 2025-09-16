@@ -13,6 +13,7 @@ import hashlib
 import numpy as np
 import statistics
 import os
+import re
 from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, asdict
@@ -40,7 +41,6 @@ class EmotionalMemory:
     created_at: datetime
     last_accessed: datetime
     access_count: int = 0
-    decay_factor: float = 0.95
 
 class DreamCoreMemory:
     """
@@ -82,7 +82,7 @@ class DreamCoreMemory:
             await self._load_memories()
             
             # Initialize emotional vector space
-            self._initialize_emotional_vectors()
+            await self._initialize_emotional_vectors()
             
             self.is_initialized = True
             logger.info("✅ DreamCore Memory System initialized successfully")
@@ -152,7 +152,7 @@ class DreamCoreMemory:
         
         logger.info(f"📚 Loaded {len(self.memories)} memories from database")
     
-    def _initialize_emotional_vectors(self):
+    async def _initialize_emotional_vectors(self):
         """Initialize emotional vector space as described in research"""
         # Emotional dimensions based on research paper
         emotions = [
@@ -187,25 +187,25 @@ class DreamCoreMemory:
         logger.info("🧠 Emotional vector space initialized")
     
     async def store_memory(
-        self, 
-        emotion_tag: str, 
-        content: str, 
+        self,
+        emotion_tag: str,
+        content: str,
         emotional_weight: float = 0.5,
         anchors: Optional[List[MemoryAnchor]] = None
     ) -> str:
         """Store memory with emotional anchoring"""
         try:
             memory_id = self._generate_memory_id(content)
-            
+
             # Redact content before storage
             redacted_content = self._redact_content(content)
-            
+
             if anchors is None:
                 anchors = self._generate_anchors(redacted_content, emotion_tag)
-            
+
             # Convert anchors to serializable format
             anchors_data = [asdict(anchor) for anchor in anchors]
-            
+
             memory = EmotionalMemory(
                 id=memory_id,
                 emotion_tag=emotion_tag,
@@ -215,17 +215,17 @@ class DreamCoreMemory:
                 created_at=datetime.utcnow(),
                 last_accessed=datetime.utcnow()
             )
-            
+
             # Store in memory and database
             self.memories[memory_id] = memory
             await self._persist_memory(memory)
-            
+
             # Update emotional vectors
-            self._update_emotional_vectors(emotion_tag, emotional_weight)
-            
+            await self._update_emotional_vectors(emotion_tag, emotional_weight)
+
             logger.info(f"💾 Memory stored: {memory_id} ({emotion_tag})")
             return memory_id
-            
+
         except Exception as e:
             logger.error(f"❌ Memory storage failed: {e}")
             raise
@@ -368,7 +368,7 @@ class DreamCoreMemory:
         
         await self.conn.commit()
     
-    def _update_emotional_vectors(self, emotion_tag: str, weight: float):
+    async def _update_emotional_vectors(self, emotion_tag: str, weight: float):
         """Update emotional vector space based on new memory"""
         if emotion_tag in self.emotional_vectors:
             # Apply learning rate to update vector
@@ -393,24 +393,17 @@ class DreamCoreMemory:
             await self.conn.commit()
     
     def _redact_content(self, content: str) -> str:
-        """Redact PII from content before storage"""
-        import re
-        
         redacted = content
-        
         # Redact email addresses
         redacted = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', '[EMAIL_REDACTED]', redacted)
-        
         # Redact phone numbers
         redacted = re.sub(r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b', '[PHONE_REDACTED]', redacted)
-        
         # Redact potential API keys/tokens
         redacted = re.sub(r'\b[A-Za-z0-9]{32,}\b', '[TOKEN_REDACTED]', redacted)
-        
         return redacted
     
     async def _apply_temporal_decay(self):
-        """Apply temporal decay to memories as described in research"""
+        """Apply temporal decay to memories"""
         current_time = datetime.utcnow()
         decayed_memories = []
         
