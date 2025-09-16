@@ -7,7 +7,13 @@ export default defineConfig({
   root: '.',
   plugins: [react()],
   server: {
-    // https: false
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
   },
   build: {
     rollupOptions: {
