@@ -4,8 +4,14 @@ Production-ready backend starter
 """
 
 import os
+import sys
 import uvicorn
 from dotenv import load_dotenv
+from pathlib import Path
+
+# Add parent directory to Python path for imports
+root_dir = Path(__file__).parent.parent
+sys.path.append(str(root_dir))
 
 # Load environment variables
 load_dotenv()

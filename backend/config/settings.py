@@ -43,9 +43,21 @@ class Settings(BaseSettings):
     supabase_url: str = Field(default="", env="SUPABASE_URL")
     supabase_service_role_key: str = Field(default="", env="SUPABASE_SERVICE_ROLE_KEY")
     
+    # Frontend Configuration
+    vite_api_base_url: str = Field(default="http://localhost:8000", env="VITE_API_BASE_URL")
+    
     class Config:
         env_file = ".env"
         case_sensitive = False
+        
+def get_ai_system_config() -> Dict[str, Any]:
+    """Get AI system configuration"""
+    settings = Settings()
+    return {
+        "enabled": settings.ai_systems_enabled,
+        "quantum_max_dimension": settings.quantum_max_dimension,
+        "neural_prediction_limit": settings.neural_prediction_limit
+    }
 
 # Global settings instance
 settings = Settings()

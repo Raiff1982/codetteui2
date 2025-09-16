@@ -31,7 +31,16 @@ def analyze_python_code(code: str) -> CodeAnalysisResult:
         pylint_output = []
         reporter = JSONReporter()
         pylint.lint.Run([tmp_path], reporter=reporter, exit=False)
-        linting_issues = reporter.messages
+        linting_issues = [
+            {
+                'message': msg.msg or 'Unknown issue',
+                'line': msg.line,
+                'column': msg.column,
+                'type': msg.symbol,
+                'module': msg.module
+            }
+            for msg in reporter.messages
+        ]
 
         # Bandit security analysis
         b_conf = config.BanditConfig()
@@ -40,11 +49,13 @@ def analyze_python_code(code: str) -> CodeAnalysisResult:
         b_mgr.run_tests()
         security_issues = []
         for issue in b_mgr.get_issue_list():
+            issue_dict = issue.__dict__
             security_issues.append({
-                'severity': issue.severity,
-                'confidence': issue.confidence,
-                'description': issue.text,
-                'line': issue.line_number
+                'severity': str(issue_dict.get('severity', 'UNKNOWN')),
+                'confidence': str(issue_dict.get('confidence', 'UNKNOWN')),
+                'description': str(issue_dict.get('text', 'Unknown security issue')),
+                'line': issue_dict.get('lineno', 0),
+                'test_id': issue_dict.get('test_id', 'UNKNOWN')
             })
 
         # Basic metrics
