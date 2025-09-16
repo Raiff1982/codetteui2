@@ -11,15 +11,20 @@ import {
   Keyboard,
   Heart,
   Brain,
-  Atom,
-  Network,
+  Atom      icon: Brain,
+      title: 'AI Features',
+      description: 'AI capabilities in active development',  Network,
   Shield,
   Sparkles,
   AlertTriangle,
   Activity,
   Music,
   Eye,
-  ChevronDown,
+  Ch              <p className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-600 dark:text-gray-400 ${isMobile ? 'max-w-full' : 'max-w-4xl'} mx-auto leading-relaxed font-medium`}>
+              An innovative IDE focused on ethical AI development. Currently in development, Codette aims to combine AI 
+              systems with ethical governance and security features. Some features are implemented as proof-of-concept,
+              while others are in active development or planned for future releases.
+            </p>Down,
   Server,
   Database,
   Wifi,
@@ -226,15 +231,15 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
     },
     {
       icon: Brain,
-      title: 'Quantum AI Analysis',
-      description: 'Real quantum-inspired optimization with mathematical foundations',
-      action: () => onCreateFile('example-ai.ts', 'file')
+      title: 'AI Analysis Demo',
+      description: 'Try out our AI analysis features (in development)',
+      action: () => onCreateFile('ai-demo.ts', 'file')
     },
     {
       icon: Heart,
-      title: 'Ethical AI Demo',
-      description: 'Virtue-driven AI with compassion, integrity, wisdom, and courage',
-      action: () => onCreateFile('ethical-example.ts', 'file')
+      title: 'Ethics Guidelines',
+      description: 'View our AI ethics guidelines and principles',
+      action: () => onCreateFile('ethics-guidelines.md', 'file')
     },
     {
       icon: Shield,
@@ -244,8 +249,8 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
     },
     {
       icon: Server,
-      title: 'Backend AI Systems',
-      description: 'Access all 6 production AI systems via Python backend',
+      title: 'Backend API',
+      description: 'View the API documentation (development in progress)',
       action: () => window.open('http://localhost:8000/docs', '_blank')
     },
     {
@@ -270,18 +275,18 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
     },
     {
       icon: Brain,
-      title: 'AI-Powered',
-      description: 'Six production AI systems with real research backing'
+      title: 'AI Features',
+      description: 'AI capabilities in active development'
     },
     {
       icon: Atom,
-      title: 'Quantum Inspired',
-      description: 'Real quantum computing principles, not just buzzwords'
+      title: 'Future Tech',
+      description: 'Exploring advanced computing concepts'
     },
     {
       icon: Shield,
-      title: 'Ethical AI',
-      description: 'Virtue-driven AI with transparent decision making'
+      title: 'Ethics First',
+      description: 'Guidelines for responsible AI development'
     },
     {
       icon: Keyboard,
@@ -290,8 +295,8 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
     },
     {
       icon: Network,
-      title: 'Collaborative Intelligence',
-      description: 'Real-time collaboration with WebSocket technology'
+      title: 'Collaboration',
+      description: 'Basic collaborative features planned'
     },
     {
       icon: TerminalIcon,
@@ -300,13 +305,13 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
     },
     {
       icon: Heart,
-      title: 'Virtue-Driven',
-      description: 'Emotional intelligence and genuine care for users'
+      title: 'User-Focused',
+      description: 'Designed with developer experience in mind'
     },
     {
       icon: Server,
-      title: 'Production Backend',
-      description: 'Complete Python backend with FastAPI and SQLite'
+      title: 'Backend API',
+      description: 'FastAPI backend under development'
     }
   ];
 
@@ -340,11 +345,11 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
                     : 'text-blue-700 dark:text-blue-300'
                 }`}>
                   {backendStatus === 'connected' 
-                    ? '🚀 Full AI Backend Connected' 
-                    : backendStatus === 'disconnected'
-                    ? '🎨 Frontend Demo Mode'
-                    : '🔍 Checking Backend Status'
-                  }
+                  ? 'Backend Connected - Basic AI Services Available' 
+                  : backendStatus === 'disconnected'
+                  ? '🎨 Frontend Demo Mode'
+                  : '🔍 Checking Backend Status'
+                }
                 </span>
                 {backendStatus === 'connected' && (
                   <a 
@@ -366,9 +371,9 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
               Welcome to Codette
             </h1>
             <p className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-600 dark:text-gray-400 ${isMobile ? 'max-w-full' : 'max-w-4xl'} mx-auto leading-relaxed font-medium`}>
-              The world's first <strong>enterprise-ready</strong> AI development environment built on genuine research with published DOIs. 
-              Codette combines 6 production AI systems with mathematical rigor, event-loop safety, PII protection, and emotional intelligence 
-              to create a development experience that's not just intelligent, but genuinely caring and ethically sound.
+              An innovative IDE focused on ethical AI development. Currently in development, Codette aims to combine AI 
+              systems with ethical governance and security features. Some features are implemented as proof-of-concept,
+              while others are in active development or planned for future releases.
             </p>
             <div className={`${isMobile ? 'mt-3' : 'mt-4'} text-center`}>
               <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-500 dark:text-gray-500 font-medium`}>
@@ -400,8 +405,8 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
               </div>
               <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-700 dark:text-gray-300 text-center font-medium`}>
                 {backendStatus === 'connected' 
-                  ? 'All 6 AI systems operational with mathematical rigor! Experience quantum optimization, ethical governance, neural prediction, and real-time collaboration with PII protection.'
-                  : 'Explore the revolutionary interface and see how ethical AI development works. Deploy the production backend for complete enterprise functionality!'
+                  ? 'Basic AI services are operational. Some features are in development or proof-of-concept stage. We are committed to honest representation of our capabilities.'
+                  : 'Currently in development mode. Basic code editing and UI features are available. AI features require backend setup.'
                 }
               </p>
               {backendStatus === 'connected' && (
@@ -574,13 +579,13 @@ export function WelcomeScreen({ onCreateFile, onOpenMusic, onOpenCommandPalette 
                       <h4 className="font-medium text-gray-800 dark:text-white">What You'll Get</h4>
                     </div>
                     <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1 text-left">
-                      <li>• 6 enterprise-ready AI systems with mathematical rigor and published research</li>
-                      <li>• Event-loop safe real-time collaboration with WebSocket support</li>
-                      <li>• Quantum-inspired optimization with genuine Pareto front analysis</li>
-                      <li>• Ethical AI governance with deterministic virtue weighting and consensus</li>
-                      <li>• Neural code prediction with privacy-first learning and PII redaction</li>
-                      <li>• Production API with correlation tracking and structured logging</li>
-                      <li>• Comprehensive security with auto-blocking and multi-layer validation</li>
+                      <li>• Basic code editor with syntax highlighting and file management</li>
+                      <li>• Light and dark themes with smooth transitions</li>
+                      <li>• Simple backend API with basic error handling</li>
+                      <li>• Proof-of-concept AI features in development</li>
+                      <li>• Basic security measures and input validation</li>
+                      <li>• Frontend performance optimizations</li>
+                      <li>• Ethical AI development guidelines and documentation</li>
                     </ul>
                   </div>
                 </div>
