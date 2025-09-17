@@ -6,11 +6,16 @@ import json
 import asyncio
 import aiohttp
 import time
+import logging
 from typing import Dict, Any
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 async def test_code_analysis():
     """Test code analysis features"""
-    print("\n=== Testing Code Analysis ===")
+    logger.info("\n=== Testing Code Analysis ===")
     
     async with aiohttp.ClientSession() as session:
         # Test Python analysis
@@ -23,8 +28,8 @@ async def test_code_analysis():
         ) as response:
             status = response.status
             result = await response.json()
-            print(f"\nPython Analysis Response (Status {status}):")
-            print(json.dumps(result, indent=2))
+            logger.info(f"\nPython Analysis Response (Status {status}):")
+            logger.info(json.dumps(result, indent=2))
             
         # Test JavaScript analysis
         with open(os.path.join(os.path.dirname(__file__), 'test_analysis.js'), 'r') as f:
@@ -36,16 +41,16 @@ async def test_code_analysis():
         ) as response:
             status = response.status
             result = await response.json()
-            print(f"\nJavaScript Analysis Response (Status {status}):")
-            print(json.dumps(result, indent=2))
+            logger.info(f"\nJavaScript Analysis Response (Status {status}):")
+            logger.info(json.dumps(result, indent=2))
 
 async def test_security_features():
     """Test security features"""
-    print("\n=== Testing Security Features ===")
+    logger.info("\n=== Testing Security Features ===")
     
     async with aiohttp.ClientSession() as session:
         # Test rate limiting
-        print("\nTesting Rate Limiting...")
+        logger.info("\nTesting Rate Limiting...")
         start_time = time.time()
         requests = []
         for _ in range(70):  # Should hit rate limit (60 per minute)

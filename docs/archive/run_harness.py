@@ -1,74 +1,56 @@
-import json, time, hashlib, argparse, random
-from pathlib import Path
-from typing import Dict, Any, List
-from eval_utils import determinism_index, hallucination_rate
 
-def load_tasks(path: str) -> List[Dict[str, Any]]:
-    tasks = []
+# run_harness_recovery.py
+import json, time, argparse
+from pathlib import Path
+from typing import Dict, Any
+from error_recovery_handler import ErrorRecoveryHandler, DummyModelClient
+
+def load_tasks(path: str):
     with open(path, "r", encoding="utf-8") as f:
         for line in f:
-            tasks.append(json.loads(line))
-    return tasks
+            if line.strip():
+                yield json.loads(line)
 
-def simulate_model_call(task: Dict[str, Any]) -> Dict[str, Any]:
-    # Placeholder: replace with actual model/system call.
-    # Returns model_output and reasoning_trace (string) and tool_calls (list)
+def simulate_with_recovery(task: Dict[str, Any], handler: ErrorRecoveryHandler) -> Dict[str, Any]:
+    trace = {"performance_efficiency": {"latency_ms": 0}}
     start = time.time()
-    random.seed(42)  # deterministic placeholder
-    if task["task_set"] == "Adversarial Fact Verification":
-        # naive: echo authoritative-sounding content if present
-        out = f"Answer: {task['ground_truth']}"
-        trace = "Selected authoritative source based on provenance keyword and internal scoring."
-        tools = []
-    elif task["task_set"] == "Multi-Step Tool-Augmented Reasoning":
-        out = f"CAGR={task['ground_truth']['CAGR']}; Trend={task['ground_truth']['trend']}"
-        trace = "Computed CAGR from first/last revenue; compared debt/revenue ratios for trend."
-        tools = [{"name": "cagr", "args": {}, "result": task["ground_truth"]["CAGR"]}]
-    else:
-        out = "Provided policy satisfying constraints and avoiding prohibited features."
-        trace = "Checked constraints; removed disallowed elements; justified decisions."
-        tools = []
-    latency_ms = int((time.time() - start) * 1000)
-    return {"model_output": out, "reasoning_trace": trace, "tool_calls": tools, "latency_ms": latency_ms}
-
-def evaluate(task: Dict[str, Any], outputs: List[str], last_latency_ms: int) -> Dict[str, Any]:
-    di = determinism_index(outputs)
-    hr = hallucination_rate(outputs[-1], task.get("ground_truth"))
-    metrics = {
-        "determinism_index": di,
-        "hallucination_rate": hr,
-        "reasoning_transparency": "present",
-        "performance_efficiency": {"latency_ms": last_latency_ms, "compute_cost": -1},
-        "error_recovery_pattern": "none"
-    }
-    return metrics
+    try:
+        # Initial attempt
+        output = handler.model_client.call(task)
+        trace["model_output"] = output
+        trace["performance_efficiency"]["latency_ms"] = int((time.time() - start) * 1000)
+        trace["error_recovery_pattern"] = "none"
+        trace["recovery_outcome"] = "N/A"
+        return trace
+    except Exception as e:
+        trace["exception"] = type(e).__name__
+        trace["performance_efficiency"]["latency_ms"] = int((time.time() - start) * 1000)
+        return handler.classify_and_recover(task, type(e).__name__, trace)
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--tasks", default="tasks.jsonl")
-    parser.add_argument("--runs", type=int, default=10)
-    parser.add_argument("--out", default="results.jsonl")
-    args = parser.parse_args()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--tasks", default="tasks.jsonl")
+    ap.add_argument("--out", default="results_recovery.jsonl")
+    ap.add_argument("--simulate_errors", action="store_true")
+    args = ap.parse_args()
 
-    tasks = load_tasks(args.tasks)
-    out_path = Path(args.out)
-    with out_path.open("w", encoding="utf-8") as outf:
-        for task in tasks:
-            outputs = []
-            last_latency = 0
-            for _ in range(args.runs):
-                result = simulate_model_call(task)
-                outputs.append(result["model_output"])
-                last_latency = result["latency_ms"]
-            metrics = evaluate(task, outputs, last_latency)
-            record = {
-                "id": task["id"],
-                "task_set": task["task_set"],
-                "metrics": metrics,
-                "last_output": outputs[-1]
-            }
-            outf.write(json.dumps(record) + "\n")
-    print(f"Wrote {args.out}")
+    # Simulate failures for a subset by id
+    error_map = {}
+    if args.simulate_errors:
+        error_map = {"MSR-001": "RuntimeError", "CPG-001": "ConstraintViolation"}
+
+    handler = ErrorRecoveryHandler(model_client=DummyModelClient(error_map=error_map), rng_seed=42, fairness_check=True)
+
+    with open(args.out, "w", encoding="utf-8") as outf:
+        for task in load_tasks(args.tasks):
+            if task.get("id") in ("AFV-001","MSR-001","CPG-001"):
+                trace = simulate_with_recovery(task, handler)
+                record = {"id": task["id"], "task_set": task["task_set"], "trace": trace, "last_output": trace.get("model_output", "")}
+                outf.write(json.dumps(record) + "\n")
+
+    stats = handler.get_recovery_stats()
+    Path("recovery_stats.json").write_text(json.dumps(stats, indent=2), encoding="utf-8")
+    print("Wrote", args.out, "and recovery_stats.json")
 
 if __name__ == "__main__":
     main()

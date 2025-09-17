@@ -7,9 +7,39 @@
 
 Codette is an experimental development environment that combines traditional IDE features with AI-enhanced capabilities. We believe in transparency about our capabilities, so here's an honest overview of what Codette currently can and cannot do:
 
-## 🛠️ Quick Start
+## � Quick Start Guide
 
-### Backend Setup
+### Prerequisites
+- Node.js 18 or later
+- Python 3.11 or later
+- Git
+- VS Code (recommended)
+
+### Option 1: Docker Setup (Recommended)
+The fastest way to get started is using Docker:
+
+1. Clone the repository:
+```bash
+git clone https://github.com/Raiff1982/codetteui2.git
+cd codetteui2
+```
+
+2. Set up environment:
+```bash
+cp .env.example .env
+cp backend/.env.example backend/.env
+```
+
+3. Start the containers:
+```bash
+docker-compose up
+```
+
+Visit http://localhost:3000 to access Codette!
+
+### Option 2: Local Development Setup
+
+#### Backend Setup
 
 1. Create and activate a Python virtual environment:
 ```bash
@@ -22,31 +52,107 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-2. Install dependencies:
+2. Install backend dependencies:
 ```bash
-# Backend dependencies
 pip install -r backend/requirements.txt
-
-# Frontend dependencies (if working on UI)
-npm i
 ```
 
-3. Configure environment:
+3. Configure backend environment:
 ```bash
-# Copy example env file
 cp backend/.env.example backend/.env
-
-# Required environment variables (with defaults):
-# - DATABASE_URL: SQLite by default (sqlite:///backend/data/codette.db)
-# - ENVIRONMENT: development
-# - API_HOST: 0.0.0.0 (listen all interfaces)
-# - API_PORT: 8000
-# - CORS_ORIGINS: http://localhost:5173 (Vite dev server)
-# - RATE_LIMIT_REQUESTS_PER_MINUTE: 60
-# - RATE_LIMIT_BURST: 10
 ```
 
-Note: When running locally, ensure CORS_ORIGINS includes 'http://localhost:5173' for the Vite dev server.
+4. Start the backend:
+```bash
+cd backend
+python start.py
+```
+
+#### Frontend Setup
+
+1. Install Node.js dependencies:
+```bash
+npm install
+```
+
+2. Configure frontend environment:
+```bash
+cp .env.example .env
+```
+
+3. Start the development server:
+```bash
+npm run dev
+```
+
+Visit http://localhost:5173 to access Codette!
+
+### Environment Configuration
+
+#### Frontend (.env)
+```bash
+VITE_API_URL=http://localhost:8000              # Backend API URL
+VITE_SUPABASE_URL=your_supabase_url            # Supabase project URL
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key  # Supabase anonymous key
+```
+
+#### Backend (.env)
+```bash
+DATABASE_URL=sqlite:///backend/data/codette.db  # SQLite for local dev
+ENVIRONMENT=development                         # or 'production'
+API_HOST=0.0.0.0                               # Listen all interfaces
+API_PORT=8000                                  # Backend port
+CORS_ORIGINS=http://localhost:5173             # Frontend URL
+RATE_LIMIT_REQUESTS_PER_MINUTE=60             # API rate limiting
+RATE_LIMIT_BURST=10                           # Rate limit burst
+```
+
+### VS Code Extensions
+For the best development experience, install these extensions:
+1. Python
+2. Pylance
+3. ESLint
+4. Prettier
+5. Docker
+6. Thunder Client (for API testing)
+
+### Verifying Installation
+
+1. Backend health check:
+```bash
+curl http://localhost:8000/health
+```
+
+2. Test the backend:
+```bash
+cd backend
+python test_backend.py
+```
+
+3. Run frontend tests:
+```bash
+npm test
+```
+
+### Common Issues
+
+1. Port conflicts:
+   - Backend port (8000) in use: Change `API_PORT` in backend/.env
+   - Frontend port (5173) in use: Use `npm run dev -- --port 3000`
+
+2. Dependencies issues:
+   - Clear npm cache: `npm cache clean --force`
+   - Rebuild Python venv: Delete .venv and recreate
+
+3. Database errors:
+   - Check DATABASE_URL in backend/.env
+   - Ensure SQLite file permissions are correct
+
+### Next Steps
+- Read the [API Documentation](docs/API.md)
+- Explore the [Architecture Guide](docs/ARCHITECTURE.md)
+- Check the [Contributing Guide](CONTRIBUTING.md)
+- Set up [VS Code Integration](docs/VSCODE_SETUP.md)
 
 4. Start the backend server:
 ```bash

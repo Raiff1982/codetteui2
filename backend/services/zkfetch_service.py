@@ -8,6 +8,10 @@ from typing import Dict, Any, Optional, List
 import json
 import hashlib
 import time
+import logging
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 class ZkFetchService:
     """
@@ -66,7 +70,8 @@ class ZkFetchService:
         try:
             from urllib.parse import urlparse
             return urlparse(url).hostname or "unknown"
-        except:
+        except (ValueError, TypeError) as e:
+            logger.error(f"Failed to parse URL '{url}': {e}")
             return "unknown"
     
     def _generate_hash(self, data: str) -> str:

@@ -42,17 +42,152 @@ pip install -r requirements.txt
 python start.py
 ```
 
-### Docker Deployment
-```dockerfile
-FROM python:3.11-slim
+## 🐳 Docker Deployment (Recommended)
 
-WORKDIR /app
-COPY backend/ .
-RUN pip install -r requirements.txt
+### Prerequisites
+- Docker installed on your system
+- Docker Compose installed on your system
+- Git repository cloned locally
 
-EXPOSE 8000
-CMD ["python", "start.py"]
+### Environment Setup
+
+1. Create environment files:
+```bash
+# Frontend environment (.env)
+cp .env.example .env
+
+# Backend environment (backend/.env)
+cp backend/.env.example backend/.env
 ```
+
+2. Configure environment variables:
+```env
+# Frontend (.env)
+VITE_API_URL=http://localhost:8000
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_key
+
+# Backend (backend/.env)
+DATABASE_URL=your_supabase_postgres_url
+SUPABASE_URL=your_supabase_url
+SUPABASE_SERVICE_KEY=your_supabase_service_key
+```
+
+### Container Build and Deploy
+
+1. Build and start all services:
+```bash
+docker-compose up --build
+```
+
+2. Build and start specific services:
+```bash
+# Frontend only
+docker-compose up --build frontend
+
+# Backend only
+docker-compose up --build backend
+```
+
+3. Run in detached mode:
+```bash
+docker-compose up -d
+```
+
+### Docker Configuration Details
+
+#### Frontend Container
+- Base image: Node 18
+- Exposed port: 3000
+- Build steps:
+  1. Install dependencies
+  2. Build the application
+  3. Serve using Nginx
+
+#### Backend Container
+- Base image: Python 3.11
+- Exposed port: 8000
+- Features:
+  1. FastAPI application server
+  2. Async database connections
+  3. WebSocket support
+  4. Rate limiting
+
+#### Nginx Configuration
+The Nginx configuration (`deploy/nginx.conf`) handles:
+- Reverse proxy to backend
+- Static file serving
+- CORS headers
+- Security headers
+- WebSocket upgrades
+
+### Container Management
+
+1. View logs:
+```bash
+# All containers
+docker-compose logs -f
+
+# Specific container
+docker-compose logs -f frontend
+docker-compose logs -f backend
+```
+
+2. Container health check:
+```bash
+docker-compose ps
+```
+
+3. Stop containers:
+```bash
+docker-compose down
+```
+
+4. Clean up:
+```bash
+# Remove containers and networks
+docker-compose down
+
+# Also remove volumes
+docker-compose down -v
+
+# Remove all unused images
+docker system prune
+```
+
+### Production Deployment
+
+For production deployment, use the production Docker Compose file:
+
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
+Production configuration includes:
+- SSL termination
+- Optimized Nginx config
+- Production-ready environment variables
+- Health checks
+- Resource limits
+- Automatic restarts
+- Volume persistence
+
+### Troubleshooting
+
+1. Container fails to start:
+   - Check logs: `docker-compose logs <service-name>`
+   - Verify environment variables
+   - Ensure ports are available
+
+2. Connection issues:
+   - Check network configuration
+   - Verify firewall settings
+   - Ensure services are running: `docker-compose ps`
+
+3. Performance issues:
+   - Monitor resources: `docker stats`
+   - Check container logs for bottlenecks
+   - Review volume mounts and network settings
 
 ### Cloud Deployment
 

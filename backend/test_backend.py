@@ -347,31 +347,35 @@ class BackendTester:
         with open("backend_test_report.json", "w") as f:
             json.dump(report, f, indent=2)
         
-        # Print summary
-        print("\n" + "="*60)
-        print("CODETTE AI BACKEND TEST REPORT")
-        print("="*60)
-        print(f"Total Tests: {total_tests}")
-        print(f"Passed: {passed_tests}")
-        print(f"Failed: {total_tests - passed_tests}")
-        print(f"Success Rate: {report['test_summary']['success_rate']:.1f}%")
-        print("="*60)
+        # Log summary
+        summary = [
+            "\n" + "="*60,
+            "CODETTE AI BACKEND TEST REPORT",
+            "="*60,
+            f"Total Tests: {total_tests}",
+            f"Passed: {passed_tests}",
+            f"Failed: {total_tests - passed_tests}",
+            f"Success Rate: {report['test_summary']['success_rate']:.1f}%",
+            "="*60
+        ]
+        
+        logger.info("\n".join(summary))
         
         for system, result in self.test_results.items():
             status_icon = "✅" if result["status"] == "PASSED" else "❌"
-            print(f"{status_icon} {system.upper()}: {result['status']}")
+            logger.info(f"{status_icon} {system.upper()}: {result['status']}")
             if result["status"] == "FAILED":
-                print(f"   Error: {result.get('error', 'Unknown error')}")
+                logger.error(f"   Error: {result.get('error', 'Unknown error')}")
         
-        print("="*60)
+        logger.info("="*60)
         
         if report["overall_status"] == "PASSED":
-            print("🎉 ALL TESTS PASSED! Backend is fully functional.")
+            logger.info("🎉 ALL TESTS PASSED! Backend is fully functional.")
         else:
-            print("⚠️  Some tests failed. Check logs for details.")
+            logger.warning("⚠️  Some tests failed. Check logs for details.")
         
-        print(f"Report saved to: backend_test_report.json")
-        print("="*60)
+        logger.info(f"Report saved to: backend_test_report.json")
+        logger.info("="*60)
 
 async def main():
     """Main test runner"""
